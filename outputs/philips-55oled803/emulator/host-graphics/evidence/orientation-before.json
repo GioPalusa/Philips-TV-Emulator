@@ -1,0 +1,62 @@
+{
+  "renderer_sha256": "8375639d6cf33677cabc813911eea8576c88a4253e4b093871bcb760207cf804",
+  "transport": "Android 8 GLES packets \u2192 gfxstream \u2192 ANGLE Metal \u2192 shared RGBA",
+  "coordinates": "Expected mmap top-left red, top-right green, bottom-left blue, bottom-right yellow",
+  "flush_result": 0,
+  "expected": {
+    "top_left": [
+      255,
+      0,
+      0,
+      255
+    ],
+    "top_right": [
+      0,
+      255,
+      0,
+      255
+    ],
+    "bottom_left": [
+      0,
+      0,
+      255,
+      255
+    ],
+    "bottom_right": [
+      255,
+      255,
+      0,
+      255
+    ]
+  },
+  "actual": {
+    "top_left": [
+      0,
+      0,
+      255,
+      255
+    ],
+    "top_right": [
+      255,
+      255,
+      0,
+      255
+    ],
+    "bottom_left": [
+      255,
+      0,
+      0,
+      255
+    ],
+    "bottom_right": [
+      0,
+      255,
+      0,
+      255
+    ]
+  },
+  "frame_count": 4,
+  "stable_sequence": 8,
+  "passed": false,
+  "renderer_log": "HOSTGPU_RENDERER Android Emulator OpenGL ES Translator (ANGLE (Apple, ANGLE Metal Renderer: Apple M4 Pro, Version 27.0 (Build 26A428)))\nHOSTGPU_READY /var/folders/cp/6bs8j1955lxd9lbczch09t000000gn/T/philips-orientation-wk4340vz/gpu.sock\nHOSTGPU_FRAME 1\nHOSTGPU_FRAME 2\nHOSTGPU_FRAME 3\n"
+}

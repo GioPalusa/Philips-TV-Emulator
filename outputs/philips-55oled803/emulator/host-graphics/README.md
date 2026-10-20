@@ -56,6 +56,30 @@ One mmap file, top-down RGBA8 pixels at offset 64, total size 8,294,464 bytes. T
 
 Readers should read an even sequence, copy the frame, and confirm the same sequence afterward. gfxstream uses asynchronous GPU readback; the callback must call `getReadPixelsCallback()` rather than trusting the notification's pixel buffer. The first frame requires filling the readback pipeline. Currently output is fixed at 1080p.
 
+### Orientation regression check
+
+`orientation_probe.py` starts an isolated renderer and sends GLES scissored clears
+through the Android 8 protocol: red/green at the top of the guest window and
+blue/yellow at the bottom. It checks all four corresponding corners in a stable
+shared-memory frame. Run it from this directory:
+
+```sh
+python3 orientation_probe.py --output evidence/orientation-current.json
+```
+
+The original producer reversed those rows; `evidence/orientation-before.json`
+records the failing test. The corrected producer passes the same test on actual
+ANGLE Metal (`evidence/orientation-after.json`). The pinned SDK's separate async
+readback is already top-down relative to guest window coordinates, although
+`FrameBuffer::Impl::doPostCallback` hardcodes `ydir=-1` for its notification.
+The producer therefore copies this separate readback without another flip.
+Consumers, including Ambilight, receive canonical top-down RGBA with no display
+CSS workaround. The synchronous callback path retains its documented `ydir`
+handling; it was not exercised by this Metal test. Re-run the regression check
+after SDK or backend changes. `evidence/orientation-source.json` records the
+pinned source references consulted; the test is the evidence for actual row order.
+
+
 ## Scope and remaining work
 
 This package does not itself install the guest EGL/gralloc libraries or wire the QEMU transport. It has no physical-TV connection. No firmware update or hardware performance equivalence is implied. GPU command validation, resource limits beyond the 128-client cap, shutdown cleanup, transport batching, and full guest UI benchmarking remain integration work.

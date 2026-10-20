@@ -1,0 +1,18 @@
+{
+  "gfxstream_commit": "01b914196fc1cdf5d46ad78cca4eee4e485d0e91",
+  "sources": [
+    {
+      "url": "https://github.com/google/gfxstream/blob/01b914196fc1cdf5d46ad78cca4eee4e485d0e91/host/frame_buffer.cpp",
+      "sha256": "ff5cacbb9d8e30fd68caff7b51903518c307d0c7155439617e21a04f29d16e9d"
+    },
+    {
+      "url": "https://github.com/google/gfxstream/blob/01b914196fc1cdf5d46ad78cca4eee4e485d0e91/host/gl/readback_worker_gl.cpp",
+      "sha256": "4b4105aeac498f694c467bba930e10e95c59d6b5cee0c06cbdc0fb13886fb533"
+    },
+    {
+      "url": "https://github.com/google/gfxstream/blob/01b914196fc1cdf5d46ad78cca4eee4e485d0e91/host/gl/color_buffer_gl.cpp",
+      "sha256": "b8ea8b02e2612a7cf5a8dc03ca6e42077bf09ddb69e07fa8e5ddb6e522c596d2"
+    }
+  ],
+  "finding": "doPostCallback hardcodes -1. getPixels delegates to readback worker which copies mapped buffer bytes. Actual separate readback orientation is established by GLES quadrant test, not inferred from API ydir."
+}

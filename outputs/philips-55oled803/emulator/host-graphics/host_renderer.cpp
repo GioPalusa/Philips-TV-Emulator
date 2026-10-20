@@ -53,9 +53,18 @@ static bool receiveAll(int fd,void*ptr,size_t n){auto*p=(char*)ptr;while(n){ssiz
 static void onFrame(void*ctx,uint32_t display,int w,int h,int ydir,int format,int type,unsigned char*pixels){
  if(display||w!=1920||h!=1080||format!=0x1908||type!=0x1401)return;
  auto&o=*(Output*)ctx;std::lock_guard<std::mutex>guard(o.mutex);auto*hdr=(FrameHeader*)o.data;
- std::vector<uint8_t> asyncPixels;if(o.async||!pixels){asyncPixels.resize(w*h*4);o.readPixels(asyncPixels.data(),asyncPixels.size(),display);pixels=asyncPixels.data();}
+ const bool separateReadback=o.async||!pixels;
+ std::vector<uint8_t> asyncPixels;if(separateReadback){asyncPixels.resize(w*h*4);o.readPixels(asyncPixels.data(),asyncPixels.size(),display);pixels=asyncPixels.data();}
+ // SDK 36.6.11 ANGLE Metal's posted async image is already top-down relative
+ // to guest window coordinates (orientation_probe.py verifies four quadrants).
+ // gfxstream doPostCallback hardcodes ydir=-1; it does not describe this
+ // separate readback's observed orientation. Applying it again inverted the
+ // shared frame, affecting both display and Ambilight. Keep callback row-order
+ // handling for the synchronous path; SDK/backend changes need revalidation.
+ const bool flipRows=!separateReadback&&ydir<0;
+ if(!hdr->frameCount){fprintf(stderr,"HOSTGPU_ROW_ORDER async=%d separate=%d callback_ydir=%d flip=%d output=top-down\n",o.async,separateReadback,ydir,flipRows);fflush(stderr);}
  __atomic_add_fetch(&hdr->sequence,1,__ATOMIC_SEQ_CST);
- for(int y=0;y<h;y++)memcpy(o.data+64+y*w*4,pixels+(ydir<0?h-y-1:y)*w*4,w*4);
+ for(int y=0;y<h;y++)memcpy(o.data+64+y*w*4,pixels+(flipRows?h-y-1:y)*w*4,w*4);
  hdr->frameCount++;__atomic_add_fetch(&hdr->sequence,1,__ATOMIC_SEQ_CST);
  if(hdr->frameCount<=3||hdr->frameCount%300==0){fprintf(stderr,"HOSTGPU_FRAME %llu\n",hdr->frameCount);fflush(stderr);}
 }
