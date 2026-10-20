@@ -1,0 +1,112 @@
+{
+  "report_updated": "2026-10-21",
+  "physical_observations_date": "2026-10-20",
+  "timezone": "Europe/Stockholm",
+  "target": {
+    "model": "Philips 55OLED803/12",
+    "firmware": "TPM171E_R.107.001.143.000",
+    "android": "8.0.0",
+    "api": 26,
+    "userspace_abi": "armeabi-v7a",
+    "soc": "MT5891"
+  },
+  "source": {
+    "name": "Google TV Home",
+    "version_name": "1.0.478096200",
+    "version_code": 174690,
+    "origin": "Official Google TV Android 12 / API 31 ARM64 emulator image, revision 4",
+    "original_min_sdk": 29,
+    "sha256": "6424cf054762dbc7a7109fad0456830be2c446a000d489eb3f6419125aa4555e"
+  },
+  "installed_modified_apk": {
+    "sha256": "88bacd76c160487437bab3a8eebae70fdfa4518e0a81664e9367b9fb4cdadb71",
+    "device_readback_matched": true,
+    "signature_verification": {
+      "v2": true,
+      "v3": true
+    },
+    "min_sdk": 26,
+    "selected_home_component": "com.google.android.apps.tv.launcherx/.home.VanillaModeHomeActivity",
+    "mode": "Basic TV, pseudonymous",
+    "original_launcher_retained": true
+  },
+  "physical_owner_confirmation": {
+    "source": "Apple TV / HDMI 1",
+    "quote": "Picture, sound and Ambilight work"
+  },
+  "back_navigation": [
+    {
+      "screen": "Google TV root",
+      "observed_activity": "com.google.android.apps.tv.launcherx/.home.VanillaModeHomeActivity",
+      "consecutive_root_back_number": 1
+    },
+    {
+      "screen": "Google TV root",
+      "observed_activity": "com.google.android.apps.tv.launcherx/.home.VanillaModeHomeActivity",
+      "consecutive_root_back_number": 2
+    },
+    {
+      "screen": "Google TV root",
+      "observed_activity": "com.google.android.apps.tv.launcherx/.home.VanillaModeHomeActivity",
+      "consecutive_root_back_number": 3
+    },
+    {
+      "screen": "Google TV root",
+      "observed_activity": "com.google.android.apps.tv.launcherx/.home.VanillaModeHomeActivity",
+      "consecutive_root_back_number": 4
+    },
+    {
+      "screen": "Anpassa kanaler",
+      "observed_activity": "com.google.android.apps.tv.launcherx/.home.VanillaModeHomeActivity",
+      "back_presses": 1
+    },
+    {
+      "screen": "Play Butik",
+      "observed_activity": "com.google.android.apps.tv.launcherx/.home.VanillaModeHomeActivity",
+      "back_presses": 2
+    },
+    {
+      "screen": "Google Assistent",
+      "observed_activity": "com.google.android.apps.tv.launcherx/.home.VanillaModeHomeActivity",
+      "back_presses": 1
+    },
+    {
+      "screen": "Indatakällor",
+      "observed_activity": "com.google.android.apps.tv.launcherx/.home.VanillaModeHomeActivity",
+      "back_presses": 1
+    }
+  ],
+  "old_home_task_after_checks": false,
+  "root_back_failure": {
+    "exception": "java.lang.NoSuchMethodError",
+    "missing_method": "android.os.PowerManager.dream(J)V",
+    "location": "ikf.d",
+    "observed_time_local": "2026-10-20 23:36:44",
+    "fix": "At the first home row, consume Back without requesting dream(long). Preserve setup dismissal and row-focus reset."
+  },
+  "account_status": {
+    "owner_report": "Account setup says the account already exists",
+    "native_play_store_catalogue_observed": true,
+    "new_login_observed": false,
+    "app_purchase_or_download_tested": false,
+    "modified_launcher_account_selector": "Service rejects local signing identity; tested in separate emulator only"
+  },
+  "startup": {
+    "preferred_home_verified": true,
+    "earlier_basic_build_force_stop_then_home_relaunch_verified": true,
+    "that_earlier_build_sha256": "5749c581c80ddea0e74912be25f1a9d568b7d81917737ead5088744c72286243",
+    "final_build_full_tv_reboot_tested": false,
+    "standby_wake_tested": false,
+    "immediate_google_tv_on_power_on_confirmed": false
+  },
+  "not_established": [
+    "Newer Android OS installed",
+    "Google TV account profiles or personalized cloud feed",
+    "App/content channel rows inside Google TV Basic",
+    "Spoken Assistant response heard/confirmed by owner",
+    "All HDMI ports or HDR/4K formats",
+    "DRM playback or tuner reception",
+    "Cold-boot or standby feature parity"
+  ],
+  "provenance": "Curated from local package hashes, installed APK readback, activity observations, crash log, and owner confirmation; raw captures retained locally."
+}

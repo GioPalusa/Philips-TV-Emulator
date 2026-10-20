@@ -36,6 +36,18 @@ Permanent root is a separate operation that patches and flashes the boot partiti
 
 No root exploit, reboot, or flash has been run on this TV during this investigation. The recovery USB stick still needs to be prepared before trying the exploit.
 
+## Physical Google TV interface backport
+
+The later launcher investigation installed an adapted, signed-out Google TV
+Basic home as the physical TV's Home destination. Native HDMI 1 picture/sound
+and Ambilight were confirmed, native Google-app/settings access was retained,
+and a reproduced Android 8 root Back crash was fixed. Android remains 8.0.0;
+this is not a new OS image or firmware update. Google TV account features and
+app/content rows within Basic mode remain unresolved. Full restart and
+standby/wake behavior have not been validated.
+
+See [the current findings, artifact identity, verification and rollback](google-tv/README.md).
+
 ## Model-specific emulator
 
 The [55OLED803/12 emulator](emulator/README.md) now boots the stock Linux kernel
