@@ -36,6 +36,16 @@ Permanent root is a separate operation that patches and flashes the boot partiti
 
 No root exploit, reboot, or flash has been run on this TV during this investigation. The recovery USB stick still needs to be prepared before trying the exploit.
 
-## Model-specific emulator prototype
+## Model-specific emulator
 
-The [55OLED803/12 early boot emulator](emulator/README.md) now includes a sparse virtual eMMC image populated from the 2021 stock update: Android `system`, boot, recovery, vendor filesystems, default settings, and fresh writable ext4 partitions. QEMU accepts the disk read-only, but the stock kernel still stops during early MediaTek hardware setup before Android starts.
+The [55OLED803/12 emulator](emulator/README.md) now boots the stock Linux kernel
+on four emulated Cortex-A53 cores and has reached Android framework boot
+completion. Development graphics profiles have displayed the stock boot
+animation; actual guest GLES pixel and shader tests also pass through ANGLE on
+the Mac's Metal GPU. The stock Ambilight algorithm has produced captured SPI
+output from explicitly synthetic measurement inputs. Full TV peripheral
+behavior, physical LED calibration and a consistently usable launcher remain
+incomplete. This does not provide security updates or validate physical flashing.
+
+The [wiki development history](https://github.com/GioPalusa/Philips-TV-Emulator/wiki/Development-History)
+tracks the stages, evidence and remaining work.

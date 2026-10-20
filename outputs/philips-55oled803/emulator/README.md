@@ -4,6 +4,20 @@ Development build, 20 October 2026. **The Android framework has reached `sys.boo
 
 The original graphics blocker is captured in [the graphics diagnostic log](evidence/graphics-diagnostic-console.txt): `libGLES_mali.so` fails `eglInitialize`. A separate development profile uses ARM32 SwiftShader, a framebuffer composer, and an allocator compatibility fix. The allocator now uses shared memory that each graphics process can import, resolving the observed SurfaceFlinger crash from an unmapped framebuffer pointer. Actual guest pixel readback and GLSL triangle tests pass. [Captured boot animation](evidence/android-bootanimation.png) shows real guest output.
 
+A later [host graphics profile](host-graphics/README.md) executes actual Android
+guest GLES commands through gfxstream and ANGLE on the Mac's Metal GPU.
+[Guest pixel and shader tests](host-graphics/evidence/integrated-guest-rendering.json)
+pass with SELinux enforcing. This translates graphics APIs; Mali registers,
+firmware and timing are not reproduced. A recorded boot-animation interval
+produced about 2.19 new frames/second, so successful GPU execution does not
+establish TV-like responsiveness.
+
+See the [wiki development history](https://github.com/GioPalusa/Philips-TV-Emulator/wiki/Development-History)
+for the chronological evidence and
+[disk checkpoint documentation](ui/CHECKPOINTS.md) for optional persistent
+development storage. Checkpoint helper tests use synthetic disks; they do not
+by themselves establish a successful warmed-TV-guest restore.
+
 ## Viewer and virtual remote
 
 ```sh
@@ -12,7 +26,15 @@ python3 /Users/palusa/Documents/Codex/2026-10-20/my/outputs/philips-55oled803/em
 
 Open <http://127.0.0.1:8765>. The viewer shows the actual captured guest framebuffer, Ambilight SPI output, boot status, and a virtual remote: arrows, OK, Back, Home, volume and mute. Remote buttons send Android key events over the guest console and report acknowledgments or timeouts. A successful command alone does not prove a visible response. The screen may remain black while the framework is incomplete.
 
-The local server controls only its own emulator process. The included development profile uses software graphics, scoped JIT permissions for two graphics services, synthetic Ambilight geometry, and the stock measured-input Ambilight algorithm. Framebuffer measurements approximate the raw OSD plane; full panel composition and physical LED calibration are not modeled. Boot and remote acknowledgments are recorded in [first boot evidence](evidence/android-boot-complete.json) and [second boot verification](evidence/android-second-boot.json). See [software graphics](software-graphics/README.md) and [profile manifest](development/manifest.json).
+The local server controls only its own emulator process. Development profiles
+include [software graphics](software-graphics/README.md) and
+[host Metal graphics](host-graphics/README.md), synthetic Ambilight geometry,
+and the stock measured-input Ambilight algorithm. Measurement input can sample
+the raw OSD plane or the host renderer's posted frame. Sampling is approximate;
+physical LED wiring and calibration remain unverified. Boot and remote
+acknowledgments are recorded in [first boot evidence](evidence/android-boot-complete.json)
+and [second boot verification](evidence/android-second-boot.json). The original
+software profile is recorded in its [manifest](development/manifest.json).
 
 ## Run on this Mac
 
@@ -56,7 +78,7 @@ Open `ambilight/viewer.html` and load the decoded JSONL. The viewer starts empty
 | Standby controller | Decoded PDWNC mailbox commands and IRQ104/SPI72, with unsupported requests logged. The 8051 firmware is not executed. |
 | Audio processor | Reset-ready and decoded lifecycle mailbox responses; enough for `AUD_Init End`. DSP instruction execution, decoding and sound output are absent. |
 | Keypad ADC | Idle, full-scale channel readings prevent zero-valued stub registers from generating false OK-button presses. Physical key inputs are not implemented. |
-| Graphics | Reset, command queue, packed pixel fills, same-format copies and completion interrupts. Raw OSD plane 2 scanout into a QEMU display. Separate SwiftShader/HWC development adaptation passes guest pixel/shader tests. Mali hardware is not emulated; stable Android TV display remains incomplete. |
+| Graphics | Reset, command queue, packed pixel fills, same-format copies and completion interrupts. Raw OSD plane 2 scanout into a QEMU display. Separate SwiftShader/HWC and host GLES→ANGLE Metal adaptations pass guest pixel/shader tests. Mali hardware is not emulated; a reliably usable Android TV interface remains incomplete. |
 | Ambilight | Recovered stock kernel algorithm and actual SPI output capture. Constant-red input has produced nonblack firmware output. Optional raw-framebuffer sampling supplies approximate measurements. Real panel geometry, calibration and full application-driven operation remain unverified. |
 | Trusty and other devices | Unsupported secure-monitor calls return errors. USB, tuner, network, clock/PLL and other peripheral behavior is incomplete. |
 

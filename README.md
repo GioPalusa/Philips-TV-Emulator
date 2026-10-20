@@ -11,6 +11,10 @@ locally for some build and launch steps; a checkout alone is not a runnable TV.
 See the emulator and software-graphics READMEs for provenance and reproduction.
 
 Current milestone: the firmware's Android framework has completed boot, rendered
-its stock boot animation through the software graphics adaptation, and accepted
-virtual remote input. TV-like responsiveness and a reliably usable launcher
-remain development work.
+its stock boot animation, and accepted virtual remote input. Actual Android
+guest GLES pixel and shader tests now execute through ANGLE on the Mac's Metal
+GPU. This is a development graphics adaptation; Mali hardware emulation,
+TV-like responsiveness and a reliably usable launcher remain incomplete.
+
+The [development history in the wiki](https://github.com/GioPalusa/Philips-TV-Emulator/wiki/Development-History)
+records the verified stages, evidence, commits and remaining work.
