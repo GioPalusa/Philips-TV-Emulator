@@ -1,0 +1,121 @@
+{
+  "gfxstream_commit": "01b914196fc1cdf5d46ad78cca4eee4e485d0e91",
+  "sdk_revision": "36.6.11",
+  "sdk_build_id": "15507667",
+  "sdk_backend_sha256": "4bb5e5befd03ba3b02c53adae717812ada08fb46de4d92f7e5e0688e31c5ad19",
+  "headers": [
+    {
+      "path": "include/EGL/egl.h",
+      "sha256": "c3dc71d18dd4f2e4c7277876a2d6ae0b5c7f189933826e6bc0b0f8f2e2e94588"
+    },
+    {
+      "path": "include/EGL/eglext.h",
+      "sha256": "7613ec1daf1538c559d30f08c9ea986c70e89debab83056a34c349611a8aa513"
+    },
+    {
+      "path": "include/EGL/eglplatform.h",
+      "sha256": "8bb778b21b11f06ff5d3f160af32e519242535d8c8e7ea758e0c7b272ca420cd"
+    },
+    {
+      "path": "include/GLES2/gl2.h",
+      "sha256": "2a0868d65496bd4bf66dcf638cd29ee691c53a20238619318a672713c2942054"
+    },
+    {
+      "path": "include/GLES2/gl2platform.h",
+      "sha256": "8f25443c4c5b3c8e702c3510f12b6ec8c23c2e3c1ca1c71bb07d148653696d9a"
+    },
+    {
+      "path": "include/KHR/khrplatform.h",
+      "sha256": "4f1013d451392be5c3d051aea4c70b9da74ad3a1164d1e959f5f47b49a5213dd"
+    },
+    {
+      "path": "include/gfxstream/host/features.h",
+      "sha256": "b02f1a796c870d2472d833efe885a07ffbc182566a7e5694fc2462e486a62c8b"
+    },
+    {
+      "path": "include/render-utils/MediaNative.h",
+      "sha256": "40db871194c8d52349a136fe038fe5364cc55d3de0368b35f541b28b25e0d52f"
+    },
+    {
+      "path": "include/render-utils/RenderChannel.h",
+      "sha256": "3ba27bb184c70de6fa53a90cedbe25860ab9630115152a2b5cc683aed44500d3"
+    },
+    {
+      "path": "include/render-utils/RenderLib.h",
+      "sha256": "1a10a09844253d42ae3f8f25719b5190ea4d1becb0288c48d736454c60fed9bb"
+    },
+    {
+      "path": "include/render-utils/Renderer.h",
+      "sha256": "7dd6f8f1f96aa7df88137edb3d59a884325da145e4c95662c8fd9fa5d62e2e8e"
+    },
+    {
+      "path": "include/render-utils/address_space_graphics_types.h",
+      "sha256": "8fcbf41977a850b9fade8b1c23da150eca1f3c2733d248edd3026a89b8386b25"
+    },
+    {
+      "path": "include/render-utils/address_space_operations.h",
+      "sha256": "2462a46ddc7fdec0edc8e699a53c2ce42b08af874c24f5b1d2a609fe2f5d97ad"
+    },
+    {
+      "path": "include/render-utils/display_operations.h",
+      "sha256": "362357406cd68c7e7227c963bf4d3687d8c13b624cbf6fb5e8154c9e27116718"
+    },
+    {
+      "path": "include/render-utils/dma_device.h",
+      "sha256": "cc7a643754cf2b624952d656d0bcd0069e68b20389dbb378657ac2b715459acc"
+    },
+    {
+      "path": "include/render-utils/gralloc_enums.h",
+      "sha256": "d4c121c48cb32f374049802ab2cd2db35a58518ad116e832f71503f7bf6e71fe"
+    },
+    {
+      "path": "include/render-utils/logging_operations.h",
+      "sha256": "96da6e8adac7f123b53165f61850d3764b5c028f2a2982b2e7d2f75f49a9af63"
+    },
+    {
+      "path": "include/render-utils/render_api.h",
+      "sha256": "c34537c718fe753ec90ac5d3e92821eb0385d2f0d64f8f250372cb20be03f0f5"
+    },
+    {
+      "path": "include/render-utils/render_api_functions.h",
+      "sha256": "cf48eda0bdbb548f8f47972b732a6211b43e3b96c962d71bab48790cf25c8bb4"
+    },
+    {
+      "path": "include/render-utils/render_api_platform_types.h",
+      "sha256": "6fccbf303cd0bba68286df1b191133ec3729144d957732ad42e084cdefedf5e2"
+    },
+    {
+      "path": "include/render-utils/renderer_enums.h",
+      "sha256": "a3c17263ed27c3e776e32fc53fb1fb2c81a3be38d4f52d7adaf7e66009370723"
+    },
+    {
+      "path": "include/render-utils/small_vector.h",
+      "sha256": "4d95a8ad30134ee66b4ed25059545fc1b28f53a9759ea809ad80506a651661d2"
+    },
+    {
+      "path": "include/render-utils/snapshot_operations.h",
+      "sha256": "32a803ed586cf6c9924eb1d65c4f5f3cf541b138e2298c74ed4a4f138fe29ad4"
+    },
+    {
+      "path": "include/render-utils/stream.h",
+      "sha256": "ec2580e4c4ebbeb1a2759c842a9e73c8b6d8e473b43ac8ab1e8406049daec624"
+    },
+    {
+      "path": "include/render-utils/sync_device.h",
+      "sha256": "160c24a2f4591e758772901676c38d6194878f9fbc333bf561940b5d39438e07"
+    },
+    {
+      "path": "include/render-utils/virtio_gpu_ops.h",
+      "sha256": "42864129f24fee92a3d76eabf49c72cb0c5b0d5d6df0a35fe61aed3772c5cf85"
+    },
+    {
+      "path": "include/render-utils/vm_operations.h",
+      "sha256": "9401e5a0f8c2aefb38787a5f7177c8796d59bc321f9a1486c86a00aea9dad491"
+    },
+    {
+      "path": "include/render-utils/window_operations.h",
+      "sha256": "28bd6bba39270695b84c632e0bbba580bd17a67fd8a0c6c7a12b846f32024572"
+    }
+  ],
+  "khronos_header_source": "SwiftShader commit 40586720c2da48d4bb1ddf936204fd6eab2d54a9 include/{EGL,GLES2,KHR}; individual copyright/permission notices retained"
+}
