@@ -1,0 +1,9 @@
+{
+  "source_sha256": "e6e40ff97d5ac6e46edf472decbc5f12b734fc287ec38c3845777541235ba322",
+  "artifact_sha256": "911984ca129bc0414c964276df5797a98065d1445b077c91d5082ef6b9277b7b",
+  "size": 11824,
+  "clang": "Homebrew clang version 22.1.2",
+  "linker": "GNU ld (GNU Binutils) 2.46.0.20260210",
+  "libgcc_sha256": "e75910eee7b9ebaa0e78d9b1279f52f8990014164df8b0c70af1e5a0db223882",
+  "guest_image_modified": false
+}

@@ -1,5 +1,5 @@
 /* Philips emulator-only host graphics transport broker. Never use on a TV.
- * Protocol v1: nonblocking MMIO commands; one independent host stream/client.
+ * Base protocol v1 plus optional readiness extension v1. One stream/client.
  */
 #define _GNU_SOURCE
 #include <errno.h>
@@ -23,8 +23,8 @@
 #define CLIENTS 64
 #define CHUNK 65536
 #define ENDPOINT "/dev/socket/philips_hostgpu"
-enum { CMD=0, STATUS=1, CONNECTION=2, LENGTH=3, RESULT=4, MAGIC_REG=5 };
-enum { OP_OPEN=1, OP_WRITE=2, OP_READ=3, OP_CLOSE=4 };
+enum { CMD=0, STATUS=1, CONNECTION=2, LENGTH=3, RESULT=4, MAGIC_REG=5, CAPABILITIES=7, READY_LOW=8, READY_HIGH=9 };
+enum { OP_OPEN=1, OP_WRITE=2, OP_READ=3, OP_CLOSE=4, OP_READINESS=5 };
 typedef struct { int fd, host, handshake; size_t tx_len, tx_off, rx_len, rx_off; unsigned char tx[CHUNK], rx[CHUNK]; } Client;
 static volatile uint32_t *ctrl;
 static unsigned char *payload;
@@ -51,7 +51,34 @@ static void close_client(Client *c) {
     if(c->fd>=0) close(c->fd);
     memset(c,0,sizeof(*c)); c->fd=c->host=-1;
 }
+/* Snapshot after all queued writes so newly available replies can be read in
+ * this iteration. A failed optional query falls back to legacy reads, never
+ * suppressing data or EOF. The next iteration retries the snapshot.
+ */
+static uint64_t host_readiness(int supported) {
+    if(!supported)return UINT64_MAX;
+    barrier();ctrl[CMD]=OP_READINESS;barrier();
+    if((int32_t)ctrl[STATUS]!=0)return UINT64_MAX;
+    uint32_t low=ctrl[READY_LOW],high=ctrl[READY_HIGH];
+    return (uint64_t)low|((uint64_t)high<<32);
+}
 static int would_block(int n) { return n==-EAGAIN || n==-EWOULDBLOCK || n==-EINPROGRESS; }
+/* Preserve pending replies across backpressure. Even a host EOF readiness bit
+ * must not trigger another READ until all previously received bytes are sent.
+ */
+static void service_host_reply(Client *c,uint64_t readable) {
+    if(c->rx_off==c->rx_len && (readable&(UINT64_C(1)<<(c->host-1)))) {
+        c->rx_off=c->rx_len=0;
+        int n=command(OP_READ,c->host,NULL,CHUNK,c->rx);
+        if(n>0)c->rx_len=(size_t)n;
+        else if(!would_block(n)) {close_client(c);return;}
+    }
+    if(c->rx_len>c->rx_off) {
+        ssize_t n=send(c->fd,c->rx+c->rx_off,c->rx_len-c->rx_off,MSG_DONTWAIT|MSG_NOSIGNAL);
+        if(n>0)c->rx_off+=(size_t)n;
+        else if(n==0 || (errno!=EAGAIN && errno!=EINTR))close_client(c);
+    }
+}
 int main(int argc, char **argv) {
     int probe = argc == 2 && !strcmp(argv[1], "--probe");
     if(argc > 1 && !probe) {fprintf(stderr,"usage: hostgpu_broker [--probe]\n");return 2;}
@@ -67,6 +94,8 @@ int main(int argc, char **argv) {
     if(ctrl==MAP_FAILED) { perror("hostgpu control mmap"); close(mem); return 1; }
     /* Read before issuing any command: reject physical hardware / other boards. */
     if(ctrl[MAGIC_REG]!=MAGIC) { fprintf(stderr,"hostgpu: emulator device absent\n"); munmap((void*)ctrl,4096); close(mem); return 1; }
+    uint32_t capabilities=ctrl[CAPABILITIES];
+    int readiness_supported=(capabilities>>16)==1 && (capabilities&1);
     if(probe) {fprintf(stderr,"HOSTGPU_PROBE PASS magic=%08x PA=%llx\n",ctrl[MAGIC_REG],CTRL_PA);munmap((void*)ctrl,4096);close(mem);return 0;}
     payload=mmap64(NULL,APERTURE_SIZE,PROT_READ|PROT_WRITE,MAP_SHARED,mem,DATA_PA);
     close(mem);
@@ -95,7 +124,7 @@ int main(int argc, char **argv) {
     Client *clients=calloc(CLIENTS,sizeof(*clients));
     if(!clients) { close(listener); if(!inherited)unlink(ENDPOINT); return 1; }
     for(int i=0;i<CLIENTS;i++) clients[i].fd=clients[i].host=-1;
-    fprintf(stderr,"hostgpu: ready, nonblocking v1 payload=%llx ctrl=%llx\n",DATA_PA,CTRL_PA);
+    fprintf(stderr,"hostgpu: ready, nonblocking v1 readiness=%d payload=%llx ctrl=%llx\n",readiness_supported,DATA_PA,CTRL_PA);
     while(!stopping) {
         struct pollfd fds[CLIENTS+1]; int active=0;
         fds[0]=(struct pollfd){listener,POLLIN,0};
@@ -125,7 +154,7 @@ int main(int argc, char **argv) {
                 if(strcmp((char*)c->tx,"pipe:opengles") && strcmp((char*)c->tx,"pipe:GLProcessPipe")) {close_client(c);continue;}
                 int host=command(OP_OPEN,0,c->tx,n,NULL);
                 if(would_block(host))continue;
-                if(host<0) {fprintf(stderr,"hostgpu open failed %d\n",host);close_client(c);continue;}
+                if(host<1 || host>CLIENTS) {fprintf(stderr,"hostgpu open failed %d\n",host);close_client(c);continue;}
                 c->host=host; c->tx_off=n;
             }
             if(c->tx_len>c->tx_off) {
@@ -134,17 +163,11 @@ int main(int argc, char **argv) {
                 else if(!would_block(n)) {close_client(c);continue;}
             }
             if(c->tx_off==c->tx_len)c->tx_off=c->tx_len=0;
-            if(c->rx_off==c->rx_len) {
-                c->rx_off=c->rx_len=0;
-                int n=command(OP_READ,c->host,NULL,CHUNK,c->rx);
-                if(n>0)c->rx_len=(size_t)n;
-                else if(!would_block(n)) {close_client(c);continue;}
-            }
-            if(c->rx_len>c->rx_off) {
-                ssize_t n=send(c->fd,c->rx+c->rx_off,c->rx_len-c->rx_off,MSG_DONTWAIT|MSG_NOSIGNAL);
-                if(n>0)c->rx_off+=(size_t)n;
-                else if(n==0 || (errno!=EAGAIN && errno!=EINTR))close_client(c);
-            }
+        }
+        uint64_t readable=host_readiness(readiness_supported);
+        for(int i=0;i<CLIENTS;i++) {
+            Client *c=&clients[i];if(c->fd<0||c->host<1)continue;
+            service_host_reply(c,readable);
         }
     }
     for(int i=0;i<CLIENTS;i++)close_client(&clients[i]);

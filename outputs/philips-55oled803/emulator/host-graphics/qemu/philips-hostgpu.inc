@@ -7,12 +7,15 @@
  * Status values use Linux errno numbers, independent of the host OS.
  */
 #include <sys/un.h>
+#include <poll.h>
 #include "qemu/sockets.h"
 
 #define PHGPU_PAYLOAD_BASE 0xa1000000ULL
 #define PHGPU_CONTROL_BASE 0xa1100000ULL
 #define PHGPU_CAPACITY (1024 * 1024)
 #define PHGPU_CONNECTIONS 64
+/* High 16 bits: extension ABI version; low bit 0: OP5 readiness snapshot. */
+#define PHGPU_CAPABILITIES 0x00010001u
 
 static struct {
     MemoryRegion payload_region, control_region;
@@ -20,6 +23,7 @@ static struct {
     const char *socket_path;
     int fd[PHGPU_CONNECTIONS];
     uint32_t connection, length, command;
+    uint64_t readable;
     int32_t status, result;
 } phgpu;
 
@@ -36,6 +40,29 @@ static void phgpu_command(uint32_t command)
     struct sockaddr_un address = { .sun_family = AF_UNIX };
     phgpu.command = command;
     phgpu.status = phgpu.result = 0;
+    if (command == 5) {
+        /* One serialized broker owns this snapshot. No payload mutation, no
+         * waiting under the QEMU global lock, and no connection selector needed.
+         * Readable includes EOF/errors so the ordinary READ can close clients.
+         */
+        struct pollfd fds[PHGPU_CONNECTIONS];
+        phgpu.readable = 0;
+        for (slot = 0; slot < PHGPU_CONNECTIONS; slot++) {
+            fds[slot] = (struct pollfd){ phgpu.fd[slot], POLLIN, 0 };
+        }
+        int ready = poll(fds, PHGPU_CONNECTIONS, 0);
+        if (ready < 0) {
+            phgpu.status = phgpu_error();
+            return;
+        }
+        for (slot = 0; slot < PHGPU_CONNECTIONS; slot++) {
+            if (fds[slot].revents & (POLLIN | POLLHUP | POLLERR | POLLNVAL)) {
+                phgpu.readable |= UINT64_C(1) << slot;
+            }
+        }
+        phgpu.result = ready;
+        return;
+    }
     if (phgpu.length > PHGPU_CAPACITY) {
         phgpu.status = -22;
         return;
@@ -145,6 +172,9 @@ static uint64_t phgpu_read(void *opaque, hwaddr address, unsigned size)
     case 16: return (uint32_t)phgpu.result;
     case 20: return 0x50484750;
     case 24: return PHGPU_CAPACITY;
+    case 28: return PHGPU_CAPABILITIES;
+    case 32: return (uint32_t)phgpu.readable;
+    case 36: return (uint32_t)(phgpu.readable >> 32);
     default: return 0;
     }
 }

@@ -1,0 +1,56 @@
+{
+  "result": "PASS",
+  "origin": "Actual QEMU qtest and Unix streams",
+  "guest_android_executed": false,
+  "checks": [
+    "capability version and empty readiness",
+    "64 open idle slots have zero readiness",
+    "snapshot ignores stale selector/length and preserves payload",
+    "all 64 readiness bits including bit63",
+    "partial reads retain all ready bits",
+    "draining clears all readiness bits",
+    "legacy write, EAGAIN, invalid length/command, exhaustion",
+    "EOF readiness retains final bytes and clears after close",
+    "empty EOF and slot reuse",
+    "all closed readiness empty"
+  ],
+  "idle_poll_microbenchmark": [
+    {
+      "idle_connections": 1,
+      "iterations": 20,
+      "before_control_mmio": 100,
+      "after_control_mmio": 80,
+      "before_host_commands": 20,
+      "after_host_commands": 20,
+      "control_mmio_reduction_percent": 20.0
+    },
+    {
+      "idle_connections": 8,
+      "iterations": 20,
+      "before_control_mmio": 800,
+      "after_control_mmio": 80,
+      "before_host_commands": 160,
+      "after_host_commands": 20,
+      "control_mmio_reduction_percent": 90.0
+    },
+    {
+      "idle_connections": 32,
+      "iterations": 20,
+      "before_control_mmio": 3200,
+      "after_control_mmio": 80,
+      "before_host_commands": 640,
+      "after_host_commands": 20,
+      "control_mmio_reduction_percent": 97.5
+    },
+    {
+      "idle_connections": 64,
+      "iterations": 20,
+      "before_control_mmio": 6400,
+      "after_control_mmio": 80,
+      "before_host_commands": 1280,
+      "after_host_commands": 20,
+      "control_mmio_reduction_percent": 98.75
+    }
+  ],
+  "measurement_limit": "Control-MMIO counts only; no live guest CPU or end-to-end latency claim."
+}

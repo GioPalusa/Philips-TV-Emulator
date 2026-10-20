@@ -1,0 +1,1 @@
+PASS broker: absent/failed readiness fallback, bit63 mapping, no idle reads, partial-send EAGAIN, queued bytes then final host bytes then EOF without loss, legacy EAGAIN
