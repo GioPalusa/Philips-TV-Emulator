@@ -1,0 +1,25 @@
+{
+  "result": "pass",
+  "expect_fixed": true,
+  "base_unchanged": true,
+  "events": [
+    {
+      "rejected_command": 35,
+      "command_status": "0x100",
+      "after_command_ack": "0x0",
+      "next_successful_dma_status": "0x3008"
+    },
+    {
+      "rejected_command": 36,
+      "command_status": "0x100",
+      "after_command_ack": "0x0",
+      "next_successful_dma_status": "0x3008"
+    },
+    {
+      "rejected_command": 38,
+      "command_status": "0x100",
+      "after_command_ack": "0x0",
+      "next_successful_dma_status": "0x3008"
+    }
+  ]
+}

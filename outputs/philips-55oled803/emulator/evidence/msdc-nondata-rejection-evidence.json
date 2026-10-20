@@ -1,0 +1,32 @@
+{
+  "schema": "philips-msdc-nondata-rejection-v1",
+  "result": "PASS component tests; live reboot pending",
+  "observed_guest": {
+    "run": "ui/runs/20261020-192007-df77ee",
+    "seconds": 46.766155,
+    "pc": "c0395784",
+    "function": "msdc_irq+0x230",
+    "irq_status": "0x7008",
+    "preceding_log": "SystemServer: PerformFstrimIfNeeded"
+  },
+  "cause": "Controller rejection of non-data CMD35/36/38 incorrectly latched I_DATTO. Command-only acknowledgement leaves it pending; the next successful transfer combines timeout with completion. Exact stock IRQ code completes request before processing the saved timeout and dereferences cleared host->mrq.",
+  "confidence": "Exact status and handler mechanism reproduced; live initiating command inferred from adjacent fstrim log because command tracing was disabled.",
+  "fix": "Return existing R1 WP_VIOLATION and command-ready. Add data-timeout only if SDC_CMD data type bits 11\u201312 request a data phase. No erase operations are forwarded or enabled.",
+  "tests": {
+    "exact_status_before": "0x4100 -> command-only ACK -> 0x4000 -> successful CMD18 DMA+CMD12 -> 0x7008",
+    "exact_status_after": "0x100 -> command-only ACK -> 0 -> successful CMD18 DMA+CMD12 -> 0x3008",
+    "base_unchanged": true,
+    "existing_default_suite": "pass",
+    "existing_snapshot_write_suite": "pass on full-size stock emulator image, sector 2048",
+    "fixture_correction": "Initial write-suite run on 64 MiB fixture failed because that suite assumes sector addressing while the small card uses byte addressing. Reran using established full-size image. Exact non-data status regression uses sector zero and is valid on small fixture."
+  },
+  "files": {
+    "work/philips-emulator/qemu-11.1.2/hw/sd/mt5891-msdc.c": "9d67428e06fcfb0d5cdd20ccc106d6c9b5c58b196624712fac0aa69cbf101a13",
+    "work/philips-emulator/qemu-11.1.2/build/qemu-system-aarch64": "24dbd095229edec938222775adf84767b082e181cd89be720f95be263eb18b0d"
+  },
+  "limitations": [
+    "No live reboot performed by these isolated tests",
+    "No physical TV access",
+    "Erase/trim remains rejected; this fix removes an unrelated fabricated data interrupt"
+  ]
+}

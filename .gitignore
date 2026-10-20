@@ -37,6 +37,7 @@ __pycache__/
 /outputs/philips-55oled803/emulator/host-graphics/guest/hostgpu_render_test
 /outputs/philips-55oled803/emulator/host-graphics/guest/policy/sepolicy-hostgpu
 /outputs/philips-55oled803/emulator/host-graphics/profile/
+/outputs/philips-55oled803/emulator/rtc/rtc_alarm_probe
 
 # Keep selected build and inspection sources; other scratch data stays local.
 /work/*

@@ -1,0 +1,23 @@
+{
+  "result": "observed",
+  "events": [
+    {
+      "rejected_command": 35,
+      "command_status": "0x4100",
+      "after_command_ack": "0x4000",
+      "next_successful_dma_status": "0x7008"
+    },
+    {
+      "rejected_command": 36,
+      "command_status": "0x4100",
+      "after_command_ack": "0x4000",
+      "next_successful_dma_status": "0x7008"
+    },
+    {
+      "rejected_command": 38,
+      "command_status": "0x4100",
+      "after_command_ack": "0x4000",
+      "next_successful_dma_status": "0x7008"
+    }
+  ]
+}

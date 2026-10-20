@@ -1,0 +1,1 @@
+RTC_MODEL_PASS: presence, oscillator, BCD, 24h, leap/day/year rollover, freeze/set/resume, unlock, bus lanes, reset
