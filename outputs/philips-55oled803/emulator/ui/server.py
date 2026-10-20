@@ -53,6 +53,10 @@ spec = importlib.util.spec_from_file_location("spi_decoder",
                                              EMU / "ambilight/decode_spi.py")
 decoder = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(decoder)
+input_spec = importlib.util.spec_from_file_location("input_bridge_controller",
+                                                   EMU / "input/bridge_controller.py")
+input_module = importlib.util.module_from_spec(input_spec)
+input_spec.loader.exec_module(input_module)
 
 
 def tail(path, count=18000):
@@ -79,6 +83,8 @@ class Emulator:
         self.run_dir = None
         self.frame = None
         self.frame_time = None
+        self.frame_bytes = None
+        self.capture_ms = None
         self.started = None
         self.fixture = "framebuffer"
         self.error = ""
@@ -90,6 +96,7 @@ class Emulator:
         self.scanout_log_tail = b""
         self.last_boot_check = 0
         self.diagnostics_started = False
+        self.input_bridge = input_module.InputBridgeController(self)
 
     def attach(self, run_dir, pid):
         run_dir = run_dir.resolve(strict=True)
@@ -127,8 +134,11 @@ class Emulator:
             self.temp = tempfile.TemporaryDirectory(prefix="philips-ui-", dir="/tmp")
             self.fixture = fixture
             self.frame = self.frame_time = None
+            self.frame_bytes = None
+            self.capture_ms = None
             self.boot, self.error = "unknown", ""
             self.input_ready = False
+            self.input_bridge.reset()
             self.scanout_observed = False
             self.scanout_log_offset = 0
             self.scanout_log_tail = b""
@@ -223,6 +233,7 @@ class Emulator:
             threading.Thread(target=self.receive_console, args=(proc, console),
                              daemon=True).start()
             while proc.poll() is None and self.process is proc:
+                capture_started = time.monotonic()
                 try:
                     if not self.scanout_observed:
                         with (self.run_dir / "qemu.log").open("rb") as stream:
@@ -232,12 +243,17 @@ class Emulator:
                         observed = self.scanout_log_tail + chunk
                         self.scanout_observed = b"[mt5891 osd] raw plane2" in observed
                         self.scanout_log_tail = observed[-64:]
-                    temporary = self.run_dir / "frame-next.png"
-                    self.qmp_call("screendump", {"filename": str(temporary), "format": "png"})
-                    temporary.replace(self.run_dir / "frame.png")
+                    # Raw PPM avoids PNG compression inside QEMU's global lock.
+                    # The browser converts these actual RGB pixels to a canvas.
+                    temporary = self.run_dir / "frame-next.ppm"
+                    self.qmp_call("screendump", {"filename": str(temporary), "format": "ppm"})
+                    captured = temporary.read_bytes()
+                    temporary.replace(self.run_dir / "frame.ppm")
                     with self.lock:
-                        self.frame = self.run_dir / "frame.png"
+                        self.frame = self.run_dir / "frame.ppm"
+                        self.frame_bytes = captured
                         self.frame_time = time.time()
+                        self.capture_ms = round((time.monotonic() - capture_started) * 1000, 2)
                     if self.diagnostics_started and time.monotonic() - self.last_boot_check > 30:
                         self.check_boot()
                         self.last_boot_check = time.monotonic()
@@ -249,7 +265,8 @@ class Emulator:
                 except Exception as exc:
                     with self.lock:
                         self.error = "Frame capture: " + str(exc)
-                time.sleep(1.5)
+                # Bound host work to 20 captures/s; never queue old frames.
+                time.sleep(max(.005, .05 - (time.monotonic() - capture_started)))
         except Exception as exc:
             with self.lock:
                 self.error = str(exc)
@@ -291,13 +308,7 @@ class Emulator:
                 lines = pending.split("\n")
                 pending = lines.pop()[-4096:]
                 for line in lines:
-                    match = re.fullmatch(r"\s*TVUI_KEY_([0-9a-f]+):(\d+)\s*", line)
-                    if match:
-                        with self.lock:
-                            for item in self.commands:
-                                if item["id"] == match[1]:
-                                    item["status"] = ("accepted" if match[2] == "0" else "failed")
-                                    item["exit_code"] = int(match[2])
+                    self.input_bridge.receive(line)
                     boot = re.fullmatch(r"\s*TVUI_BOOT:(.*?)\s*", line)
                     if boot:
                         with self.lock:
@@ -306,13 +317,17 @@ class Emulator:
                     if ready:
                         with self.lock:
                             self.input_ready = ready[1].strip() == "Service input: found"
+                            if self.input_ready and self.input_bridge.state()["status"] == "idle":
+                                self.input_bridge.start()
 
-    def send(self, text):
+    def send(self, text, on_send=None):
         with self.send_lock:
             with self.lock:
                 console = self.console
             if not console:
                 raise ValueError("Serial console is not connected")
+            if on_send:
+                on_send()
             data = text.encode()
             for pos in range(0, len(data), 12):
                 console.sendall(data[pos:pos+12])
@@ -326,20 +341,7 @@ class Emulator:
                 raise ValueError("Serial console is not connected")
             if not self.input_ready:
                 raise ValueError("Android input service is not ready")
-            if self.commands and time.time() - self.commands[-1]["time"] < .3:
-                raise ValueError("Wait briefly before sending another key")
-            ident = secrets.token_hex(6)
-            item = {"id": ident, "key": key, "status": "pending", "time": time.time()}
-            self.commands.append(item)
-        def dispatch():
-            try:
-                self.send(f"( input keyevent {KEYS[key]}; r=$?; "
-                          f"printf '\\nTVUI_KEY_{ident}:%d\\n' \"$r\" ) &\n")
-            except Exception as exc:
-                with self.lock:
-                    item["status"], item["error"] = "failed", str(exc)
-        threading.Thread(target=dispatch, daemon=True).start()
-        return dict(item)
+            return self.input_bridge.enqueue(key, KEYS[key])
 
     def check_boot(self):
         self.send("printf '\\nTVUI_BOOT:%s\\nTVUI_INPUT:%s\\n' "
@@ -350,6 +352,7 @@ class Emulator:
             "services": "getprop init.svc.dtv-svc; getprop init.svc.bootanim; service list",
             "activity": "dumpsys activity activities",
             "processes": "ps -A",
+            "identity": "id; id -Z",
             "graphics": "dumpsys SurfaceFlinger",
             "settings": "am start -a android.settings.SETTINGS",
             "launcher": "am start -n com.google.android.tvlauncher/.HomeScreen",
@@ -368,6 +371,7 @@ class Emulator:
     def stop(self):
         with self.lock:
             proc = self.process
+            self.input_bridge.reset()
         if proc and proc.poll() is None:
             # Only our still-live child, started in its own process group.
             os.killpg(proc.pid, signal.SIGTERM)
@@ -386,9 +390,6 @@ class Emulator:
             running = bool(proc and proc.poll() is None)
             qlog = tail(run_dir / "qemu.log") if run_dir else ""
             clog = tail(run_dir / "console.log") if run_dir else ""
-            for item in self.commands:
-                if item["status"] == "pending" and time.time() - item["time"] > 15:
-                    item["status"] = "timeout"
             pixels, sequence, spi_error = [], None, ""
             if run_dir:
                 for line in reversed(tail(run_dir / "ambilight.jsonl", 65536).splitlines()):
@@ -406,9 +407,11 @@ class Emulator:
                 "uptime": round(time.monotonic() - self.started) if running else None,
                 "console_connected": bool(self.console and running),
                 "input_ready": bool(self.input_ready and self.console and running),
+                "input_bridge": self.input_bridge.state(),
                 "qmp_connected": bool(self.qmp and running), "boot": self.boot,
                 "fixture": self.fixture, "frame": bool(self.frame),
                 "frame_time": self.frame_time,
+                "capture_ms": self.capture_ms,
                 "scanout_observed": self.scanout_observed,
                 "pixels": pixels, "spi_sequence": sequence, "spi_error": spi_error,
                 "commands": list(self.commands), "error": self.error,
@@ -451,9 +454,20 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/session":
             return self.reply(200, {"token": self.server.token})
         if path == "/frame.png":
-            frame = self.server.emulator.frame
-            if frame and frame.is_file():
-                return self.reply(200, frame.read_bytes(), "image/png")
+            emulator = self.server.emulator
+            if emulator.frame and emulator.qmp:
+                try:
+                    frame = emulator.run_dir / "snapshot.png"
+                    emulator.qmp_call("screendump", {"filename": str(frame), "format": "png"})
+                    return self.reply(200, frame.read_bytes(), "image/png")
+                except (OSError, RuntimeError) as exc:
+                    return self.reply(503, {"error": str(exc)})
+            return self.reply(404, {"error": "No QEMU frame captured yet"})
+        if path == "/frame.ppm":
+            with self.server.emulator.lock:
+                pixels = self.server.emulator.frame_bytes
+            if pixels:
+                return self.reply(200, pixels, "image/x-portable-pixmap")
             return self.reply(404, {"error": "No QEMU frame captured yet"})
         names = {"/": ("index.html", "text/html; charset=utf-8"),
                  "/app.js": ("app.js", "text/javascript; charset=utf-8"),
@@ -483,6 +497,8 @@ class Handler(BaseHTTPRequestHandler):
                     self.server.emulator.stop()
                 elif path == "/api/key":
                     return self.reply(200, self.server.emulator.key(data.get("key")))
+                elif path == "/api/input-bridge":
+                    self.server.emulator.input_bridge.start()
                 elif path == "/api/check-boot":
                     self.server.emulator.check_boot()
                 elif path == "/api/report":

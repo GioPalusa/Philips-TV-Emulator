@@ -1,0 +1,21 @@
+{
+  "result": "PASS",
+  "origin": "QEMU qtest with synthetic host socket",
+  "guest_android_executed": false,
+  "host_gpu_rendered": false,
+  "checks": [
+    "magic",
+    "capacity",
+    "handshake allowlist",
+    "64 independent connections",
+    "connection exhaustion",
+    "nonblocking Linux EAGAIN",
+    "bidirectional exact bytes",
+    "oversize rejected",
+    "unknown command rejected",
+    "EOF",
+    "close",
+    "slot reuse",
+    "process pipe"
+  ]
+}

@@ -1,5 +1,6 @@
 const $ = id => document.getElementById(id);
-let token = "", fixture = "framebuffer", state = null, lastFrame = null, polling = false;
+let token = "", fixture = "framebuffer", state = null, polling = false;
+let framePixels = null, frameWords = null, lastFrameAt = 0, viewFrames = 0, viewRate = 0, rateStart = performance.now();
 let actionPending = false;
 const notice = text => { $("notice").textContent = text; $("notice").classList.toggle("hidden", !text); };
 async function action(path, body = {}) {
@@ -46,27 +47,31 @@ function render(s) {
     s.boot === "not_complete" ? "Guest has not reported completion" : "No guest status response yet";
   $("spi-status").textContent = s.pixels.length ? `${s.pixels.length} wire pixels` : "No transfers";
   $("spi-detail").textContent = s.pixels.length ? `Guest SPI transfer ${s.spi_sequence}` : "Waiting for guest output";
-  $("remote-state").textContent = s.input_ready ? "READY" : s.console_connected ? "WAITING FOR ANDROID" : "OFFLINE";
-  document.querySelectorAll("[data-key]").forEach(b=>b.disabled=!s.input_ready);
+  const bridge = s.input_bridge || {status:"idle",pending:0,capacity:4};
+  const remoteReady = s.input_ready && bridge.status === "ready";
+  $("remote-state").textContent = !s.console_connected ? "OFFLINE" :
+    !s.input_ready ? "WAITING FOR ANDROID" : ({ready:"READY",preparing:"PREPARING REMOTE",
+      failed:"REMOTE UNAVAILABLE",uncertain:"WAITING FOR ACK"}[bridge.status] || "WAITING FOR BRIDGE");
+  document.querySelectorAll("[data-key]").forEach(b=>b.disabled=!remoteReady || bridge.pending >= bridge.capacity);
   $("check-boot").disabled = !s.console_connected;
   if (s.commands.length) {
     const cmd = s.commands[s.commands.length-1];
-    const names = {pending:"Waiting for guest acknowledgment…",
-      accepted:"Guest accepted the key command. Screen response is not verified.",
-      failed:`Guest command failed${cmd.exit_code !== undefined ? ` (exit ${cmd.exit_code})` : ""}.`,
-      timeout:"No guest acknowledgment. The shell or Android input service may not be ready."};
-    $("key-feedback").textContent = `${cmd.key.replaceAll("_"," ")} · ${names[cmd.status] || cmd.status}`;
-  } else $("key-feedback").textContent = s.input_ready ?
-    "Keys are sent to Android. Each command waits for a guest acknowledgment." :
-    "Remote buttons become available when Android's input service is ready.";
-  if (s.frame && lastFrame !== s.frame_time) {
-    $("frame").src = `/frame.png?t=${s.frame_time}`;
-    lastFrame = s.frame_time;
-  }
-  $("frame").classList.toggle("hidden", !s.frame);
-  $("frame-empty").classList.toggle("hidden", s.frame);
+    const names = {queued:"Queued behind the current key…",pending:"Waiting for guest acknowledgement…",
+      accepted:"Guest input dispatcher accepted the key.",accepted_late:"Guest acknowledgement arrived late.",
+      failed:`Key failed${cmd.error ? `: ${cmd.error}` : "."}`,
+      cancelled:"Not sent because the previous key has an uncertain outcome.",
+      timeout:"No acknowledgement; outcome unknown. The key was not retried."};
+    const timing = cmd.host_ms !== undefined ? ` · ${cmd.host_ms} ms to ACK${cmd.guest_ms !== null ? ` · ${cmd.guest_ms} ms in guest` : ""}` : "";
+    $("key-feedback").textContent = `${cmd.key.replaceAll("_"," ")} · ${names[cmd.status] || cmd.status}${timing}`;
+  } else $("key-feedback").textContent = remoteReady ?
+    "Persistent Android input is ready. Acknowledgements report dispatch, not screen changes." :
+    bridge.error ? `Remote: ${bridge.error}` : bridge.status === "preparing" ?
+    "Preparing one persistent input process in the Android shell." :
+    "Remote buttons become available when Android input and the persistent bridge are ready.";
+  $("frame").classList.toggle("hidden", !lastFrameAt);
+  $("frame-empty").classList.toggle("hidden", !!lastFrameAt);
   $("image-status").textContent = s.frame ? "ACTUAL QEMU FRAMEBUFFER" : "WAITING FOR QEMU";
-  $("frame-age").textContent = s.frame_time ? `${Math.max(0,Math.floor(Date.now()/1000-s.frame_time))}s SINCE CAPTURE` : "NO FRAME YET";
+  $("frame-age").textContent = lastFrameAt ? `${viewRate.toFixed(1)} VIEW FPS · ${Math.max(0,Math.round(performance.now()-lastFrameAt))}ms SINCE DISPLAY` : "NO FRAME YET";
   $("image-note").textContent = s.frame ? s.scanout_observed ?
     "Raw guest OSD input. A captured frame does not imply Android boot has completed." :
     "QEMU capture available. Guest OSD scanout has not been observed; the display may be uninitialized." :
@@ -112,11 +117,46 @@ document.querySelectorAll("[data-color]").forEach(b=>b.onclick=()=>{
   document.querySelectorAll("[data-color]").forEach(x=>x.classList.toggle("selected",x===b));
   if(state) render(state);
 });
-$("frame").onerror = ()=>notice("The latest framebuffer image could not be loaded.");
+// Fetch only after the previous frame is displayed. This bounds latency and
+// memory even if rendering or the browser slows down; no queued frame backlog.
+async function frameLoop() {
+  const started = performance.now();
+  try {
+    if (!document.hidden && state?.frame) {
+      const response = await fetch("/frame.ppm");
+      if (response.ok) {
+        const bytes = new Uint8Array(await response.arrayBuffer());
+        const header = new TextDecoder().decode(bytes.subarray(0,80)).match(/^P6\n(\d+) (\d+)\n255\n/);
+        if (!header) throw new Error("Invalid framebuffer header");
+        const width = Number(header[1]), height = Number(header[2]), offset = header[0].length;
+        if (width < 1 || height < 1 || width > 4096 || height > 2160 || bytes.length !== offset + width*height*3)
+          throw new Error("Invalid framebuffer dimensions");
+        const canvas = $("frame");
+        if (!framePixels || canvas.width !== width || canvas.height !== height) {
+          canvas.width = width; canvas.height = height;
+          framePixels = new ImageData(width,height);
+          frameWords = new Uint32Array(framePixels.data.buffer);
+        }
+        // Supported desktop hosts are little-endian; ImageData is RGBA bytes.
+        for (let i=0,p=offset;i<frameWords.length;i++,p+=3)
+          frameWords[i] = 0xff000000 | bytes[p] | bytes[p+1]<<8 | bytes[p+2]<<16;
+        canvas.getContext("2d",{alpha:false}).putImageData(framePixels,0,0);
+        lastFrameAt = performance.now();
+        canvas.classList.remove("hidden"); $("frame-empty").classList.add("hidden");
+        viewFrames++;
+        if (lastFrameAt-rateStart >= 1000) {
+          viewRate = viewFrames*1000/(lastFrameAt-rateStart); viewFrames=0; rateStart=lastFrameAt;
+        }
+      }
+    }
+  } catch(e) { notice(`Display: ${e.message}`); }
+  setTimeout(frameLoop,Math.max(5,50-(performance.now()-started)));
+}
 async function init() {
   try { token=(await (await fetch("/api/session")).json()).token; await refresh(); }
   catch(e) { notice(e.message); }
-  setInterval(refresh,1500);
+  setInterval(refresh,250);
+  frameLoop();
 }
 lights([]);
 init();

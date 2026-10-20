@@ -1,0 +1,37 @@
+{
+  "schema": "philips-input-bridge-build-v1",
+  "status": "built; host protocol tests passed; guest untested",
+  "target": "Android 8 / API 26; ordinary shell process",
+  "dex_magic": "dex\\n038\\0",
+  "tests": [
+    "strict ID and field parsing",
+    "CRLF and LF framing",
+    "fixed remote-key allowlist",
+    "one-million-byte malformed line with bounded buffer and recovery",
+    "control and non-ASCII input rejection",
+    "EOF partial request rejection",
+    "QUIT prevents subsequent dispatch",
+    "false and exception injection results produce errors"
+  ],
+  "limitations": [
+    "Guest reflection/API compatibility and permissions pending runtime check.",
+    "No latency or responsiveness improvement measured yet.",
+    "ACK confirms injection calls returned success; not an application navigation or rendered-frame assertion.",
+    "Synchronous Android injection can block; timed-out requests must not be retried automatically."
+  ],
+  "sha256": {
+    "BridgeProtocol.java": "d15395094cbb7aae44b3b9bcb27573ec9accd74d9e3c07844e19e044584ae2d9",
+    "InputBridge.java": "c7f966ea7f0ba808c1886cf9d4a457e2fb57fc44d63a886a25d012e8fc61e163",
+    "ProtocolTest.java": "160865fdf28408fa41a23f050b0abb798c6afcf095c1bbec713df9851ddb197f",
+    "build.sh": "0d22f6501a8506d131cd5a39fe5b109cb5edd0a36307923ec30e7fcc77edb553",
+    "philips-input.jar": "28f16be2b1581c889e30c08dcd48434fcb2324d6f30add3482965b830202e55f",
+    "bridge_controller.py": "94d2be6432514bb9d1277c95cb98e2acedd2f112f6de5f5db38797794318a3af",
+    "test_bridge_controller.py": "a6217711e833616a91396fc3331c987a23d5bb09671ba094723062014561f3a6"
+  },
+  "permissions": "Requires UID 2000 at launch; no privilege or SELinux changes.",
+  "controller_tests": {
+    "result": "passed",
+    "count": 6,
+    "guest_deployed": false
+  }
+}

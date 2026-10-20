@@ -1,0 +1,2 @@
+PASS: first/repeated/collision/capacity semantics; checksum=3910237210
+1M hot accesses at 8192 entries: linear 2.032225s, hash 0.008583s (236.8x)
