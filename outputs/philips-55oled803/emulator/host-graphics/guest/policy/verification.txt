@@ -288,3 +288,28 @@ allow untrusted_app_25 pdx_display_client_endpoint_socket:sock_file getattr;
 avtab_rules_before=18077 after=18077 old_mask=00000004 new_mask=00000014
 PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
 input_bytes=398272 output_bytes=398272
+PASS policy_version=30 type=shell(816) class_id=13 permission_id=4
+allow shell shell_data_file:fifo_file create;
+avtab_rules_before=18077 after=18078 old_mask=00000000 new_mask=00000008
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398272 output_bytes=398284
+PASS policy_version=30 type=shell(816) class_id=13 permission_id=17
+allow shell shell_data_file:fifo_file open;
+avtab_rules_before=18078 after=18078 old_mask=00000008 new_mask=00010008
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398284 output_bytes=398284
+PASS policy_version=30 type=shell(816) class_id=13 permission_id=2
+allow shell shell_data_file:fifo_file read;
+avtab_rules_before=18078 after=18078 old_mask=00010008 new_mask=0001000a
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398284 output_bytes=398284
+PASS policy_version=30 type=shell(816) class_id=13 permission_id=3
+allow shell shell_data_file:fifo_file write;
+avtab_rules_before=18078 after=18078 old_mask=0001000a new_mask=0001000e
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398284 output_bytes=398284
+PASS policy_version=30 type=shell(816) class_id=13 permission_id=5
+allow shell shell_data_file:fifo_file getattr;
+avtab_rules_before=18078 after=18078 old_mask=0001000e new_mask=0001001e
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398284 output_bytes=398284

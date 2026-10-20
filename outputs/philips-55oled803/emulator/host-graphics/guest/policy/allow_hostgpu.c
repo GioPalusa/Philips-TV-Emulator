@@ -1,4 +1,4 @@
-/* Add one observed graphics-domain self:process execmem permission offline.
+/* Add one explicitly scoped concrete type/class permission offline.
  * The input file is read-only. Semantic scope is verified by restoring the
  * bit in the output policy and comparing canonical serializations. */
 #include <sepol/policydb.h>
@@ -37,7 +37,7 @@ static void remove_rule(avtab_t *table,const avtab_key_t *key) {
  fail("cannot revert inserted rule");
 }
 int main(int argc,char **argv) {
- if(argc!=7)fail("usage: allow_graphics_execmem INPUT OUTPUT SOURCE TARGET CLASS PERMISSION (OUTPUT must not exist)");
+ if(argc!=7)fail("usage: allow_hostgpu INPUT OUTPUT SOURCE TARGET CLASS PERMISSION (OUTPUT must not exist)");
  const char *domain=argv[3];
 
  size_t input_size;void *input=read_file(argv[1],&input_size);
@@ -51,7 +51,7 @@ int main(int argc,char **argv) {
  if(!type||type->flavor!=TYPE_TYPE||!target||target->flavor!=TYPE_TYPE||!class)fail("required concrete type/class missing");
  perm_datum_t *perm=hashtab_search(class->permissions.table,argv[6]);
  if(!perm&&class->comdatum)perm=hashtab_search(class->comdatum->permissions.table,argv[6]);
- if(!perm||!perm->s.value||perm->s.value>32)fail("execmem permission missing or invalid");
+ if(!perm||!perm->s.value||perm->s.value>32)fail("permission missing or invalid");
  if(type->s.value>UINT16_MAX||class->s.value>UINT16_MAX)fail("symbol index overflow");
  avtab_key_t key={.source_type=type->s.value,.target_type=target->s.value,
   .target_class=class->s.value,.specified=AVTAB_ALLOWED};

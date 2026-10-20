@@ -172,7 +172,8 @@ class Emulator:
                 "console=ttyMT0,115200n1 earlyprintk=serial,ttyMT0 "
                 "androidboot.hardware=mt5891 device_name=55OLED803/12 vmalloc=650mb "
                 + (EMU / "partition-bootargs.txt").read_text().strip(),
-                "-drive", "if=none,format=raw,snapshot=on,file=" +
+                "-drive", "if=none,format=" + self.args.disk_format +
+                (",snapshot=off,file=" if self.args.persistent_disk else ",snapshot=on,file=") +
                 str(self.args.disk).replace(",", ",,") + ",id=tv-emmc",
                 "-global", "mt5891-msdc.allow-writes=on",
                 "-global", "emmc.reliable-write-sector-count=0",
@@ -198,7 +199,8 @@ class Emulator:
                 env["PHILIPS_AMBILIGHT_FIXTURE_RGB16"] = COLORS[fixture]
             (self.run_dir / "launch.json").write_text(json.dumps({
                 "command": command, "measurement_fixture": fixture,
-                "disk_writes": "temporary QEMU snapshot overlay"}, indent=2))
+                "disk_writes": ("persistent development overlay" if self.args.persistent_disk
+                                else "temporary QEMU snapshot overlay")}, indent=2))
             with (self.run_dir / "qemu.log").open("wb") as log:
                 self.process = subprocess.Popen(command, stdout=log, stderr=log,
                                                 env=env, start_new_session=True)
@@ -294,12 +296,14 @@ class Emulator:
                         self.last_boot_check = time.monotonic()
                 except Exception as exc:
                     with self.lock:
-                        self.error = "Frame capture: " + str(exc)
+                        if self.process is proc and proc.poll() is None:
+                            self.error = "Frame capture: " + str(exc)
                 # Bound host work to 20 captures/s; never queue old frames.
                 time.sleep(max(.001, (1/60 if self.host_posts else .05) - (time.monotonic() - capture_started)))
         except Exception as exc:
             with self.lock:
-                self.error = str(exc)
+                if self.process is proc:
+                    self.error = str(exc)
         finally:
             with self.lock:
                 if self.process is proc:
@@ -358,10 +362,10 @@ class Emulator:
                 raise ValueError("Serial console is not connected")
             if on_send:
                 on_send()
-            data = text.encode()
-            for pos in range(0, len(data), 12):
-                console.sendall(data[pos:pos+12])
-                time.sleep(.02)
+            # QEMU already paces the UART at 115200 baud and bounds its ingress
+            # queue through chardev backpressure. A second 600-byte/s host limit
+            # needlessly adds tens of milliseconds to every remote request.
+            console.sendall(text.encode())
 
     def key(self, key):
         if not isinstance(key, str) or key not in KEYS:
@@ -382,21 +386,24 @@ class Emulator:
             "services": "getprop init.svc.dtv-svc; getprop init.svc.bootanim; service list",
             "activity": "dumpsys activity activities",
             "processes": "ps -A",
+            "performance": "top -n 2 -d 1 -m 20; cat /proc/stat; cat /proc/loadavg",
             "identity": "id; id -Z",
             "graphics": "dumpsys SurfaceFlinger",
             "settings": "am start -a android.settings.SETTINGS",
             "launcher": "am start -n com.google.android.tvlauncher/.HomeScreen",
             "boot-files": "ls -ld /user_setting /user_setting/rw /tmp/mtk_rm_end /tmp/dtv_svc_is_ready; getprop service.bootanim.exit; getprop init.svc.bootanim",
             "storage": "ls -lZ /user_setting/rw",
+            "warmup": "getprop sys.boot_completed; ps -A | grep -E 'dex2oat|dexopt|installd|MtkRmServer'; ls -ld /data/dalvik-cache/arm; dumpsys activity activities | grep -E 'mResumedActivity|mFocusedActivity'",
+            "sync": "sync; echo TVUI_SYNC_STATUS:$?",
             "dtv-threads": "for p in $(pidof dtv_svc); do echo PID:$p; ps -T -p $p; done",
             "quiet-log": "pkill -x logcat 2>/dev/null; logcat -v threadtime -b crash -b main -b system '*:W' MTKAPI:S TV_HAL:S MTK_KL:S SwiftShader:I SystemServer:I ActivityManager:I &",
         }
         if not isinstance(name, str) or name not in commands:
             raise ValueError("Unknown diagnostic")
-        # Some stock utilities touch terminal settings even for a read-only
-        # report. Prevent job-control SIGTTOU from stopping the background job.
-        self.send(f"( trap '' TTOU; echo TVUI_REPORT_{name}_BEGIN; {commands[name]}; "
-                  f"echo TVUI_REPORT_{name}_END ) &\n")
+        # Stock toolbox utilities touch terminal settings. Run the finite
+        # report in the foreground so job-control SIGTTOU cannot suspend it.
+        self.send(f"( echo TVUI_REPORT_{name}_BEGIN; {commands[name]}; "
+                  f"echo TVUI_REPORT_{name}_END )\n")
 
     def stop(self):
         with self.lock:
@@ -555,9 +562,14 @@ def main():
     ap.add_argument("--binary", type=Path, default=EMU / "qemu-system-aarch64-55oled803")
     ap.add_argument("--disk", type=Path,
                     default=EMU / "development/development-emmc.img")
+    ap.add_argument("--disk-format", choices=("raw", "qcow2"), default="raw")
+    ap.add_argument("--persistent-disk", action="store_true",
+                    help="Keep writes in an explicitly supplied qcow2 development overlay")
     ap.add_argument("--ramdisk", type=Path,
                     default=EMU / "development/ramdisk.img")
     args = ap.parse_args()
+    if args.persistent_disk and args.disk_format != "qcow2":
+        ap.error("Persistent development storage requires an explicit qcow2 overlay")
     for name in ("binary", "disk", "ramdisk"):
         setattr(args, name, getattr(args, name).resolve())
     if bool(args.host_gpu_socket) != bool(args.host_gpu_frame):

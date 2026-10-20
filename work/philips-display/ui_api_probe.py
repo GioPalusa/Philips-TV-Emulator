@@ -8,7 +8,7 @@ BASE = "http://127.0.0.1:8765"
 parser = argparse.ArgumentParser()
 parser.add_argument("action", choices=["start", "stop", "state", "key", "boot", "security", "report"])
 parser.add_argument("--key", default="up")
-parser.add_argument("--report", choices=["services", "activity", "processes", "graphics", "settings", "launcher", "boot-files", "storage", "dtv-threads", "quiet-log"], default="services")
+parser.add_argument("--report", choices=["performance", "identity", "services", "activity", "processes", "graphics", "settings", "launcher", "boot-files", "storage", "dtv-threads", "quiet-log", "warmup", "sync"], default="services")
 args = parser.parse_args()
 if args.action == "security":
     for headers in ({}, {"Origin": "http://evil.invalid"}):

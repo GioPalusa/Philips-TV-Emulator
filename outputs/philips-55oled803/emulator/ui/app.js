@@ -1,7 +1,7 @@
 const $ = id => document.getElementById(id);
 let token = "", fixture = "framebuffer", state = null, polling = false;
 let framePixels = null, frameWords = null, lastFrameAt = 0, viewFrames = 0, viewRate = 0, rateStart = performance.now();
-let actionPending = false, frameSequence = "";
+let actionPending = false, frameSequence = "", serverError = "";
 const notice = text => { $("notice").textContent = text; $("notice").classList.toggle("hidden", !text); };
 async function action(path, body = {}, retryAuth = true) {
   if (!token) throw new Error("Control session is not ready.");
@@ -97,6 +97,8 @@ function render(s) {
   $("run-path").textContent = s.run_directory || "";
   lights(s.pixels);
   if (s.error) notice(s.error);
+  else if (serverError && $("notice").textContent === serverError) notice("");
+  serverError = s.error;
 }
 async function refresh() {
   if (polling) return;

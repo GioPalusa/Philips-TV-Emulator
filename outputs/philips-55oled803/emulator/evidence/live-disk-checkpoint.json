@@ -25,5 +25,5 @@
     "format": "qcow2",
     "fragmented-clusters": 2861
   },
-  "reboot_result": "Kernel and guest GLES test passed in combined RTC/demux/persistent-storage run; later MSDC interrupt-handler panic. Full Android reboot not yet verified."
+  "reboot_result": "Run 20261020-192519-013418 reached sys.boot_completed=1 using persistent overlay after fixing nondata MSDC interrupt contamination; experimental demux disabled. Guest GLES PASS and Home injection ACK. Apps remain unreliable."
 }

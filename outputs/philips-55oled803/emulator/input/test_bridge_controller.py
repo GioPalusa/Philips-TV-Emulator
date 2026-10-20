@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import hashlib
+import json
 from pathlib import Path
 import re
 import subprocess
@@ -20,6 +21,7 @@ class FakeEmulator:
         self.identity = '2000:u:r:shell:s0'
         self.bad_hash = False
         self.asset = False
+        self.fail_fifo = False
         self.bridge = InputBridgeController(self)
 
     def send(self, text, on_send=None):
@@ -39,7 +41,7 @@ class FakeEmulator:
             self.bridge.receive(prefix + '_HASH:' + ('0' * 64 if self.bad_hash else digest))
         elif 'app_process' in text:
             subprocess.run(['/bin/sh', '-n'], input=text, text=True, check=True)
-            self.bridge.receive(prefix + ':READY PHILIPS_INPUT_V1')
+            self.bridge.receive(prefix + (':FATAL FIFO' if self.fail_fifo else ':READY PHILIPS_INPUT_V1'))
         elif "printf 'PING" in text:
             self.bridge.receive(prefix + ':ACK 2147483647 PONG')
         elif "printf 'KEY " in text and self.reply_keys:
@@ -79,6 +81,25 @@ class ControllerTests(unittest.TestCase):
         self.assertEqual(self.bridge.status, 'ready')
         self.assertTrue(any('cp /system/etc/emulator-assets/philips-input.jar' in s for s in self.emu.sent))
         self.assertFalse(any('payload.b64' in s for s in self.emu.sent))
+
+    def test_vendor_id_context_prefix(self):
+        self.emu.identity = '2000:context=u:r:shell:s0'
+        self.bridge._prepare(self.bridge.generation)
+        self.assertEqual(self.bridge.status, 'ready')
+
+    def test_failed_fifo_can_prepare_fresh_session_after_reattach(self):
+        self.emu.fail_fifo = True
+        self.bridge._prepare(self.bridge.generation)
+        self.assertEqual(self.bridge.status, 'failed')
+        manifest = self.emu.run_dir / 'input-bridge.json'
+        failed = json.loads(manifest.read_text())
+        self.assertEqual(failed['launch_state'], 'failed_before_start')
+        self.bridge.reset()
+        self.emu.fail_fifo = False
+        self.bridge._prepare(self.bridge.generation)
+        self.assertEqual(self.bridge.status, 'ready')
+        self.assertNotEqual(failed['session'], self.bridge.session)
+        self.assertTrue((self.emu.run_dir / ('input-bridge-failed-' + failed['session'] + '.json')).exists())
 
     def test_identity_and_hash_fail_closed(self):
         self.emu.identity = '0:u:r:init:s0'

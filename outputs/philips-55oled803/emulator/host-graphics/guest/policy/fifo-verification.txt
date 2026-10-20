@@ -1,0 +1,46 @@
+Before remote FIFO additions:
+union TE allow mask=00000000
+open absent
+audit_access absent
+execmod absent
+getattr absent
+create absent
+relabelfrom absent
+link absent
+mounton absent
+append absent
+lock absent
+relabelto absent
+setattr absent
+rename absent
+read absent
+ioctl absent
+write absent
+execute absent
+quotaon absent
+unlink absent
+
+After remote FIFO additions:
+match shell -> shell_data_file mask=0001001e conditional=0 active=1
+union TE allow mask=0001001e
+open ALLOWED
+audit_access absent
+execmod absent
+getattr ALLOWED
+create ALLOWED
+relabelfrom absent
+link absent
+mounton absent
+append absent
+lock absent
+relabelto absent
+setattr absent
+rename absent
+read ALLOWED
+ioctl absent
+write ALLOWED
+execute absent
+quotaon absent
+unlink absent
+
+PASS fresh libsepol build reproduced exact policy SHA256 4573107d064c50a2f2a8c1384425d9b5af53c045183f5c89f8b42d0de3a9abe8

@@ -18,14 +18,19 @@ The default profile uses the bundled emulator/kernel/DTB and:
 - `outputs/philips-55oled803/emulator/development/ramdisk.img`
 
 Use `--binary`, `--disk`, or `--ramdisk` to choose explicit local alternatives.
-Disk writes always use QEMU `snapshot=on`. The guest has no network interface.
+Disk writes default to QEMU `snapshot=on`. An explicitly created persistent
+qcow2 development overlay can use `--disk-format qcow2 --persistent-disk`; see
+[checkpoint instructions](CHECKPOINTS.md). The guest has no network interface.
 Start does not connect to, change, or flash the physical TV.
 
 ## What the view means
 
-The main image is an actual QMP PNG screenshot. Empty, black and uninitialized
-frames are preserved. The current model displays the uncomposited first region
-of OSD plane 2; video mixing, panel scaling and compressed buffers are absent.
+The main image contains actual guest output. The default path captures raw
+QMP PPM pixels from OSD plane 2. With `--host-gpu-socket` and `--host-gpu-frame`,
+the viewer reads posted pixels from the host GLES renderer. Empty, black and
+uninitialized frames are preserved. Video mixing, panel scaling and compressed
+buffers are absent from the OSD model. The displayed visual-update rate counts
+distinct sampled images and is not a guaranteed rendering-FPS measurement.
 A picture is not evidence that Android has completed boot.
 
 Ambilight colors come from decoded guest SPI transfers. Their arrangement around
@@ -45,11 +50,15 @@ The same shell starts a background crash/main/system log reader.
 ## Virtual remote
 
 D-pad, OK, Back, Home, volume and mute map to fixed Android `input keyevent`
-codes. Buttons become available once the serial console connects. The server
-sends commands in paced chunks and waits for a unique guest exit-status marker.
+codes. Buttons require Android input-service readiness and a verified persistent
+Java bridge running as UID 2000 in the shell domain. The bridge uses a private
+FIFO, a checked JAR hash, a bounded queue and uniquely identified acknowledgments.
+The virtual UART supplies its own pacing; host commands are not artificially
+delayed. The host-graphics development policy explicitly permits the required
+shell FIFO operations while retaining SELinux enforcing.
 
 - **Pending:** delivery started, no acknowledgment yet.
-- **Accepted:** the guest command returned zero; visual reaction is unverified.
+- **Accepted:** Android input injection acknowledged the key; visual reaction is unverified.
 - **Failed:** a nonzero guest exit or transport error.
 - **Timeout:** no matching acknowledgment within 15 seconds. The shell or input
   service may not be ready.
@@ -60,10 +69,29 @@ infrared, Bluetooth, network or HDMI-CEC commands.
 ## Run records
 
 Each start creates a unique `ui/runs/` directory with the exact launch command,
-QEMU log, console/crash log, guest Ambilight JSONL and latest frame PNG. Runtime
+QEMU log, console/crash log, guest Ambilight JSONL and available raw frame capture. Runtime
 control sockets live in a private temporary directory and are cleaned on Stop.
 The logs may contain data from the guest; the server does not upload them.
 
 Validation completed: Python/JavaScript syntax checks; foreign-Origin and
 missing-token mutations rejected with HTTP 403; actual QEMU image capture and
 remote delivery are recorded separately during the current runtime test.
+
+## Host graphics and persistent storage
+
+Start [the host renderer](../host-graphics/README.md) first and use the socket
+and frame paths it prints. With a prepared host-graphics profile and a new
+persistent overlay, launch the viewer with:
+
+```sh
+python3 outputs/philips-55oled803/emulator/ui/server.py --port 8765 \
+  --disk /absolute/path/development-session.qcow2 \
+  --disk-format qcow2 --persistent-disk \
+  --ramdisk /absolute/path/host-graphics/profile/ramdisk.img \
+  --host-gpu-socket /absolute/path/gpu.sock \
+  --host-gpu-frame /absolute/path/frame.rgba
+```
+
+The renderer must remain running while the emulator uses it. Disk checkpoints
+are local development artifacts; neither this viewer nor its checkpoint helper
+flashes a physical TV.

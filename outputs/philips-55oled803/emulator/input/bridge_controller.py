@@ -75,19 +75,25 @@ class InputBridgeController:
                 session = saved.get("session", "")
                 if not re.fullmatch(r"[0-9a-f]{12}", session) or saved.get("sha256") != digest:
                     raise ValueError("Existing bridge differs; use a fresh guest session")
-                with self.lock:
-                    self.session = session
-                emulator.send("printf 'PING 2147483647\\n' >&9\n")
-                self._wait_stage("PONG", generation)
-                with self.lock:
-                    self.guest_uid, self.guest_context = 2000, "u:r:shell:s0"
-                    self.status = "ready"
-                return
+                if saved.get("launch_state") == "failed_before_start":
+                    # The FIFO branch failed before app_process could start.
+                    # Keep the evidence and prepare a new private directory.
+                    manifest.rename(manifest.with_name("input-bridge-failed-" + session + ".json"))
+                else:
+                    with self.lock:
+                        self.session = session
+                    emulator.send("printf 'PING 2147483647\\n' >&9\n")
+                    self._wait_stage("PONG", generation)
+                    with self.lock:
+                        self.guest_uid, self.guest_context = 2000, "u:r:shell:s0"
+                        self.status = "ready"
+                    return
             prefix = "TVUI_BRIDGE_" + self.session
             emulator.send("printf '\\n" + prefix + "_IDENTITY:%s:%s\\n' "
                           '"$(id -u)" "$(id -Z)"\n')
             identity = self._wait_stage("IDENTITY", generation)
-            if identity != "2000:u:r:shell:s0":
+            # Vendor toolbox id prefixes -Z with "context="; toybox does not.
+            if identity not in ("2000:u:r:shell:s0", "2000:context=u:r:shell:s0"):
                 raise ValueError("Input bridge requires the existing UID 2000 shell domain: " + identity)
             with self.lock:
                 self.guest_uid, self.guest_context = 2000, "u:r:shell:s0"
@@ -119,15 +125,15 @@ class InputBridgeController:
                 raise RuntimeError("Guest input bridge hash does not match; not launching")
             # FD 9 stays open in the existing shell, preventing FIFO EOF between keys.
             # The child reads this descriptor; its output carries a session marker.
-            emulator.send("if mkfifo " + directory + "/input.fifo && exec 9<>" + directory +
+            # Record the attempt before sending: an immediate FIFO failure must
+            # be able to mark it, and a lost reply must never create two readers.
+            manifest.write_text(json.dumps({"session": self.session, "sha256": digest,
+                                            "directory": directory}, indent=2))
+            emulator.send("if /system/bin/toybox mkfifo " + directory + "/input.fifo && exec 9<>" + directory +
                           "/input.fifo; then ( trap '' TTOU; CLASSPATH=" + directory +
                           "/bridge.jar /system/bin/app_process /system/bin tv.emulator.InputBridge "
                           "<&9 2>&1 | while IFS= read -r l; do printf '\\n" + prefix +
                           ":%s\\n' \"$l\"; done ) & else printf '\\n" + prefix + ":FATAL FIFO\\n'; fi\n")
-            # Persist as soon as launched. A failed/unknown start must not start a
-            # second reader on server restart; reattachment probes the existing one.
-            manifest.write_text(json.dumps({"session": self.session, "sha256": digest,
-                                            "directory": directory}, indent=2))
             self._wait_stage("READY", generation, timeout=60)
             with self.lock:
                 if generation == self.generation:
@@ -159,6 +165,13 @@ class InputBridgeController:
                 return
             if response.startswith("FATAL "):
                 self.status, self.error = "failed", response
+                if response == "FATAL FIFO":
+                    manifest = self.emulator.run_dir / "input-bridge.json"
+                    if manifest.exists():
+                        saved = json.loads(manifest.read_text())
+                        if saved.get("session") == self.session:
+                            saved["launch_state"] = "failed_before_start"
+                            manifest.write_text(json.dumps(saved, indent=2))
                 self.stage_event.set()
                 return
             match = re.fullmatch(r"(ACK|ERR) ([0-9]+) ([A-Z_]+)(?: ([0-9]+))?", response)

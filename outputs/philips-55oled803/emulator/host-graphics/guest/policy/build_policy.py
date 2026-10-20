@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Reproduce the exact scoped host-graphics additions from the existing JIT policy."""
+"""Reproduce scoped host graphics and input FIFO additions from the JIT policy."""
 from pathlib import Path
 import argparse,hashlib,json,subprocess,tarfile,tempfile
 p=argparse.ArgumentParser();p.add_argument('input',type=Path);p.add_argument('output',type=Path);p.add_argument('--work-dir',type=Path,default=Path('work/philips-hostgpu-policy-rebuild'));a=p.parse_args()

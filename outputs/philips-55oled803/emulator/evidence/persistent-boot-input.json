@@ -1,0 +1,50 @@
+{
+  "schema": "philips-persistent-boot-input-v1",
+  "run": "20261020-192519-013418",
+  "boot": "complete",
+  "input_bridge": {
+    "status": "ready",
+    "error": "",
+    "pending": 0,
+    "capacity": 4,
+    "guest_uid": 2000,
+    "guest_context": "u:r:shell:s0"
+  },
+  "commands": [
+    {
+      "id": "1422888109",
+      "key": "home",
+      "status": "accepted",
+      "time": 1792517208.641425,
+      "host_ms": 2474.5,
+      "guest_ms": 1725
+    },
+    {
+      "id": "1388005977",
+      "key": "down",
+      "status": "failed",
+      "time": 1792517256.240968,
+      "host_ms": 10730.1,
+      "guest_ms": 10300,
+      "error": "INJECT_REJECTED"
+    }
+  ],
+  "frame_source": "Host GPU (translated GLES)",
+  "sampled_visual_updates_hz": 1.8,
+  "host_posts": 614,
+  "spi_sequence": 5465,
+  "observations": [
+    "Stock kernel registered rtc0 and initialized the system clock.",
+    "Actual host GLES pixel/shader test passed.",
+    "Persistent qcow2 overlay booted to sys.boot_completed=1 after nondata IRQ fix.",
+    "Home injection acknowledged; Down injection rejected after guest wait. Neither proves key-to-visible-response parity.",
+    "Bluetooth now fails HCI initialization; no CLOCK_BOOTTIME_ALARM creation error was observed in this log.",
+    "Demux experimental control-plane model disabled in this run; secure-service dependency remains unresolved."
+  ],
+  "limitations": [
+    "No TV performance equivalence claimed.",
+    "Sampled visual changes are not guaranteed complete rendered-frame counts.",
+    "No suspend/wake alarm verification.",
+    "Apps and vendor service initialization remain unreliable."
+  ]
+}

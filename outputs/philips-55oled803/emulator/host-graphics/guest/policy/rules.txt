@@ -56,3 +56,8 @@ allow untrusted_app pdx_display_client_endpoint_socket:sock_file getattr;
 allow untrusted_app_25 surfaceflinger:unix_stream_socket connectto;
 allow untrusted_app_25 pdx_display_client_endpoint_socket:sock_file write;
 allow untrusted_app_25 pdx_display_client_endpoint_socket:sock_file getattr;
+allow shell shell_data_file:fifo_file create;
+allow shell shell_data_file:fifo_file open;
+allow shell shell_data_file:fifo_file read;
+allow shell shell_data_file:fifo_file write;
+allow shell shell_data_file:fifo_file getattr;
