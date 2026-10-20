@@ -1,0 +1,26 @@
+{
+  "status": "pass",
+  "card_sectors": 30535680,
+  "tests": [
+    "card-init-CID-CSD",
+    "EXT_CSD-size",
+    "PIO-read",
+    "basic-DMA-read",
+    "GPD-BD-checksummed-multiblock-read",
+    "fragmented-BD-read",
+    "byte-PIO-CMD18",
+    "counted-CMD18-stop",
+    "auto-CMD12",
+    "GPD-ownership",
+    "interrupt-W1C",
+    "bad-descriptor-rejected",
+    "PIO-overlay-write-readback",
+    "basic-DMA-overlay-write-readback",
+    "GPD-BD-overlay-write-readback",
+    "fragmented-BD-write-readback",
+    "counted-CMD25-stop-readback",
+    "wrong-direction-rejected",
+    "wrong-DMA-length-rejected",
+    "base-image-unchanged"
+  ]
+}

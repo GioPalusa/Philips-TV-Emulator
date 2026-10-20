@@ -998,7 +998,81 @@
      sd->ext_csd[EXT_CSD_HC_WP_GRP_SIZE] = 0x01; /* HC write protect group size */
      sd->ext_csd[EXT_CSD_S_C_VCC] = 0x01; /* Sleep current VCC  */
      sd->ext_csd[EXT_CSD_S_C_VCCQ] = 0x01; /* Sleep current VCCQ */
-@@ -3215,6 +3216,13 @@
+@@ -2663,7 +2664,7 @@
+ {
+     unsigned int partition_access;
+     int i;
+-    const uint8_t *value = buf;
++    size_t requested = length;
+ 
+     if (!sd->blk || !blk_is_inserted(sd->blk)) {
+         return length;
+@@ -2695,10 +2696,7 @@
+         break;
+ 
+     case 25:  /* CMD25:  WRITE_MULTIPLE_BLOCK */
+-        /*
+-         * Only read one byte at a time. We will be called again with the
+-         * remaining.
+-         */
++        /* Preserve byte-granular error handling and uncommon block sizes. */
+         length = 1;
+ 
+         if (sd->data_offset == 0) {
+@@ -2714,7 +2712,15 @@
+                 }
+             }
+         }
+-        sd->data[sd->data_offset++] = value[0];
++        /* The bus retries the remaining buffer after this callback. Consume
++         * at most the current 512-byte block, so checks and completion below
++         * still execute once per block, including fragmented controller BDs.
++         * A one-byte caller retains exactly its original behavior. */
++        if (sd->blk_len == 512 && sd->data_offset < 512) {
++            length = MIN(requested, 512 - sd->data_offset);
++        }
++        memcpy(sd->data + sd->data_offset, buf, length);
++        sd->data_offset += length;
+         if (sd->data_offset >= sd->blk_len) {
+             /* TODO: Check CRC before committing */
+             sd->state = sd_programming_state;
+@@ -2812,6 +2818,7 @@
+     unsigned int partition_access;
+     uint32_t io_len;
+     uint8_t *value = buf;
++    size_t requested = length;
+ 
+     if (!sd->blk || !blk_is_inserted(sd->blk)) {
+         memset(buf, dummy_byte, length);
+@@ -2851,10 +2858,7 @@
+         break;
+ 
+     case 18:  /* CMD18:  READ_MULTIPLE_BLOCK */
+-        /*
+-         * We will only read one byte at a time. We will be called again with
+-         * the remaining buffer.
+-         */
++        /* Preserve byte-granular error handling and uncommon block sizes. */
+         length = 1;
+ 
+         if (sd->data_offset == 0) {
+@@ -2871,7 +2875,14 @@
+                 sd_blk_read(sd, sd->data_start, io_len);
+             }
+         }
+-        *value = sd->data[sd->data_offset++];
++        /* Avoid a coroutine-backed media-presence query for every byte of a
++         * bulk request. Do not cross a card block or bypass its range/RPMB
++         * handling, block counter, or stop transition. */
++        if (io_len == 512 && sd->data_offset < 512) {
++            length = MIN(requested, 512 - sd->data_offset);
++        }
++        memcpy(buf, sd->data + sd->data_offset, length);
++        sd->data_offset += length;
+ 
+         if (sd->data_offset >= io_len) {
+             sd->data_start += io_len;
+@@ -3215,6 +3226,13 @@
  static const Property emmc_properties[] = {
      DEFINE_PROP_UINT64("boot-partition-size", SDState, boot_part_size, 0),
      DEFINE_PROP_UINT8("boot-config", SDState, boot_config, 0x0),

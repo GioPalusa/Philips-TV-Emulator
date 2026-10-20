@@ -1,0 +1,67 @@
+{
+  "schema": "philips-emmc-card-bulk-evidence-v1",
+  "finding": "Controller bulk requests were already implemented, but card CMD18/CMD25 forced each callback to one byte. Each callback queried media insertion via a coroutine wrapper.",
+  "sample_evidence": {
+    "read_path_samples_across_four_cpu_threads": 687,
+    "media_presence_check_site_samples": 482,
+    "block_read_site_samples": 172,
+    "note": "Inclusive host stack samples, not operation counts or direct total-CPU percentages; BQL contention is not attributed solely to storage."
+  },
+  "change": "CMD18/CMD25 copy only up to the current validated 512-byte block boundary. No cross-block prefetch or cache; backend reads/writes, RPMB dispatch, range checks, counter and stop handling remain per block. One-byte callers and non-512-byte block sizes retain prior granularity.",
+  "tests": {
+    "default_controller": "pass",
+    "snapshot_write_controller": "pass",
+    "extended_baseline_write_suite": "pass",
+    "coverage": [
+      "CID/CSD/EXT_CSD",
+      "PIO and basic DMA read",
+      "Checksummed multiblock descriptors",
+      "Fragmented BDs 1,510,3,510 crossing sector boundary",
+      "Explicit one-byte CMD18 PIO",
+      "CMD23-counted CMD18 and CMD25 stop transitions",
+      "Auto CMD12 and GPD ownership",
+      "Malformed descriptor rejection and IRQ W1C",
+      "Snapshot-only PIO, basic DMA and descriptor write/readback",
+      "Direction and length rejection",
+      "Original target bytes and image modification time unchanged"
+    ]
+  },
+  "benchmark": {
+    "bytes_per_transfer": 524288,
+    "before_ms": [
+      56.358,
+      58.476,
+      59.851
+    ],
+    "after_ms": [
+      9.598,
+      9.582,
+      8.078
+    ],
+    "median_speedup": 6.1,
+    "scope": "Host qtest MMIO trigger through synchronous DMA completion. Three trials per binary; full readback compared. Same image and snapshot setup. Earlier QEMU baseline binary contains other unrelated development differences. Not a boot-time, guest-app latency or FPS measurement."
+  },
+  "artifacts": {
+    "sd.c": {
+      "path": "work/philips-emulator/qemu-11.1.2/hw/sd/sd.c",
+      "sha256": "d62bf5ee1e6305fb9865e4d6cbd50ee777b9b5d2fe240526a30bacd37d8da0ff"
+    },
+    "controller": {
+      "path": "work/philips-emulator/qemu-11.1.2/hw/sd/mt5891-msdc.c",
+      "sha256": "0d7a649062ab285ddd6bc410ebfa5fbe6bdf6af34b4367f37e16b8b5532ee760"
+    },
+    "before_binary": {
+      "path": "work/philips-msdc/qemu-bulk-test",
+      "sha256": "1ffad7d8babfb083a7b0c693ce744480d47d9ea18631ac9bf5a7436a723b5ba2"
+    },
+    "after_binary": {
+      "path": "work/philips-emulator/qemu-11.1.2/build/qemu-system-aarch64",
+      "sha256": "2d394b5a2d4b84eaf3b5fb580e58b0ecaeb2f9db07b165c766d17ed230d0960f"
+    },
+    "sample": {
+      "path": "work/philips-display/qemu-hostgpu-sample.txt",
+      "sha256": "143a478bb5e7de1d922190ad8c02084d6d1a799ce098d7a1d00869e626a271f8"
+    }
+  },
+  "remaining": "Measure stock boot/application workload and host profile again; per-sector backend I/O remains, but read-ahead would require additional cache invalidation and partition correctness work."
+}

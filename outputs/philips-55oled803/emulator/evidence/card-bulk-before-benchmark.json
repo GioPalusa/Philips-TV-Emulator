@@ -1,0 +1,28 @@
+{
+  "status": "pass",
+  "card_sectors": 30535680,
+  "benchmark": {
+    "bytes_per_transfer": 524288,
+    "dma_completion_host_ms": [
+      56.358,
+      58.476,
+      59.851
+    ],
+    "scope": "qtest MMIO trigger to synchronous DMA completion; not boot or FPS"
+  },
+  "tests": [
+    "card-init-CID-CSD",
+    "EXT_CSD-size",
+    "PIO-read",
+    "basic-DMA-read",
+    "GPD-BD-checksummed-multiblock-read",
+    "fragmented-BD-read",
+    "byte-PIO-CMD18",
+    "counted-CMD18-stop",
+    "auto-CMD12",
+    "GPD-ownership",
+    "interrupt-W1C",
+    "bad-descriptor-rejected",
+    "media-write-rejected"
+  ]
+}
