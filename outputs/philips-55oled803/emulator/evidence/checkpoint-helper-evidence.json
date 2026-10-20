@@ -1,0 +1,30 @@
+{
+  "schema": "philips-checkpoint-helper-evidence-v1",
+  "date": "2026-10-20",
+  "result": "PASS",
+  "tests": 6,
+  "test_output": "test_capture_cli_exclusive_socket_and_attestation (__main__.CheckpointTests.test_capture_cli_exclusive_socket_and_attestation) ... ok\ntest_failed_start_resumes_and_keeps_incomplete (__main__.CheckpointTests.test_failed_start_resumes_and_keeps_incomplete) ... ok\ntest_full_checkpoint_resume_independence_overlay (__main__.CheckpointTests.test_full_checkpoint_resume_independence_overlay) ... ok\ntest_preconditions_and_sync_failure (__main__.CheckpointTests.test_preconditions_and_sync_failure) ... ok\ntest_resume_failure_reports_saved_artifact (__main__.CheckpointTests.test_resume_failure_reports_saved_artifact) ... ok\ntest_timeout_cancels_real_paused_job_and_resumes (__main__.CheckpointTests.test_timeout_cancels_real_paused_job_and_resumes) ... ok\n\n----------------------------------------------------------------------\nRan 6 tests in 1.728s\n\nOK\n",
+  "scope": "Separate QEMU processes with synthetic 4 MiB disks. No live TV emulator or physical TV access.",
+  "coverage": [
+    "Standalone exclusive-socket CLI, evidence validation, paused full backup and resumed running state",
+    "Complete disk byte comparison including writes held in temporary source overlay",
+    "Checkpoint remains usable after source QEMU stops and original base is deleted",
+    "Persistent overlay creation and byte equivalence",
+    "Originally paused guest remains paused",
+    "Throttled real backup timeout cancels job and resumes guest",
+    "Failed backup start cleans node and retains incomplete artifact",
+    "Failed sync prevents pause; existing output is preserved",
+    "Resume failure reports completed artifact and explicit cleanup error"
+  ],
+  "limitations": [
+    "Disk only: RAM/CPU/device state is not captured",
+    "Crash consistent, not application consistent; ext4 journal replay may be needed",
+    "Actual warmed Philips guest capture and reboot not performed by these tests",
+    "QMP must be exclusively owned; disconnection can prevent cleanup or resume"
+  ],
+  "files": {
+    "outputs/philips-55oled803/emulator/ui/checkpoint.py": "06fcc9eb115bc765b3469309a69b290db419f6ce05722a5b9fc5d543cb012393",
+    "outputs/philips-55oled803/emulator/ui/test_checkpoint.py": "e35e0d46afb26f372f72222a28713fba664617756bce7581c03f32c0fb5e45f4",
+    "work/philips-emulator/qemu-11.1.2/build/qemu-system-aarch64": "0e6b52abc82e74e52167fd306d93d4b674c6e97c6748aee021b3c4af84dd2fbc"
+  }
+}

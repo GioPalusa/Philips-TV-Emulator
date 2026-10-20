@@ -1,0 +1,29 @@
+{
+  "schema": "philips-disk-checkpoint-v1",
+  "path": "host-graphics/profile/warmed-hostgpu.qcow2 (local only)",
+  "format": "qcow2",
+  "virtual_size": 15634268160,
+  "independent": true,
+  "guest_sync_acknowledged": false,
+  "disk_only": true,
+  "consistency": "crash-consistent paused disk",
+  "source_device": "tv-emmc",
+  "original_run_state": "running",
+  "warmup_attestation": {
+    "boot_complete": true,
+    "warmup_complete": true,
+    "warmup_evidence": "Run 20261020-190533-6aac4f: sys.boot_completed=1; warmup report shows installd sleeping, no dex2oat/dexopt processes, dalvik-cache/arm populated; PostUpgradeActivity resumed. Initial compilation finished; TV service stalls remain and setup is not certified complete.",
+    "guest_sync_previously_confirmed": true,
+    "guest_sync_evidence": "console.log TVUI_SYNC_STATUS:0 at line11965 after fixed sync command."
+  },
+  "check": {
+    "image-end-offset": 2972647424,
+    "total-clusters": 238560,
+    "check-errors": 0,
+    "allocated-clusters": 45324,
+    "filename": "private staging image (closed and validated before publication)",
+    "format": "qcow2",
+    "fragmented-clusters": 2861
+  },
+  "reboot_result": "Kernel and guest GLES test passed in combined RTC/demux/persistent-storage run; later MSDC interrupt-handler panic. Full Android reboot not yet verified."
+}
