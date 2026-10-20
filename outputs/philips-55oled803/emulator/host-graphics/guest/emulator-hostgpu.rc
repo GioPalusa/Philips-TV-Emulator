@@ -1,0 +1,27 @@
+# EXPLICIT EMULATOR DEVELOPMENT PROFILE ONLY. No physical-TV installation.
+# Kernel module mtk_mmap.ko provides /dev/rmmgr; broker waits up to 30 seconds
+# for the stock post-fs-data insmod to finish and checks QEMU's device magic.
+on post-fs-data
+    start emu-hostgpu
+
+on boot
+    start emu-hostgpu-test
+
+service emu-hostgpu /sbin/sh -c "exec /system/etc/emulator-assets/hostgpu_broker"
+    class core
+    user root
+    group root graphics
+    console
+    disabled
+    seclabel u:r:mt_dtv-svc:s0
+    socket philips_hostgpu stream 0666 root root u:r:surfaceflinger:s0
+
+# Independent guest-side clear/pixel/shader validation, output on guest console.
+service emu-hostgpu-test /sbin/sh -c "sleep 3; /system/etc/emulator-assets/hostgpu_broker --probe; LD_LIBRARY_PATH=/system/lib/egl:/system/lib /system/etc/emulator-assets/hostgpu_render_test"
+    class late_start
+    user root
+    group root graphics
+    console
+    disabled
+    oneshot
+    seclabel u:r:mt_dtv-svc:s0

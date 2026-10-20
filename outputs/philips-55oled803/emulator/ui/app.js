@@ -1,13 +1,18 @@
 const $ = id => document.getElementById(id);
 let token = "", fixture = "framebuffer", state = null, polling = false;
 let framePixels = null, frameWords = null, lastFrameAt = 0, viewFrames = 0, viewRate = 0, rateStart = performance.now();
-let actionPending = false;
+let actionPending = false, frameSequence = "";
 const notice = text => { $("notice").textContent = text; $("notice").classList.toggle("hidden", !text); };
-async function action(path, body = {}) {
+async function action(path, body = {}, retryAuth = true) {
   if (!token) throw new Error("Control session is not ready.");
   const response = await fetch(path, {method:"POST", headers:{
     "Content-Type":"application/json", "X-TVUI-Token":token}, body:JSON.stringify(body)});
   const result = await response.json();
+  if (response.status === 403 && retryAuth) {
+    // A viewer restart rotates its token. A rejected request did not execute.
+    token = (await (await fetch("/api/session")).json()).token;
+    return action(path, body, false);
+  }
   if (!response.ok) throw new Error(result.error || "Action failed");
   return result;
 }
@@ -34,6 +39,10 @@ function lights(pixels) {
   }
 }
 function render(s) {
+  if (s.running && s.pid !== state?.pid) {
+    frameSequence = "";
+    lastFrameAt = 0;
+  }
   state = s;
   $("connection").textContent = "● Local connection";
   $("start").disabled = s.running || actionPending;
@@ -70,9 +79,9 @@ function render(s) {
     "Remote buttons become available when Android input and the persistent bridge are ready.";
   $("frame").classList.toggle("hidden", !lastFrameAt);
   $("frame-empty").classList.toggle("hidden", !!lastFrameAt);
-  $("image-status").textContent = s.frame ? "ACTUAL QEMU FRAMEBUFFER" : "WAITING FOR QEMU";
-  $("frame-age").textContent = lastFrameAt ? `${viewRate.toFixed(1)} VIEW FPS · ${Math.max(0,Math.round(performance.now()-lastFrameAt))}ms SINCE DISPLAY` : "NO FRAME YET";
-  $("image-note").textContent = s.frame ? s.scanout_observed ?
+  $("image-status").textContent = s.frame ? (s.frame_source || "ACTUAL QEMU FRAMEBUFFER").toUpperCase() : "WAITING FOR QEMU";
+  $("frame-age").textContent = lastFrameAt ? `${s.visual_updates_hz ?? 0} VISUAL UPDATES/s · ${Math.max(0,Math.round((Date.now()/1000-s.frame_time)*1000))}ms SINCE IMAGE CHANGE` : "NO FRAME YET";
+  $("image-note").textContent = s.host_posts ? "Android GLES rendered by the host GPU. Visual updates are sampled over five seconds; unchanged images are not counted." : s.frame ? s.scanout_observed ?
     "Raw guest OSD input. A captured frame does not imply Android boot has completed." :
     "QEMU capture available. Guest OSD scanout has not been observed; the display may be uninitialized." :
     "The framebuffer will appear here, including black or uninitialized frames.";
@@ -122,9 +131,9 @@ document.querySelectorAll("[data-color]").forEach(b=>b.onclick=()=>{
 async function frameLoop() {
   const started = performance.now();
   try {
-    if (!document.hidden && state?.frame) {
-      const response = await fetch("/frame.ppm");
-      if (response.ok) {
+    if (!document.hidden && state?.frame && state?.running) {
+      const response = await fetch("/frame.ppm",{headers:{"X-Frame-Sequence":frameSequence}});
+      if (response.status === 200) {
         const bytes = new Uint8Array(await response.arrayBuffer());
         const header = new TextDecoder().decode(bytes.subarray(0,80)).match(/^P6\n(\d+) (\d+)\n255\n/);
         if (!header) throw new Error("Invalid framebuffer header");
@@ -141,6 +150,7 @@ async function frameLoop() {
         for (let i=0,p=offset;i<frameWords.length;i++,p+=3)
           frameWords[i] = 0xff000000 | bytes[p] | bytes[p+1]<<8 | bytes[p+2]<<16;
         canvas.getContext("2d",{alpha:false}).putImageData(framePixels,0,0);
+        frameSequence = response.headers.get("X-Frame-Sequence") || "";
         lastFrameAt = performance.now();
         canvas.classList.remove("hidden"); $("frame-empty").classList.add("hidden");
         viewFrames++;
@@ -150,7 +160,7 @@ async function frameLoop() {
       }
     }
   } catch(e) { notice(`Display: ${e.message}`); }
-  setTimeout(frameLoop,Math.max(5,50-(performance.now()-started)));
+  setTimeout(frameLoop,Math.max(1,(state?.host_posts ? 1000/60 : 50)-(performance.now()-started)));
 }
 async function init() {
   try { token=(await (await fetch("/api/session")).json()).token; await refresh(); }

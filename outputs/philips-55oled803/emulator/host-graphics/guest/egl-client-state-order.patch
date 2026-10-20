@@ -1,0 +1,16 @@
+--- a/system/egl/egl.cpp
++++ b/system/egl/egl.cpp
+@@ -1534,6 +1534,13 @@
+         context->flags |= EGLContext_t::IS_CURRENT;
+         GLClientState* contextState =
+             context->getClientState();
++
++        // Capability queries below use the GLES encoder's state-aware entry
++        // points. Bind the new state before querying ES3 caps on first use.
++        // The complete make-current/share-group initialization remains below.
++        if (context->majorVersion > 1) {
++            hostCon->gl2Encoder()->setClientState(contextState);
++        }
+ 
+         if (!hostCon->gl2Encoder()->isInitialized()) {
+             s_display.gles2_iface()->init();

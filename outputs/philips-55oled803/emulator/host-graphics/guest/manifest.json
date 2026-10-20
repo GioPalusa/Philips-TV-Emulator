@@ -1,0 +1,57 @@
+{
+  "status": "guest runtime clear/readback and shader pixel test passed on ANGLE Metal Apple M4 Pro; TV boot latency and full UI performance remain separate validation",
+  "source_tag": "android-8.0.0_r36",
+  "sources": {
+    "goldfish-opengl.tar.gz": {
+      "url": "https://android.googlesource.com/device/generic/goldfish-opengl/+archive/android-8.0.0_r36.tar.gz",
+      "sha256": "d443ab05699239a68d8cc31b6c1ccf7ef2634b237f556357760b25250af8b567"
+    },
+    "bionic-private.tar.gz": {
+      "url": "https://android.googlesource.com/platform/bionic/+archive/android-8.0.0_r36/libc/private.tar.gz",
+      "sha256": "806cefc1b47992dd6626cf8909775c8479528704bc75dff599b84d03e7288c61"
+    }
+  },
+  "artifacts": {
+    "libOpenglSystemCommon.so": {
+      "sha256": "1b06226abe213b3cad52241549c81cf312857ab03a23c354316c24fcc13c7fcc",
+      "size": 29984
+    },
+    "libGLESv2_enc.so": {
+      "sha256": "e8fef33bab37155f344f05fb593eca9fd1ddc5d916421329935b07e735cfba31",
+      "size": 518868
+    },
+    "hostgpu_broker": {
+      "sha256": "280106e5ae91952336c9482846d41345b7c5bef65d38378f02a5c35ec38f0703",
+      "size": 11448
+    },
+    "libEGL_emulation.so": {
+      "sha256": "6ca023d4a21fc07981ca5cf8b3958b7790dcfc3255b6aa7a8c3daf510a79748e",
+      "size": 197568
+    },
+    "libGLESv1_CM_emulation.so": {
+      "sha256": "376bfda794693f6acbd00cf15283e99350562f46a370e3756b78076caf5f8e80",
+      "size": 62220
+    },
+    "lib_renderControl_enc.so": {
+      "sha256": "621be20a0a6e32ec950bc22a875297dca18501120cb4bfdbe357b4efaa31400f",
+      "size": 49120
+    },
+    "libGLESv2_emulation.so": {
+      "sha256": "7e863e10b0c0b220a655097edbb22db11243b977626b1ebe09bedb4e3f4bc097",
+      "size": 91168
+    },
+    "libGLESv1_enc.so": {
+      "sha256": "78ae30fbef5d4d59f60a1bf0c0c62b5be15ce1f2aa49c6a5639ea8520e0dc823",
+      "size": 312680
+    },
+    "hostgpu_render_test": {
+      "sha256": "84048aafdac07c4a42cd924c859c537a1fcc9dca1c148bc99ebe385679457312",
+      "size": 10944
+    },
+    "gralloc.goldfish.so": {
+      "sha256": "fa0b5adedb46c44416a188e49497a2ae2b64ecf4c94d13fbc6c5701fc788d765",
+      "size": 54868
+    }
+  },
+  "runtime_evidence": "guest-render-test.txt"
+}

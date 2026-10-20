@@ -1,0 +1,6 @@
+HOSTGPU_PROBE PASS magic=50484750 PA=a1100000
+HOSTGPU TEST BEGIN
+GLES vendor=Google (Google Inc. (Apple)) renderer=Android Emulator OpenGL ES Translator (ANGLE (Apple, ANGLE Metal Renderer: Apple M4 Pro, Version 27.0 (Build 26A428))) version=OpenGL ES 3.0 (OpenGL ES 3.0.0 (ANGLE 2.1.1 git hash: fbf66f49c7cc))
+PASS clear/readback red RGBA=255,0,0,255
+PASS shaders/triangle interior green; exterior preserved red
+HOSTGPU TEST PASS

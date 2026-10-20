@@ -1,0 +1,290 @@
+PASS policy_version=30 type=mt_dtv-svc(1608) class_id=10 permission_id=20
+allow mt_dtv-svc rmmgr_device:chr_file open;
+avtab_rules_before=18052 after=18052 old_mask=00080257 new_mask=00080257
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=397972 output_bytes=397972
+PASS policy_version=30 type=mt_dtv-svc(1608) class_id=10 permission_id=2
+allow mt_dtv-svc rmmgr_device:chr_file read;
+avtab_rules_before=18052 after=18052 old_mask=00080257 new_mask=00080257
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=397972 output_bytes=397972
+PASS policy_version=30 type=mt_dtv-svc(1608) class_id=10 permission_id=3
+allow mt_dtv-svc rmmgr_device:chr_file write;
+avtab_rules_before=18052 after=18052 old_mask=00080257 new_mask=00080257
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=397972 output_bytes=397972
+PASS policy_version=30 type=mt_dtv-svc(1608) class_id=10 permission_id=5
+allow mt_dtv-svc rmmgr_device:chr_file getattr;
+avtab_rules_before=18052 after=18052 old_mask=00080257 new_mask=00080257
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=397972 output_bytes=397972
+PASS policy_version=30 type=mt_dtv-svc(1608) class_id=8 permission_id=1
+allow mt_dtv-svc init:fd use;
+avtab_rules_before=18052 after=18053 old_mask=00000000 new_mask=00000001
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=397972 output_bytes=397984
+PASS policy_version=30 type=init(548) class_id=12 permission_id=11
+allow init socket_device:sock_file unlink;
+avtab_rules_before=18053 after=18054 old_mask=00000000 new_mask=00000400
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=397984 output_bytes=397996
+PASS policy_version=30 type=init(548) class_id=12 permission_id=11
+allow init pdx_display_client_endpoint_socket:sock_file unlink;
+avtab_rules_before=18054 after=18054 old_mask=000105ba new_mask=000105ba
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=397996 output_bytes=397996
+PASS policy_version=30 type=mt_dtv-svc(1608) class_id=23 permission_id=4
+allow mt_dtv-svc surfaceflinger:unix_stream_socket create;
+avtab_rules_before=18054 after=18055 old_mask=00000000 new_mask=00000008
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=397996 output_bytes=398008
+PASS policy_version=30 type=mt_dtv-svc(1608) class_id=23 permission_id=2
+allow mt_dtv-svc surfaceflinger:unix_stream_socket read;
+avtab_rules_before=18055 after=18055 old_mask=00000008 new_mask=0000000a
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398008 output_bytes=398008
+PASS policy_version=30 type=mt_dtv-svc(1608) class_id=23 permission_id=3
+allow mt_dtv-svc surfaceflinger:unix_stream_socket write;
+avtab_rules_before=18055 after=18055 old_mask=0000000a new_mask=0000000e
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398008 output_bytes=398008
+PASS policy_version=30 type=mt_dtv-svc(1608) class_id=23 permission_id=5
+allow mt_dtv-svc surfaceflinger:unix_stream_socket getattr;
+avtab_rules_before=18055 after=18055 old_mask=0000000e new_mask=0000001e
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398008 output_bytes=398008
+PASS policy_version=30 type=mt_dtv-svc(1608) class_id=23 permission_id=6
+allow mt_dtv-svc surfaceflinger:unix_stream_socket setattr;
+avtab_rules_before=18055 after=18055 old_mask=0000001e new_mask=0000003e
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398008 output_bytes=398008
+PASS policy_version=30 type=mt_dtv-svc(1608) class_id=23 permission_id=14
+allow mt_dtv-svc surfaceflinger:unix_stream_socket accept;
+avtab_rules_before=18055 after=18055 old_mask=0000003e new_mask=0000203e
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398008 output_bytes=398008
+PASS policy_version=30 type=mt_dtv-svc(1608) class_id=23 permission_id=13
+allow mt_dtv-svc surfaceflinger:unix_stream_socket listen;
+avtab_rules_before=18055 after=18055 old_mask=0000203e new_mask=0000303e
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398008 output_bytes=398008
+PASS policy_version=30 type=mt_dtv-svc(1608) class_id=23 permission_id=15
+allow mt_dtv-svc surfaceflinger:unix_stream_socket getopt;
+avtab_rules_before=18055 after=18055 old_mask=0000303e new_mask=0000703e
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398008 output_bytes=398008
+PASS policy_version=30 type=mt_dtv-svc(1608) class_id=23 permission_id=16
+allow mt_dtv-svc surfaceflinger:unix_stream_socket setopt;
+avtab_rules_before=18055 after=18055 old_mask=0000703e new_mask=0000f03e
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398008 output_bytes=398008
+PASS policy_version=30 type=mt_dtv-svc(1608) class_id=23 permission_id=17
+allow mt_dtv-svc surfaceflinger:unix_stream_socket shutdown;
+avtab_rules_before=18055 after=18055 old_mask=0000f03e new_mask=0001f03e
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398008 output_bytes=398008
+PASS policy_version=30 type=mt_dtv-svc(1608) class_id=12 permission_id=5
+allow mt_dtv-svc socket_device:sock_file getattr;
+avtab_rules_before=18055 after=18056 old_mask=00000000 new_mask=00000010
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398008 output_bytes=398020
+PASS policy_version=30 type=mt_dtv-svc(1608) class_id=12 permission_id=8
+allow mt_dtv-svc socket_device:sock_file relabelfrom;
+avtab_rules_before=18056 after=18056 old_mask=00000010 new_mask=00000090
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398020 output_bytes=398020
+PASS policy_version=30 type=mt_dtv-svc(1608) class_id=12 permission_id=5
+allow mt_dtv-svc pdx_display_client_endpoint_socket:sock_file getattr;
+avtab_rules_before=18056 after=18057 old_mask=00000000 new_mask=00000010
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398020 output_bytes=398032
+PASS policy_version=30 type=mt_dtv-svc(1608) class_id=12 permission_id=6
+allow mt_dtv-svc pdx_display_client_endpoint_socket:sock_file setattr;
+avtab_rules_before=18057 after=18057 old_mask=00000010 new_mask=00000030
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398032 output_bytes=398032
+PASS policy_version=30 type=mt_dtv-svc(1608) class_id=12 permission_id=9
+allow mt_dtv-svc pdx_display_client_endpoint_socket:sock_file relabelto;
+avtab_rules_before=18057 after=18057 old_mask=00000030 new_mask=00000130
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398032 output_bytes=398032
+PASS policy_version=30 type=mt_dtv-svc(1608) class_id=23 permission_id=21
+allow mt_dtv-svc surfaceflinger:unix_stream_socket connectto;
+avtab_rules_before=18057 after=18057 old_mask=0001f03e new_mask=0011f03e
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398032 output_bytes=398032
+PASS policy_version=30 type=mt_dtv-svc(1608) class_id=12 permission_id=3
+allow mt_dtv-svc pdx_display_client_endpoint_socket:sock_file write;
+avtab_rules_before=18057 after=18057 old_mask=00000130 new_mask=00000134
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398032 output_bytes=398032
+PASS policy_version=30 type=mt_dtv-svc(1608) class_id=12 permission_id=5
+allow mt_dtv-svc pdx_display_client_endpoint_socket:sock_file getattr;
+avtab_rules_before=18057 after=18057 old_mask=00000134 new_mask=00000134
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398032 output_bytes=398032
+PASS policy_version=30 type=bootanim(173) class_id=23 permission_id=21
+allow bootanim surfaceflinger:unix_stream_socket connectto;
+avtab_rules_before=18057 after=18058 old_mask=00000000 new_mask=00100000
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398032 output_bytes=398044
+PASS policy_version=30 type=bootanim(173) class_id=12 permission_id=3
+allow bootanim pdx_display_client_endpoint_socket:sock_file write;
+avtab_rules_before=18058 after=18059 old_mask=00000000 new_mask=00000004
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398044 output_bytes=398056
+PASS policy_version=30 type=bootanim(173) class_id=12 permission_id=5
+allow bootanim pdx_display_client_endpoint_socket:sock_file getattr;
+avtab_rules_before=18059 after=18059 old_mask=00000004 new_mask=00000014
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398056 output_bytes=398056
+PASS policy_version=30 type=surfaceflinger(821) class_id=23 permission_id=21
+allow surfaceflinger surfaceflinger:unix_stream_socket connectto;
+avtab_rules_before=18059 after=18059 old_mask=0011fe7f new_mask=0011fe7f
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398056 output_bytes=398056
+PASS policy_version=30 type=surfaceflinger(821) class_id=12 permission_id=3
+allow surfaceflinger pdx_display_client_endpoint_socket:sock_file write;
+avtab_rules_before=18059 after=18060 old_mask=00000000 new_mask=00000004
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398056 output_bytes=398068
+PASS policy_version=30 type=surfaceflinger(821) class_id=12 permission_id=5
+allow surfaceflinger pdx_display_client_endpoint_socket:sock_file getattr;
+avtab_rules_before=18060 after=18060 old_mask=00000004 new_mask=00000014
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398068 output_bytes=398068
+PASS policy_version=30 type=hal_graphics_allocator_default(1423) class_id=23 permission_id=21
+allow hal_graphics_allocator_default surfaceflinger:unix_stream_socket connectto;
+avtab_rules_before=18060 after=18061 old_mask=00000000 new_mask=00100000
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398068 output_bytes=398080
+PASS policy_version=30 type=hal_graphics_allocator_default(1423) class_id=12 permission_id=3
+allow hal_graphics_allocator_default pdx_display_client_endpoint_socket:sock_file write;
+avtab_rules_before=18061 after=18062 old_mask=00000000 new_mask=00000004
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398080 output_bytes=398092
+PASS policy_version=30 type=hal_graphics_allocator_default(1423) class_id=12 permission_id=5
+allow hal_graphics_allocator_default pdx_display_client_endpoint_socket:sock_file getattr;
+avtab_rules_before=18062 after=18062 old_mask=00000004 new_mask=00000014
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398092 output_bytes=398092
+PASS policy_version=30 type=hal_graphics_composer_default(1426) class_id=23 permission_id=21
+allow hal_graphics_composer_default surfaceflinger:unix_stream_socket connectto;
+avtab_rules_before=18062 after=18063 old_mask=00000000 new_mask=00100000
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398092 output_bytes=398104
+PASS policy_version=30 type=hal_graphics_composer_default(1426) class_id=12 permission_id=3
+allow hal_graphics_composer_default pdx_display_client_endpoint_socket:sock_file write;
+avtab_rules_before=18063 after=18064 old_mask=00000000 new_mask=00000004
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398104 output_bytes=398116
+PASS policy_version=30 type=hal_graphics_composer_default(1426) class_id=12 permission_id=5
+allow hal_graphics_composer_default pdx_display_client_endpoint_socket:sock_file getattr;
+avtab_rules_before=18064 after=18064 old_mask=00000004 new_mask=00000014
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398116 output_bytes=398116
+PASS policy_version=30 type=shell(816) class_id=23 permission_id=21
+allow shell surfaceflinger:unix_stream_socket connectto;
+avtab_rules_before=18064 after=18065 old_mask=00000000 new_mask=00100000
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398116 output_bytes=398128
+PASS policy_version=30 type=shell(816) class_id=12 permission_id=3
+allow shell pdx_display_client_endpoint_socket:sock_file write;
+avtab_rules_before=18065 after=18066 old_mask=00000000 new_mask=00000004
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398128 output_bytes=398140
+PASS policy_version=30 type=shell(816) class_id=12 permission_id=5
+allow shell pdx_display_client_endpoint_socket:sock_file getattr;
+avtab_rules_before=18066 after=18066 old_mask=00000004 new_mask=00000014
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398140 output_bytes=398140
+PASS policy_version=30 type=system_server(823) class_id=23 permission_id=21
+allow system_server surfaceflinger:unix_stream_socket connectto;
+avtab_rules_before=18066 after=18066 old_mask=00008006 new_mask=00108006
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398140 output_bytes=398140
+PASS policy_version=30 type=system_server(823) class_id=12 permission_id=3
+allow system_server pdx_display_client_endpoint_socket:sock_file write;
+avtab_rules_before=18066 after=18067 old_mask=00000000 new_mask=00000004
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398140 output_bytes=398152
+PASS policy_version=30 type=system_server(823) class_id=12 permission_id=5
+allow system_server pdx_display_client_endpoint_socket:sock_file getattr;
+avtab_rules_before=18067 after=18067 old_mask=00000004 new_mask=00000014
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398152 output_bytes=398152
+PASS policy_version=30 type=system_app(822) class_id=23 permission_id=21
+allow system_app surfaceflinger:unix_stream_socket connectto;
+avtab_rules_before=18067 after=18068 old_mask=00000000 new_mask=00100000
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398152 output_bytes=398164
+PASS policy_version=30 type=system_app(822) class_id=12 permission_id=3
+allow system_app pdx_display_client_endpoint_socket:sock_file write;
+avtab_rules_before=18068 after=18069 old_mask=00000000 new_mask=00000004
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398164 output_bytes=398176
+PASS policy_version=30 type=system_app(822) class_id=12 permission_id=5
+allow system_app pdx_display_client_endpoint_socket:sock_file getattr;
+avtab_rules_before=18069 after=18069 old_mask=00000004 new_mask=00000014
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398176 output_bytes=398176
+PASS policy_version=30 type=platform_app(595) class_id=23 permission_id=21
+allow platform_app surfaceflinger:unix_stream_socket connectto;
+avtab_rules_before=18069 after=18070 old_mask=00000000 new_mask=00100000
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398176 output_bytes=398188
+PASS policy_version=30 type=platform_app(595) class_id=12 permission_id=3
+allow platform_app pdx_display_client_endpoint_socket:sock_file write;
+avtab_rules_before=18070 after=18071 old_mask=00000000 new_mask=00000004
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398188 output_bytes=398200
+PASS policy_version=30 type=platform_app(595) class_id=12 permission_id=5
+allow platform_app pdx_display_client_endpoint_socket:sock_file getattr;
+avtab_rules_before=18071 after=18071 old_mask=00000004 new_mask=00000014
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398200 output_bytes=398200
+PASS policy_version=30 type=priv_app(603) class_id=23 permission_id=21
+allow priv_app surfaceflinger:unix_stream_socket connectto;
+avtab_rules_before=18071 after=18072 old_mask=00000000 new_mask=00100000
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398200 output_bytes=398212
+PASS policy_version=30 type=priv_app(603) class_id=12 permission_id=3
+allow priv_app pdx_display_client_endpoint_socket:sock_file write;
+avtab_rules_before=18072 after=18073 old_mask=00000000 new_mask=00000004
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398212 output_bytes=398224
+PASS policy_version=30 type=priv_app(603) class_id=12 permission_id=5
+allow priv_app pdx_display_client_endpoint_socket:sock_file getattr;
+avtab_rules_before=18073 after=18073 old_mask=00000004 new_mask=00000014
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398224 output_bytes=398224
+PASS policy_version=30 type=untrusted_app(835) class_id=23 permission_id=21
+allow untrusted_app surfaceflinger:unix_stream_socket connectto;
+avtab_rules_before=18073 after=18074 old_mask=00000000 new_mask=00100000
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398224 output_bytes=398236
+PASS policy_version=30 type=untrusted_app(835) class_id=12 permission_id=3
+allow untrusted_app pdx_display_client_endpoint_socket:sock_file write;
+avtab_rules_before=18074 after=18075 old_mask=00000000 new_mask=00000004
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398236 output_bytes=398248
+PASS policy_version=30 type=untrusted_app(835) class_id=12 permission_id=5
+allow untrusted_app pdx_display_client_endpoint_socket:sock_file getattr;
+avtab_rules_before=18075 after=18075 old_mask=00000004 new_mask=00000014
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398248 output_bytes=398248
+PASS policy_version=30 type=untrusted_app_25(836) class_id=23 permission_id=21
+allow untrusted_app_25 surfaceflinger:unix_stream_socket connectto;
+avtab_rules_before=18075 after=18076 old_mask=00000000 new_mask=00100000
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398248 output_bytes=398260
+PASS policy_version=30 type=untrusted_app_25(836) class_id=12 permission_id=3
+allow untrusted_app_25 pdx_display_client_endpoint_socket:sock_file write;
+avtab_rules_before=18076 after=18077 old_mask=00000000 new_mask=00000004
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398260 output_bytes=398272
+PASS policy_version=30 type=untrusted_app_25(836) class_id=12 permission_id=5
+allow untrusted_app_25 pdx_display_client_endpoint_socket:sock_file getattr;
+avtab_rules_before=18077 after=18077 old_mask=00000004 new_mask=00000014
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=398272 output_bytes=398272

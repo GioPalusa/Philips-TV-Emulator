@@ -1,0 +1,18 @@
+{
+  "result": "PASS",
+  "origin": "Actual stock Android8 kernel in model-specific QEMU with development GLES adaptation",
+  "run": "20261020-185805-cc1698",
+  "evidence": [
+    "HOSTGPU_PROBE PASS magic=50484750 PA=a1100000",
+    "HOSTGPU TEST BEGIN",
+    "EGL 1.4 vendor=Google Android emulator Host: Google Inc. (Apple)EGL_KHR_create_context",
+    "GLES vendor=Google (Google Inc. (Apple)) renderer=Android Emulator OpenGL ES Translator (ANGLE (Apple, ANGLE Metal Renderer: Apple M4 Pro, Version 27.0 (Build 26A428))) version=OpenGL ES 3.0 (OpenGL ES 3.0.0 (ANGLE 2.1.1 git hash: fbf66f49c7cc))",
+    "PASS clear/readback red RGBA=255,0,0,255",
+    "PASS shaders/triangle interior green; exterior preserved red",
+    "HOSTGPU TEST PASS"
+  ],
+  "physical_tv_modified": false,
+  "selinux_enforcing": true,
+  "tv_performance_equivalence_verified": false,
+  "note": "Guest pbuffer pixel and shader tests. Launcher and Ambilight integration require separate checks."
+}

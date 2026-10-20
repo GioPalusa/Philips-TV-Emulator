@@ -15,6 +15,8 @@ import subprocess
 import tempfile
 import threading
 import time
+import zlib
+from host_frame import HostFrame, png_from_ppm
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlsplit
 
@@ -85,6 +87,12 @@ class Emulator:
         self.frame_time = None
         self.frame_bytes = None
         self.capture_ms = None
+        self.frame_sequence = 0
+        self.frame_crc = None
+        self.frame_changes = deque()
+        self.frame_source = "QEMU OSD"
+        self.host_posts = 0
+        self.host_frame = HostFrame(args.host_gpu_frame) if args.host_gpu_frame else None
         self.started = None
         self.fixture = "framebuffer"
         self.error = ""
@@ -136,6 +144,12 @@ class Emulator:
             self.frame = self.frame_time = None
             self.frame_bytes = None
             self.capture_ms = None
+            self.frame_sequence = 0
+            self.frame_crc = None
+            self.frame_changes.clear()
+            self.frame_source = "QEMU OSD"
+            self.host_posts = 0
+            self.host_frame = HostFrame(self.args.host_gpu_frame) if self.args.host_gpu_frame else None
             self.boot, self.error = "unknown", ""
             self.input_ready = False
             self.input_bridge.reset()
@@ -169,6 +183,12 @@ class Emulator:
             for name in ("PHILIPS_AMBILIGHT_FIXTURE", "PHILIPS_VIDEO_VSYNC_FIXTURE",
                          "PHILIPS_AMBILIGHT_FIXTURE_RGB16", "PHILIPS_AMBILIGHT_FRAMEBUFFER"):
                 env.pop(name, None)
+            if self.args.host_gpu_socket:
+                env["PHILIPS_HOSTGPU_SOCKET"] = str(self.args.host_gpu_socket)
+                env["PHILIPS_HOSTGPU_FRAME"] = str(self.args.host_gpu_frame)
+            else:
+                env.pop("PHILIPS_HOSTGPU_SOCKET", None)
+                env.pop("PHILIPS_HOSTGPU_FRAME", None)
             env.update(PHILIPS_OSD_SCANOUT="1", PHILIPS_VIDEO_VSYNC_FIXTURE="1",
                        PHILIPS_AMBILIGHT_LOG=str(self.run_dir / "ambilight.jsonl"))
             if fixture == "framebuffer":
@@ -243,17 +263,27 @@ class Emulator:
                         observed = self.scanout_log_tail + chunk
                         self.scanout_observed = b"[mt5891 osd] raw plane2" in observed
                         self.scanout_log_tail = observed[-64:]
-                    # Raw PPM avoids PNG compression inside QEMU's global lock.
-                    # The browser converts these actual RGB pixels to a canvas.
-                    temporary = self.run_dir / "frame-next.ppm"
-                    self.qmp_call("screendump", {"filename": str(temporary), "format": "ppm"})
-                    captured = temporary.read_bytes()
-                    temporary.replace(self.run_dir / "frame.ppm")
-                    with self.lock:
-                        self.frame = self.run_dir / "frame.ppm"
-                        self.frame_bytes = captured
-                        self.frame_time = time.time()
-                        self.capture_ms = round((time.monotonic() - capture_started) * 1000, 2)
+                    host = self.host_frame.read() if self.host_frame else None
+                    captured = None
+                    if host:
+                        captured, self.host_posts = host
+                        self.frame_source = "Host GPU (translated GLES)"
+                    elif not self.host_posts:
+                        temporary = self.run_dir / "frame-next.ppm"
+                        self.qmp_call("screendump", {"filename": str(temporary), "format": "ppm"})
+                        captured = temporary.read_bytes()
+                        temporary.replace(self.run_dir / "frame.ppm")
+                    if captured is not None:
+                        crc = zlib.crc32(captured)
+                        with self.lock:
+                            self.frame = self.run_dir / "frame.ppm"
+                            if crc != self.frame_crc:
+                                self.frame_sequence += 1
+                                self.frame_crc = crc
+                                self.frame_bytes = captured
+                                self.frame_time = time.time()
+                                self.frame_changes.append(time.monotonic())
+                            self.capture_ms = round((time.monotonic() - capture_started) * 1000, 2)
                     if self.diagnostics_started and time.monotonic() - self.last_boot_check > 30:
                         self.check_boot()
                         self.last_boot_check = time.monotonic()
@@ -266,7 +296,7 @@ class Emulator:
                     with self.lock:
                         self.error = "Frame capture: " + str(exc)
                 # Bound host work to 20 captures/s; never queue old frames.
-                time.sleep(max(.005, .05 - (time.monotonic() - capture_started)))
+                time.sleep(max(.001, (1/60 if self.host_posts else .05) - (time.monotonic() - capture_started)))
         except Exception as exc:
             with self.lock:
                 self.error = str(exc)
@@ -401,6 +431,9 @@ class Emulator:
                         break
                     except (ValueError, KeyError, TypeError) as exc:
                         spi_error = str(exc)
+            now = time.monotonic()
+            while self.frame_changes and self.frame_changes[0] < now - 5:
+                self.frame_changes.popleft()
             return {
                 "running": running, "pid": proc.pid if running else None,
                 "exit_code": proc.returncode if proc else None,
@@ -412,6 +445,10 @@ class Emulator:
                 "fixture": self.fixture, "frame": bool(self.frame),
                 "frame_time": self.frame_time,
                 "capture_ms": self.capture_ms,
+                "frame_sequence": self.frame_sequence,
+                "frame_source": self.frame_source,
+                "host_posts": self.host_posts,
+                "visual_updates_hz": round(len(self.frame_changes) / 5, 1),
                 "scanout_observed": self.scanout_observed,
                 "pixels": pixels, "spi_sequence": sequence, "spi_error": spi_error,
                 "commands": list(self.commands), "error": self.error,
@@ -425,7 +462,7 @@ class Handler(BaseHTTPRequestHandler):
         if args and str(args[0]).startswith("POST"):
             super().log_message(fmt, *args)
 
-    def reply(self, code, body, content_type="application/json"):
+    def reply(self, code, body, content_type="application/json", headers=None):
         if not isinstance(body, bytes):
             body = json.dumps(body).encode()
         self.send_response(code)
@@ -436,6 +473,8 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Security-Policy",
                          "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
                          "img-src 'self'; connect-src 'self'; frame-ancestors 'none'")
+        for name, value in (headers or {}).items():
+            self.send_header(name, str(value))
         self.end_headers()
         try:
             self.wfile.write(body)
@@ -453,22 +492,18 @@ class Handler(BaseHTTPRequestHandler):
             return self.reply(200, self.server.emulator.state())
         if path == "/api/session":
             return self.reply(200, {"token": self.server.token})
-        if path == "/frame.png":
+        if path in ("/frame.png", "/frame.ppm"):
             emulator = self.server.emulator
-            if emulator.frame and emulator.qmp:
-                try:
-                    frame = emulator.run_dir / "snapshot.png"
-                    emulator.qmp_call("screendump", {"filename": str(frame), "format": "png"})
-                    return self.reply(200, frame.read_bytes(), "image/png")
-                except (OSError, RuntimeError) as exc:
-                    return self.reply(503, {"error": str(exc)})
-            return self.reply(404, {"error": "No QEMU frame captured yet"})
-        if path == "/frame.ppm":
-            with self.server.emulator.lock:
-                pixels = self.server.emulator.frame_bytes
+            with emulator.lock:
+                pixels, sequence = emulator.frame_bytes, emulator.frame_sequence
             if pixels:
-                return self.reply(200, pixels, "image/x-portable-pixmap")
-            return self.reply(404, {"error": "No QEMU frame captured yet"})
+                if path == "/frame.png":
+                    return self.reply(200, png_from_ppm(pixels), "image/png")
+                headers = {"X-Frame-Sequence": sequence}
+                if self.headers.get("X-Frame-Sequence") == str(sequence):
+                    return self.reply(204, b"", headers=headers)
+                return self.reply(200, pixels, "image/x-portable-pixmap", headers)
+            return self.reply(404, {"error": "No frame captured yet"})
         names = {"/": ("index.html", "text/html; charset=utf-8"),
                  "/app.js": ("app.js", "text/javascript; charset=utf-8"),
                  "/style.css": ("style.css", "text/css; charset=utf-8")}
@@ -513,6 +548,8 @@ class Handler(BaseHTTPRequestHandler):
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--port", type=int, default=8765)
+    ap.add_argument("--host-gpu-socket", type=Path)
+    ap.add_argument("--host-gpu-frame", type=Path)
     ap.add_argument("--attach-run", type=Path)
     ap.add_argument("--attach-pid", type=int)
     ap.add_argument("--binary", type=Path, default=EMU / "qemu-system-aarch64-55oled803")
@@ -523,6 +560,8 @@ def main():
     args = ap.parse_args()
     for name in ("binary", "disk", "ramdisk"):
         setattr(args, name, getattr(args, name).resolve())
+    if bool(args.host_gpu_socket) != bool(args.host_gpu_frame):
+        ap.error("Host GPU socket and frame must be supplied together")
     emulator = Emulator(args)
     if bool(args.attach_run) != bool(args.attach_pid):
         ap.error("--attach-run and --attach-pid must be supplied together")

@@ -314,6 +314,38 @@ The test passed against `qemu-amb-framebuffer`; the result is saved in
 source hashes. End-to-end stock output from changing framebuffer content remains
 to be validated separately.
 
+## Posted host-renderer frames
+
+The explicit host graphics profile can additionally set `PHILIPS_HOSTGPU_FRAME`
+to its renderer's shared RGBA file. `philips-hostgpu-frame.inc` then supplies the
+same measurement grid from posted guest GLES content, before trying the raw OSD
+source. It is called only through the existing framebuffer measurement path;
+`PHILIPS_AMBILIGHT_FRAMEBUFFER=1` is still required. The resulting samples continue
+through the stock driver algorithm and captured SPI transport.
+
+The adapter validates the exact version-1 header, 1920×1080 dimensions, 7680-byte
+stride, RGBA8 format and file size. It averages 4×4 sample locations in each of
+32×20 cells and ignores alpha. It reads the publication sequence before and after
+sampling; an odd or changed sequence does not commit the new grid. The previous
+stable grid is retained during concurrent writes. An unchanged publication uses
+the cache. Invalid metadata or no published frame permits the existing OSD
+fallback.
+
+A new frame needs 10,240 sampled pixel locations and 30,720 color-byte loads;
+there is no complete 8 MiB image copy under the QEMU lock. File checks and mmap
+page faults can still incur host work. This is an approximation of video
+measurement hardware, and the host graphics path translates guest GLES rather
+than emulating Mali. The shared file is a trusted local renderer interface and
+must keep its size and inode throughout the run. Last-frame retention is not a
+freshness guarantee.
+
+Focused ASan/UBSan tests pass for the grid, channel order, averaging, seqlock
+change, cached snapshots, format validation, default-off behavior and detected
+prior truncation. A read-only probe of the existing renderer file observed a
+stable blue frame at sequence 24 / frame count 12. This probe does not execute
+the stock Ambilight algorithm. See `hostgpu-frame-evidence.json`; integrated
+stock output remains to be validated after the parent QEMU build.
+
 ## Verified QEMU capture path
 
 `qtest_spi_smoke.py` has run against the built `qemu-timer-ambi` binary, exercising

@@ -1,0 +1,6 @@
+{
+  "input_sha256": "621e4c7a1fe7474608349c94060351a7fc82ff32cbc7b1bd9b03a37bfbedc238",
+  "output_sha256": "e208055a8e010ec258c9eeb6b179d3d8588965adf2cee73989ce4fc35a82293a",
+  "rules": 58,
+  "verification": "Each rule roundtripped through libsepol; reverting precisely its bit reproduced the input canonical policy. No permissive-domain or global enforcement edits."
+}

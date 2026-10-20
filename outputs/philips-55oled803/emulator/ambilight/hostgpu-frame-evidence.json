@@ -1,0 +1,60 @@
+{
+  "schema": "philips-hostgpu-measurement-evidence-v1",
+  "status": "Implemented; sanitizer tests and read-only producer-file probe passed; QEMU stock-firmware integration pending.",
+  "input_contract": {
+    "environment": "PHILIPS_HOSTGPU_FRAME",
+    "magic": "0x55475048",
+    "version": 1,
+    "width": 1920,
+    "height": 1080,
+    "stride": 7680,
+    "format": "1: RGBA8, top down",
+    "header_bytes": 64,
+    "sequence_offset": 24,
+    "frame_count_offset": 32,
+    "file_bytes": 8294464
+  },
+  "sampling": "32\u00d720 cells, 4\u00d74 sample locations per cell, average RGB8 shifted left eight bits; alpha ignored.",
+  "snapshot_behavior": "Read even sequence, sample, recheck sequence before atomic grid commit. Reuse last stable grid during a busy or changing writer. Reuse cached grid for unchanged publication. Invalid metadata/no published frame falls back to the existing guest OSD sampler.",
+  "work_bound": "10,240 pixel locations and 30,720 color-byte loads per new frame; no complete image copy. Cached output copy is 3,840 bytes. File metadata check and mmap page faults can still incur host work.",
+  "tests": {
+    "sanitizers": "AddressSanitizer and UndefinedBehaviorSanitizer passed with -Wall -Wextra -Werror.",
+    "coverage": [
+      "All grid positions and RGB averaging",
+      "RGBA channel order and alpha ignored",
+      "Odd writer sequence preserves prior grid",
+      "Deterministic sequence change before commit rejects new grid",
+      "Invalid magic, version, width, height, stride and format",
+      "Zero frame count, wrong size and unaligned input",
+      "No environment variable means disabled",
+      "Actual mmap and detected prior truncation"
+    ],
+    "producer_file_probe": {
+      "path": "work/philips-host-gpu/runtime/frame3.rgba",
+      "sequence": 24,
+      "frame_count": 12,
+      "rgb16_ranges": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          65280,
+          65280
+        ]
+      ],
+      "interpretation": "Read-only adapter probe of an existing blue posted frame; does not establish stock Ambilight output."
+    }
+  },
+  "limitations": [
+    "This graphics translation development path is not Mali hardware emulation or calibrated sensor behavior.",
+    "Source is a trusted renderer file that must retain its inode and size for the run; a concurrent hostile truncate cannot be made safe by fstat before mmap reads.",
+    "A busy or unchanged producer can retain the last stable frame; no new-frame freshness guarantee.",
+    "Physical LED geometry and calibration remain synthetic/unverified."
+  ],
+  "source_sha256": "a622e91e6c1b958ec48e9a0416c6176a06073aecbb5a4554038eec39d384234b"
+}

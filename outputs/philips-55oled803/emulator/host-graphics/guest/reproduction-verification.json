@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "method": "Fresh extraction from pinned archives, both patches applied, complete rebuild; all ten artifact hashes match manifest",
+  "artifacts": {
+    "libOpenglSystemCommon.so": true,
+    "libGLESv2_enc.so": true,
+    "hostgpu_broker": true,
+    "libEGL_emulation.so": true,
+    "libGLESv1_CM_emulation.so": true,
+    "lib_renderControl_enc.so": true,
+    "libGLESv2_emulation.so": true,
+    "libGLESv1_enc.so": true,
+    "hostgpu_render_test": true,
+    "gralloc.goldfish.so": true
+  }
+}

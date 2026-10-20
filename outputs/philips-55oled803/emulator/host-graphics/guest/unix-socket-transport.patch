@@ -1,0 +1,54 @@
+--- a/system/OpenglSystemCommon/qemu_pipe.h
++++ b/system/OpenglSystemCommon/qemu_pipe.h
+@@ -25,6 +25,8 @@
+ #include <stdio.h>
+ #include <string.h>
+ #include <errno.h>
++#include <sys/socket.h>
++#include <sys/un.h>
+ 
+ #ifndef D
+ #  define  D(...)   do{}while(0)
+@@ -35,7 +37,7 @@
+   size_t remaining = byte_count;
+   while (remaining > 0) {
+     ssize_t n = TEMP_FAILURE_RETRY(write(fd, p, remaining));
+-    if (n == -1) return false;
++    if (n <= 0) return false;
+     p += n;
+     remaining -= n;
+   }
+@@ -78,12 +80,19 @@
+ 
+     snprintf(buff, sizeof buff, "pipe:%s", pipeName);
+ 
+-    fd = TEMP_FAILURE_RETRY(open("/dev/qemu_pipe", O_RDWR));
+-    if (fd < 0 && errno == ENOENT)
+-        fd = TEMP_FAILURE_RETRY(open("/dev/goldfish_pipe", O_RDWR));
+-    if (fd < 0) {
+-        D("%s: Could not open /dev/qemu_pipe: %s", __FUNCTION__, strerror(errno));
+-        //errno = ENOSYS;
++    // Development emulator transport: the broker accepts a separate socket for
++    // each host stream. Keep the existing pipe service handshake and byte ABI.
++    // No application may open /dev/mem or contact a network host directly.
++    struct sockaddr_un address = {};
++    address.sun_family = AF_UNIX;
++    strcpy(address.sun_path, "/dev/socket/philips_hostgpu");
++    fd = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
++    if (fd < 0) return -1;
++    if (TEMP_FAILURE_RETRY(connect(fd, (struct sockaddr*)&address,
++                                   sizeof(address))) < 0) {
++        int saved = errno;
++        close(fd);
++        errno = saved;
+         return -1;
+     }
+ 
+@@ -91,6 +100,7 @@
+ 
+     if (!WriteFully(fd, buff, buffLen + 1)) {
+         D("%s: Could not connect to %s pipe service: %s", __FUNCTION__, pipeName, strerror(errno));
++        close(fd);
+         return -1;
+     }
+ 
