@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Philips TV Lab · 55OLED803/12</title>
+  <link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script>
+</head>
+<body>
+<header>
+  <a class="brand" href="/">PHILIPS <span>TV LAB</span></a>
+  <div class="model">55OLED803/12 <span>LOCAL EMULATOR</span></div>
+  <span id="connection" class="connection">Connecting</span>
+</header>
+<main>
+  <section class="intro">
+    <div><p class="eyebrow">HARDWARE DEVELOPMENT</p><h1>Your TV, on your Mac.</h1>
+    <p class="subhead">A live view of the guest framebuffer and Ambilight output.</p></div>
+    <div class="controls"><button id="refresh" class="quiet">↻ Refresh</button>
+    <button id="stop" class="quiet" disabled>Stop</button><button id="start" class="primary">Start TV</button></div>
+  </section>
+  <div id="notice" role="status" class="notice hidden"></div>
+  <section class="workspace">
+    <div class="display-area">
+      <div class="display-label"><span id="image-status">WAITING FOR QEMU</span><span id="frame-age">NO FRAME YET</span></div>
+      <div class="tv-stage">
+        <div class="light-strip top" id="lights-top"></div>
+        <div class="light-strip left" id="lights-left"></div>
+        <div class="light-strip right" id="lights-right"></div>
+        <div class="tv">
+          <img id="frame" alt="Actual QEMU framebuffer capture" class="hidden">
+          <div id="frame-empty"><div class="screen-icon">▱</div><h2>No captured frame yet</h2>
+          <p>Start the emulator to see its actual display output.</p>
+          <small>No Android screen is substituted here.</small></div>
+          <div class="bezel"><span>PHILIPS</span><i id="power-led"></i></div>
+        </div>
+      </div>
+      <div class="image-note"><span class="live-dot"></span><span id="image-note">The framebuffer will appear here, including black or uninitialized frames.</span></div>
+      <div class="light-caption">Ambilight preview · wire order arranged around three sides for inspection.
+        <strong>Physical LED placement is not calibrated.</strong></div>
+      <div class="cards">
+        <article><span>EMULATOR</span><h3 id="process-status">Stopped</h3><p id="process-detail">Local, isolated process</p></article>
+        <article><span>ANDROID BOOT</span><h3 id="boot-status">Unknown</h3><p id="boot-detail">Requires a guest status response</p></article>
+        <article><span>AMBILIGHT SPI</span><h3 id="spi-status">No transfers</h3><p id="spi-detail">Waiting for guest output</p></article>
+      </div>
+    </div>
+    <aside>
+      <section class="remote panel">
+        <div class="panel-heading"><h2>Remote</h2><span id="remote-state">OFFLINE</span></div>
+        <p class="muted">Android input over the guest console.</p>
+        <div class="dpad">
+          <button data-key="up" class="up" aria-label="Up">↑</button>
+          <button data-key="left" class="left-key" aria-label="Left">←</button>
+          <button data-key="ok" class="ok">OK</button>
+          <button data-key="right" class="right-key" aria-label="Right">→</button>
+          <button data-key="down" class="down" aria-label="Down">↓</button>
+        </div>
+        <div class="remote-row"><button data-key="back">↶ <span>Back</span></button>
+        <button data-key="home">⌂ <span>Home</span></button></div>
+        <div class="volume"><button data-key="volume_down" aria-label="Volume down">−</button>
+        <span>VOLUME</span><button data-key="volume_up" aria-label="Volume up">+</button></div>
+        <button data-key="mute" class="mute">Mute / unmute</button>
+        <div id="key-feedback" class="key-feedback" role="status">Connect the guest console to send keys.</div>
+      </section>
+      <section class="panel fixture">
+        <div class="panel-heading"><h2>Ambilight input</h2><span id="input-kind">FIXTURE</span></div>
+        <p class="muted" id="input-description">Synthetic measurement color. The lights show the guest driver’s resulting SPI values.</p>
+        <div class="swatches" role="group" aria-label="Synthetic measurement color">
+          <button data-color="red"><i class="red"></i>Red</button>
+          <button data-color="green"><i class="green"></i>Green</button>
+          <button data-color="blue"><i class="blue"></i>Blue</button>
+        </div>
+        <button data-color="framebuffer" class="framebuffer-source selected">Use framebuffer measurements</button>
+        <p id="fixture-note" class="small">Selected color applies on the next start.</p>
+      </section>
+    </aside>
+  </section>
+  <details class="debug panel">
+    <summary><span>Diagnostics</span><span class="muted">Console, boot checks and model limits</span></summary>
+    <div class="debug-controls"><button id="check-boot">Check Android boot status</button>
+    <span id="run-path" class="small"></span></div>
+    <p class="limits">Display: raw OSD plane 2, first region. Video composition, panel scaling and compression are not modeled.
+    Disk writes use a temporary snapshot. No network interface or physical TV connection is enabled.</p>
+    <div class="logs"><div><h3>Guest console / crash log</h3><pre id="console-log">No console output yet.</pre></div>
+    <div><h3>QEMU / boot log</h3><pre id="qemu-log">No boot output yet.</pre></div></div>
+  </details>
+</main>
+<footer>TPM171E development model <span>Actual guest pixels · explicit hardware limitations</span></footer>
+</body></html>

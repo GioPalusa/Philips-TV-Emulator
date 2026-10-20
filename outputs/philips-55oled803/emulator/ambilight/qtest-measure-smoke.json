@@ -1,0 +1,36 @@
+{
+  "result": "passed",
+  "origin": "synthetic-qtest-measurement",
+  "android_booted": false,
+  "stock_ambilight_algorithm_executed": false,
+  "irq_delivery_to_guest_handler_verified": false,
+  "qemu": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-emulator/qemu-vsync-console",
+  "results": [
+    {
+      "fixture_enabled": false,
+      "timer_did_not_change_status": true
+    },
+    {
+      "fixture_enabled": true,
+      "rows_checked": 2,
+      "columns_checked": 32,
+      "checks": [
+        "virtual timer under running TCG",
+        "raw three-plane FIFO",
+        "pending-row backpressure",
+        "bit7 ACK only",
+        "overlapping word ACK",
+        "row advancement"
+      ]
+    },
+    {
+      "fixture_enabled": true,
+      "vsync_fixture_enabled": true,
+      "checks": [
+        "independent VSync despite pending row",
+        "independent bit 6 and bit 7 acknowledgement",
+        "shared GIC SPI 95 OR assertion/deassertion"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+PASS policy_version=30 type=surfaceflinger(821) class=process(2) permission=execmem(26)
+allow surfaceflinger surfaceflinger:process execmem;
+avtab_rules_before=18052 after=18052 old_mask=20217f7d new_mask=22217f7d
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=397972 output_bytes=397972

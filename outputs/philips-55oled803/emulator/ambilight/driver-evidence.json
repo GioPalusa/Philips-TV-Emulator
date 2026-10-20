@@ -1,0 +1,1046 @@
+{
+  "IMambR_WriteSPI": {
+    "result": "0x1900: mov ip, sp\n0x1904: push {fp, ip, lr, pc}\n0x1908: sub fp, ip, #0x4\n0x190c: str lr, [sp, #0xc + var_10]\n0x1910: bl __gnu_mcount_nc\n0x1914: mov r3, r0\n0x1918: mov r0, r1\n0x191c: mov r1, r2\n0x1920: mov r2, r3\n0x1924: bl vDrvAmbiLitBatchWriteCmd",
+    "evidence_id": "ev_7fe975612f7b1f46a70f7ae04a35ef523daa6a6d3f890eca149825374e768085",
+    "evidence": {
+      "evidence_id": "ev_7fe975612f7b1f46a70f7ae04a35ef523daa6a6d3f890eca149825374e768085",
+      "subject": {
+        "name": "dtv_driver.ko",
+        "digest": {
+          "sha256": "7c9beee7c57ce276357eb4ee8a031ea3c8e5eebd42230df5b073ae557633bea9"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/dtv_driver.ko"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_assembly",
+      "parameters": {
+        "procedure": "IMambR_WriteSPI",
+        "document": null
+      },
+      "raw_result": "0x1900: mov ip, sp\n0x1904: push {fp, ip, lr, pc}\n0x1908: sub fp, ip, #0x4\n0x190c: str lr, [sp, #0xc + var_10]\n0x1910: bl __gnu_mcount_nc\n0x1914: mov r3, r0\n0x1918: mov r0, r1\n0x191c: mov r1, r2\n0x1920: mov r2, r3\n0x1924: bl vDrvAmbiLitBatchWriteCmd",
+      "normalized_result": "0x1900: mov ip, sp\n0x1904: push {fp, ip, lr, pc}\n0x1908: sub fp, ip, #0x4\n0x190c: str lr, [sp, #0xc + var_10]\n0x1910: bl __gnu_mcount_nc\n0x1914: mov r3, r0\n0x1918: mov r0, r1\n0x191c: mov r1, r2\n0x1920: mov r2, r3\n0x1924: bl vDrvAmbiLitBatchWriteCmd",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "IMambR_WriteI2C": {
+    "result": "    __gnu_mcount_nc();\n    return;\n",
+    "evidence_id": "ev_a6349aba8c90ddb77e720dda86f3795c20f034d46e30d9bd69c16c6a29bff634",
+    "evidence": {
+      "evidence_id": "ev_a6349aba8c90ddb77e720dda86f3795c20f034d46e30d9bd69c16c6a29bff634",
+      "subject": {
+        "name": "dtv_driver.ko",
+        "digest": {
+          "sha256": "7c9beee7c57ce276357eb4ee8a031ea3c8e5eebd42230df5b073ae557633bea9"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/dtv_driver.ko"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_pseudo_code",
+      "parameters": {
+        "procedure": "IMambR_WriteI2C",
+        "document": null
+      },
+      "raw_result": "    __gnu_mcount_nc();\n    return;\n",
+      "normalized_result": "    __gnu_mcount_nc();\n    return;\n",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "IMambP_SetStaticPixel": {
+    "result": "    r1 = arg1;\n    r0 = arg0;\n    r3 = r1 + IMsrcmeterR;\n    r12 = &arg_0;\n    if (r3 != IMsrcmeterR) {\n            r3 = 0x1;\n    }\n    if (r0 > 0x3c) {\n            r3 = IMsrcmeterR;\n    }\n    decomp_var_14 = r4;\n    bool_3 = r3 == IMsrcmeterR;\n    r5 = r0;\n    r4 = r1;\n    if (r3 == IMsrcmeterR) {\n            r0 = 0x1;\n    }\n    if (!bool_3) {\n            memset(&var_1A, IMsrcmeterR, 0x6);\n            var_1A = *r4;\n            r0 = IMamb_Eng_SetStaticPixel(r5, &var_1A);\n    }\n    &decomp_var_1c = &decomp_var_14;\n    return r0;\n",
+    "evidence_id": "ev_649c7c8c19762c3aecd8b751d3e31d69121b23e893fbda682bcb8e58b4db9134",
+    "evidence": {
+      "evidence_id": "ev_649c7c8c19762c3aecd8b751d3e31d69121b23e893fbda682bcb8e58b4db9134",
+      "subject": {
+        "name": "dtv_driver.ko",
+        "digest": {
+          "sha256": "7c9beee7c57ce276357eb4ee8a031ea3c8e5eebd42230df5b073ae557633bea9"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/dtv_driver.ko"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_pseudo_code",
+      "parameters": {
+        "procedure": "IMambP_SetStaticPixel",
+        "document": null
+      },
+      "raw_result": "    r1 = arg1;\n    r0 = arg0;\n    r3 = r1 + IMsrcmeterR;\n    r12 = &arg_0;\n    if (r3 != IMsrcmeterR) {\n            r3 = 0x1;\n    }\n    if (r0 > 0x3c) {\n            r3 = IMsrcmeterR;\n    }\n    decomp_var_14 = r4;\n    bool_3 = r3 == IMsrcmeterR;\n    r5 = r0;\n    r4 = r1;\n    if (r3 == IMsrcmeterR) {\n            r0 = 0x1;\n    }\n    if (!bool_3) {\n            memset(&var_1A, IMsrcmeterR, 0x6);\n            var_1A = *r4;\n            r0 = IMamb_Eng_SetStaticPixel(r5, &var_1A);\n    }\n    &decomp_var_1c = &decomp_var_14;\n    return r0;\n",
+      "normalized_result": "    r1 = arg1;\n    r0 = arg0;\n    r3 = r1 + IMsrcmeterR;\n    r12 = &arg_0;\n    if (r3 != IMsrcmeterR) {\n            r3 = 0x1;\n    }\n    if (r0 > 0x3c) {\n            r3 = IMsrcmeterR;\n    }\n    decomp_var_14 = r4;\n    bool_3 = r3 == IMsrcmeterR;\n    r5 = r0;\n    r4 = r1;\n    if (r3 == IMsrcmeterR) {\n            r0 = 0x1;\n    }\n    if (!bool_3) {\n            memset(&var_1A, IMsrcmeterR, 0x6);\n            var_1A = *r4;\n            r0 = IMamb_Eng_SetStaticPixel(r5, &var_1A);\n    }\n    &decomp_var_1c = &decomp_var_14;\n    return r0;\n",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "amb_getOutputBuffer": {
+    "result": "    r2 = arg2;\n    r1 = arg1;\n    r0 = arg0;\n    if (r0 != IMsrcmeterR) {\n            r3 = r0[0x1];\n            if (r3 != IMsrcmeterR) {\n                    bool_7 = r1 == IMsrcmeterR;\n                    if (!bool_7) {\n                            r12 = r0[0xe];\n                            if (r12 == 0x1) {\n                                    lr = r0[0xf];\n                                    bool_10 = lr != 0x3;\n                                    bool_6 = lr != 0x3;\n                                    bool_1 = lr != 0x3;\n                                    if (lr != 0x3) {\n                                            r3 = r3[0x15c];\n                                    }\n                                    if (bool_1) {\n                                            *(int16_t *)r2 = r3;\n                                    }\n                                    if (bool_6) {\n                                            r3 = IMsrcmeterR;\n                                    }\n                                    if (!bool_10) {\n                                            switch (IMsrcmeterR) {\n                                                case 1:\n                                                    *(int16_t *)r2 = 0x2a4;\n                                                    *(int8_t *)r1 = 0x47;\n                                                    IMsrcmeterR = 0x2;\n                                                    r12 = 0x1c2;\n                                                    r2 = IMsrcmeterR;\n                                                    r3 = 0xe1;\n                                                    break;\n                                                case 2:\n                                                    *(int16_t *)r2 = 0x23c;\n                                                    *(int8_t *)r1 = 0x42;\n                                                    IMsrcmeterR = IMsrcmeterR;\n                                                    r2 = r12;\n                                                    r3 = 0x1c2;\n                                                    r12 = 0x280;\n                                                    break;\n                                                default:\n                                                    r3 = IMsrcmeterR;\n                                                    bool_14 = IMsrcmeterR != IMsrcmeterR;\n                                                    bool_9 = IMsrcmeterR != IMsrcmeterR;\n                                                    bool_2 = IMsrcmeterR != IMsrcmeterR;\n                                                    if (IMsrcmeterR != IMsrcmeterR) {\n                                                            r2 = IMsrcmeterR;\n                                                    }\n                                                    if (bool_2) {\n                                                            r12 = r2;\n                                                    }\n                                                    if (bool_9) {\n                                                            r3 = r2;\n                                                    }\n                                                    if (!bool_14) {\n                                                            IMsrcmeterR = r12;\n                                                            *(int16_t *)r2 = 0x2a4;\n                                                            *(int8_t *)r1 = 0x52;\n                                                            r2 = r12;\n                                                            r12 = 0xe1;\n                                                    }\n                                                    break;\n                                            }\n                                            r1 = r1 + r2;\n                                            while (true) {\n                                                    r1 = r1 + 0x3;\n                                                    if (r3 >= r12) {\n                                                            break;\n                                                    }\n                                                    r1[0xfffffffffffffffd] = *(int8_t *)(r0[0x5] + r3 + 0xa24);\n                                                    r1[0xfffffffffffffffe] = *(int8_t *)(r0[0x5] + r3 + 0xca4);\n                                                    r2 = r0[0x5];\n                                                    r2 = r2 + r3;\n                                                    r3 = r3 + 0x1;\n                                                    r1[0xffffffffffffffff] = r2[IMvideoR_SetMainBrightness];\n                                            }\n                                    }\n                                    else {\n                                            while (r3 < *(int16_t *)r2) {\n                                                    *(int8_t *)(r1 + r3) = *(int8_t *)(r0[0x1] + r3 + 0x1af);\n                                                    r3 = r3 + 0x1;\n                                            }\n                                    }\n                                    r0 = IMsrcmeterR;\n                            }\n                            else {\n                                    r0 = IMsrcmeterR;\n                                    *(int16_t *)r2 = IMsrcmeterR;\n                            }\n                    }\n                    else {\n                            r0 = 0x2;\n                    }\n            }\n            else {\n                    r0 = 0x2;\n            }\n    }\n    else {\n            r0 = 0x2;\n    }\n    return r0;\n",
+    "evidence_id": "ev_b54a17cd45b4d77bceaee3367cadc3208ec4a0cf70602383ce9aa69d1e5a987f",
+    "evidence": {
+      "evidence_id": "ev_b54a17cd45b4d77bceaee3367cadc3208ec4a0cf70602383ce9aa69d1e5a987f",
+      "subject": {
+        "name": "dtv_driver.ko",
+        "digest": {
+          "sha256": "7c9beee7c57ce276357eb4ee8a031ea3c8e5eebd42230df5b073ae557633bea9"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/dtv_driver.ko"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_pseudo_code",
+      "parameters": {
+        "procedure": "amb_getOutputBuffer",
+        "document": null
+      },
+      "raw_result": "    r2 = arg2;\n    r1 = arg1;\n    r0 = arg0;\n    if (r0 != IMsrcmeterR) {\n            r3 = r0[0x1];\n            if (r3 != IMsrcmeterR) {\n                    bool_7 = r1 == IMsrcmeterR;\n                    if (!bool_7) {\n                            r12 = r0[0xe];\n                            if (r12 == 0x1) {\n                                    lr = r0[0xf];\n                                    bool_10 = lr != 0x3;\n                                    bool_6 = lr != 0x3;\n                                    bool_1 = lr != 0x3;\n                                    if (lr != 0x3) {\n                                            r3 = r3[0x15c];\n                                    }\n                                    if (bool_1) {\n                                            *(int16_t *)r2 = r3;\n                                    }\n                                    if (bool_6) {\n                                            r3 = IMsrcmeterR;\n                                    }\n                                    if (!bool_10) {\n                                            switch (IMsrcmeterR) {\n                                                case 1:\n                                                    *(int16_t *)r2 = 0x2a4;\n                                                    *(int8_t *)r1 = 0x47;\n                                                    IMsrcmeterR = 0x2;\n                                                    r12 = 0x1c2;\n                                                    r2 = IMsrcmeterR;\n                                                    r3 = 0xe1;\n                                                    break;\n                                                case 2:\n                                                    *(int16_t *)r2 = 0x23c;\n                                                    *(int8_t *)r1 = 0x42;\n                                                    IMsrcmeterR = IMsrcmeterR;\n                                                    r2 = r12;\n                                                    r3 = 0x1c2;\n                                                    r12 = 0x280;\n                                                    break;\n                                                default:\n                                                    r3 = IMsrcmeterR;\n                                                    bool_14 = IMsrcmeterR != IMsrcmeterR;\n                                                    bool_9 = IMsrcmeterR != IMsrcmeterR;\n                                                    bool_2 = IMsrcmeterR != IMsrcmeterR;\n                                                    if (IMsrcmeterR != IMsrcmeterR) {\n                                                            r2 = IMsrcmeterR;\n                                                    }\n                                                    if (bool_2) {\n                                                            r12 = r2;\n                                                    }\n                                                    if (bool_9) {\n                                                            r3 = r2;\n                                                    }\n                                                    if (!bool_14) {\n                                                            IMsrcmeterR = r12;\n                                                            *(int16_t *)r2 = 0x2a4;\n                                                            *(int8_t *)r1 = 0x52;\n                                                            r2 = r12;\n                                                            r12 = 0xe1;\n                                                    }\n                                                    break;\n                                            }\n                                            r1 = r1 + r2;\n                                            while (true) {\n                                                    r1 = r1 + 0x3;\n                                                    if (r3 >= r12) {\n                                                            break;\n                                                    }\n                                                    r1[0xfffffffffffffffd] = *(int8_t *)(r0[0x5] + r3 + 0xa24);\n                                                    r1[0xfffffffffffffffe] = *(int8_t *)(r0[0x5] + r3 + 0xca4);\n                                                    r2 = r0[0x5];\n                                                    r2 = r2 + r3;\n                                                    r3 = r3 + 0x1;\n                                                    r1[0xffffffffffffffff] = r2[IMvideoR_SetMainBrightness];\n                                            }\n                                    }\n                                    else {\n                                            while (r3 < *(int16_t *)r2) {\n                                                    *(int8_t *)(r1 + r3) = *(int8_t *)(r0[0x1] + r3 + 0x1af);\n                                                    r3 = r3 + 0x1;\n                                            }\n                                    }\n                                    r0 = IMsrcmeterR;\n                            }\n                            else {\n                                    r0 = IMsrcmeterR;\n                                    *(int16_t *)r2 = IMsrcmeterR;\n                            }\n                    }\n                    else {\n                            r0 = 0x2;\n                    }\n            }\n            else {\n                    r0 = 0x2;\n            }\n    }\n    else {\n            r0 = 0x2;\n    }\n    return r0;\n",
+      "normalized_result": "    r2 = arg2;\n    r1 = arg1;\n    r0 = arg0;\n    if (r0 != IMsrcmeterR) {\n            r3 = r0[0x1];\n            if (r3 != IMsrcmeterR) {\n                    bool_7 = r1 == IMsrcmeterR;\n                    if (!bool_7) {\n                            r12 = r0[0xe];\n                            if (r12 == 0x1) {\n                                    lr = r0[0xf];\n                                    bool_10 = lr != 0x3;\n                                    bool_6 = lr != 0x3;\n                                    bool_1 = lr != 0x3;\n                                    if (lr != 0x3) {\n                                            r3 = r3[0x15c];\n                                    }\n                                    if (bool_1) {\n                                            *(int16_t *)r2 = r3;\n                                    }\n                                    if (bool_6) {\n                                            r3 = IMsrcmeterR;\n                                    }\n                                    if (!bool_10) {\n                                            switch (IMsrcmeterR) {\n                                                case 1:\n                                                    *(int16_t *)r2 = 0x2a4;\n                                                    *(int8_t *)r1 = 0x47;\n                                                    IMsrcmeterR = 0x2;\n                                                    r12 = 0x1c2;\n                                                    r2 = IMsrcmeterR;\n                                                    r3 = 0xe1;\n                                                    break;\n                                                case 2:\n                                                    *(int16_t *)r2 = 0x23c;\n                                                    *(int8_t *)r1 = 0x42;\n                                                    IMsrcmeterR = IMsrcmeterR;\n                                                    r2 = r12;\n                                                    r3 = 0x1c2;\n                                                    r12 = 0x280;\n                                                    break;\n                                                default:\n                                                    r3 = IMsrcmeterR;\n                                                    bool_14 = IMsrcmeterR != IMsrcmeterR;\n                                                    bool_9 = IMsrcmeterR != IMsrcmeterR;\n                                                    bool_2 = IMsrcmeterR != IMsrcmeterR;\n                                                    if (IMsrcmeterR != IMsrcmeterR) {\n                                                            r2 = IMsrcmeterR;\n                                                    }\n                                                    if (bool_2) {\n                                                            r12 = r2;\n                                                    }\n                                                    if (bool_9) {\n                                                            r3 = r2;\n                                                    }\n                                                    if (!bool_14) {\n                                                            IMsrcmeterR = r12;\n                                                            *(int16_t *)r2 = 0x2a4;\n                                                            *(int8_t *)r1 = 0x52;\n                                                            r2 = r12;\n                                                            r12 = 0xe1;\n                                                    }\n                                                    break;\n                                            }\n                                            r1 = r1 + r2;\n                                            while (true) {\n                                                    r1 = r1 + 0x3;\n                                                    if (r3 >= r12) {\n                                                            break;\n                                                    }\n                                                    r1[0xfffffffffffffffd] = *(int8_t *)(r0[0x5] + r3 + 0xa24);\n                                                    r1[0xfffffffffffffffe] = *(int8_t *)(r0[0x5] + r3 + 0xca4);\n                                                    r2 = r0[0x5];\n                                                    r2 = r2 + r3;\n                                                    r3 = r3 + 0x1;\n                                                    r1[0xffffffffffffffff] = r2[IMvideoR_SetMainBrightness];\n                                            }\n                                    }\n                                    else {\n                                            while (r3 < *(int16_t *)r2) {\n                                                    *(int8_t *)(r1 + r3) = *(int8_t *)(r0[0x1] + r3 + 0x1af);\n                                                    r3 = r3 + 0x1;\n                                            }\n                                    }\n                                    r0 = IMsrcmeterR;\n                            }\n                            else {\n                                    r0 = IMsrcmeterR;\n                                    *(int16_t *)r2 = IMsrcmeterR;\n                            }\n                    }\n                    else {\n                            r0 = 0x2;\n                    }\n            }\n            else {\n                    r0 = 0x2;\n            }\n    }\n    else {\n            r0 = 0x2;\n    }\n    return r0;\n",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "IMamb_Eng_SetStaticPixel": {
+    "result": "    IMamb_Fms_SetStaticPixel(arg0, arg1);\n    return IMsrcmeterR;\n",
+    "evidence_id": "ev_03bba0c805691989904e07a2274f8e2848016982058a8393da89e9119e74cac1",
+    "evidence": {
+      "evidence_id": "ev_03bba0c805691989904e07a2274f8e2848016982058a8393da89e9119e74cac1",
+      "subject": {
+        "name": "dtv_driver.ko",
+        "digest": {
+          "sha256": "7c9beee7c57ce276357eb4ee8a031ea3c8e5eebd42230df5b073ae557633bea9"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/dtv_driver.ko"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_pseudo_code",
+      "parameters": {
+        "procedure": "IMamb_Eng_SetStaticPixel",
+        "document": null
+      },
+      "raw_result": "    IMamb_Fms_SetStaticPixel(arg0, arg1);\n    return IMsrcmeterR;\n",
+      "normalized_result": "    IMamb_Fms_SetStaticPixel(arg0, arg1);\n    return IMsrcmeterR;\n",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "vDrvAmbiLitBatchWriteCmd": {
+    "result": "0x1434f4: mov ip, sp\n0x1434f8: push {fp, ip, lr, pc}\n0x1434fc: sub fp, ip, #0x4\n0x143500: str lr, [sp, #0xc + var_10]\n0x143504: bl __gnu_mcount_nc\n0x143508: lsr r3, r0, #2\n0x14350c: mov r2, #0x4\n0x143510: mov r0, r1\n0x143514: mov r1, r3\n0x143518: bl vDrvLcdimSpiSendDataSWModeMbyN",
+    "evidence_id": "ev_5bc0f3552c2a1bfdae7c082c5605bc016a004b1557fa0b0406c3d35591d7c369",
+    "evidence": {
+      "evidence_id": "ev_5bc0f3552c2a1bfdae7c082c5605bc016a004b1557fa0b0406c3d35591d7c369",
+      "subject": {
+        "name": "dtv_driver.ko",
+        "digest": {
+          "sha256": "7c9beee7c57ce276357eb4ee8a031ea3c8e5eebd42230df5b073ae557633bea9"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/dtv_driver.ko"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_assembly",
+      "parameters": {
+        "procedure": "vDrvAmbiLitBatchWriteCmd",
+        "document": null
+      },
+      "raw_result": "0x1434f4: mov ip, sp\n0x1434f8: push {fp, ip, lr, pc}\n0x1434fc: sub fp, ip, #0x4\n0x143500: str lr, [sp, #0xc + var_10]\n0x143504: bl __gnu_mcount_nc\n0x143508: lsr r3, r0, #2\n0x14350c: mov r2, #0x4\n0x143510: mov r0, r1\n0x143514: mov r1, r3\n0x143518: bl vDrvLcdimSpiSendDataSWModeMbyN",
+      "normalized_result": "0x1434f4: mov ip, sp\n0x1434f8: push {fp, ip, lr, pc}\n0x1434fc: sub fp, ip, #0x4\n0x143500: str lr, [sp, #0xc + var_10]\n0x143504: bl __gnu_mcount_nc\n0x143508: lsr r3, r0, #2\n0x14350c: mov r2, #0x4\n0x143510: mov r0, r1\n0x143514: mov r1, r3\n0x143518: bl vDrvLcdimSpiSendDataSWModeMbyN",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "IMamb_Fms_SetStaticPixel": {
+    "result": "0x5a47c0: mov ip, sp\n0x5a47c4: mov r2, #0xc\n0x5a47c8: push {r4, r5, r6, fp, ip, lr, pc}\n0x5a47cc: sub fp, ip, #0x4\n0x5a47d0: sub sp, sp, #0x1c\n0x5a47d4: sub r4, fp, #0x28\n0x5a47d8: mov r5, r1\n0x5a47dc: mov r6, r0\n0x5a47e0: mov r1, #0x0\n0x5a47e4: mov r0, r4\n0x5a47e8: bl memset\n0x5a47ec: ldrh r3, [r5]\n0x5a47f0: ldr r2, =0x9fd390\n0x5a47f4: str r3, [fp, var_28]\n0x5a47f8: ldrh r3, [r5, #0x2]\n0x5a47fc: ldr r0, [r2]\n0x5a4800: str r3, [fp, var_24]\n0x5a4804: ldrh r3, [r5, #0x4]\n0x5a4808: cmp r0, #0x0\n0x5a480c: moveq r0, #0x1\n0x5a4810: str r3, [fp, var_20]\n0x5a4818: str r3, [sp, #0x34 + var_34]\n0x5a481c: mov r1, r6\n0x5a4820: ldm r4, {r2, r3}\n0x5a4824: bl amb_setStaticPixel\n0x5a482c: sub sp, fp, #0x18",
+    "evidence_id": "ev_6554574a43724d09d231a3e41270fb9afcbb339fd564e630cd334088e061b8ba",
+    "evidence": {
+      "evidence_id": "ev_6554574a43724d09d231a3e41270fb9afcbb339fd564e630cd334088e061b8ba",
+      "subject": {
+        "name": "dtv_driver.ko",
+        "digest": {
+          "sha256": "7c9beee7c57ce276357eb4ee8a031ea3c8e5eebd42230df5b073ae557633bea9"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/dtv_driver.ko"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_assembly",
+      "parameters": {
+        "procedure": "IMamb_Fms_SetStaticPixel",
+        "document": null
+      },
+      "raw_result": "0x5a47c0: mov ip, sp\n0x5a47c4: mov r2, #0xc\n0x5a47c8: push {r4, r5, r6, fp, ip, lr, pc}\n0x5a47cc: sub fp, ip, #0x4\n0x5a47d0: sub sp, sp, #0x1c\n0x5a47d4: sub r4, fp, #0x28\n0x5a47d8: mov r5, r1\n0x5a47dc: mov r6, r0\n0x5a47e0: mov r1, #0x0\n0x5a47e4: mov r0, r4\n0x5a47e8: bl memset\n0x5a47ec: ldrh r3, [r5]\n0x5a47f0: ldr r2, =0x9fd390\n0x5a47f4: str r3, [fp, var_28]\n0x5a47f8: ldrh r3, [r5, #0x2]\n0x5a47fc: ldr r0, [r2]\n0x5a4800: str r3, [fp, var_24]\n0x5a4804: ldrh r3, [r5, #0x4]\n0x5a4808: cmp r0, #0x0\n0x5a480c: moveq r0, #0x1\n0x5a4810: str r3, [fp, var_20]\n0x5a4818: str r3, [sp, #0x34 + var_34]\n0x5a481c: mov r1, r6\n0x5a4820: ldm r4, {r2, r3}\n0x5a4824: bl amb_setStaticPixel\n0x5a482c: sub sp, fp, #0x18",
+      "normalized_result": "0x5a47c0: mov ip, sp\n0x5a47c4: mov r2, #0xc\n0x5a47c8: push {r4, r5, r6, fp, ip, lr, pc}\n0x5a47cc: sub fp, ip, #0x4\n0x5a47d0: sub sp, sp, #0x1c\n0x5a47d4: sub r4, fp, #0x28\n0x5a47d8: mov r5, r1\n0x5a47dc: mov r6, r0\n0x5a47e0: mov r1, #0x0\n0x5a47e4: mov r0, r4\n0x5a47e8: bl memset\n0x5a47ec: ldrh r3, [r5]\n0x5a47f0: ldr r2, =0x9fd390\n0x5a47f4: str r3, [fp, var_28]\n0x5a47f8: ldrh r3, [r5, #0x2]\n0x5a47fc: ldr r0, [r2]\n0x5a4800: str r3, [fp, var_24]\n0x5a4804: ldrh r3, [r5, #0x4]\n0x5a4808: cmp r0, #0x0\n0x5a480c: moveq r0, #0x1\n0x5a4810: str r3, [fp, var_20]\n0x5a4818: str r3, [sp, #0x34 + var_34]\n0x5a481c: mov r1, r6\n0x5a4820: ldm r4, {r2, r3}\n0x5a4824: bl amb_setStaticPixel\n0x5a482c: sub sp, fp, #0x18",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "IMamb_Fms_SetProcessedPixel": {
+    "result": "0x5a48a8: mov ip, sp\n0x5a48ac: mov r2, #0xc\n0x5a48b0: push {r4, r5, r6, fp, ip, lr, pc}\n0x5a48b4: sub fp, ip, #0x4\n0x5a48b8: sub sp, sp, #0x1c\n0x5a48bc: sub r4, fp, #0x28\n0x5a48c0: mov r5, r1\n0x5a48c4: mov r6, r0\n0x5a48c8: mov r1, #0x0\n0x5a48cc: mov r0, r4\n0x5a48d0: bl memset\n0x5a48d4: ldrh r3, [r5]\n0x5a48d8: ldr r2, =0x9fd390\n0x5a48dc: str r3, [fp, var_28]\n0x5a48e0: ldrh r3, [r5, #0x2]\n0x5a48e4: ldr r0, [r2]\n0x5a48e8: str r3, [fp, var_24]\n0x5a48ec: ldrh r3, [r5, #0x4]\n0x5a48f0: cmp r0, #0x0\n0x5a48f4: moveq r0, #0x1\n0x5a48f8: str r3, [fp, var_20]\n0x5a4900: str r3, [sp, #0x34 + var_34]\n0x5a4904: mov r1, r6\n0x5a4908: ldm r4, {r2, r3}\n0x5a490c: bl amb_setProcessedPixel\n0x5a4914: sub sp, fp, #0x18",
+    "evidence_id": "ev_decb2ead51b6a007235b8f3a4db195cda3e54cd9b64f63c5a53fa313f1df3eb3",
+    "evidence": {
+      "evidence_id": "ev_decb2ead51b6a007235b8f3a4db195cda3e54cd9b64f63c5a53fa313f1df3eb3",
+      "subject": {
+        "name": "dtv_driver.ko",
+        "digest": {
+          "sha256": "7c9beee7c57ce276357eb4ee8a031ea3c8e5eebd42230df5b073ae557633bea9"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/dtv_driver.ko"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_assembly",
+      "parameters": {
+        "procedure": "IMamb_Fms_SetProcessedPixel",
+        "document": null
+      },
+      "raw_result": "0x5a48a8: mov ip, sp\n0x5a48ac: mov r2, #0xc\n0x5a48b0: push {r4, r5, r6, fp, ip, lr, pc}\n0x5a48b4: sub fp, ip, #0x4\n0x5a48b8: sub sp, sp, #0x1c\n0x5a48bc: sub r4, fp, #0x28\n0x5a48c0: mov r5, r1\n0x5a48c4: mov r6, r0\n0x5a48c8: mov r1, #0x0\n0x5a48cc: mov r0, r4\n0x5a48d0: bl memset\n0x5a48d4: ldrh r3, [r5]\n0x5a48d8: ldr r2, =0x9fd390\n0x5a48dc: str r3, [fp, var_28]\n0x5a48e0: ldrh r3, [r5, #0x2]\n0x5a48e4: ldr r0, [r2]\n0x5a48e8: str r3, [fp, var_24]\n0x5a48ec: ldrh r3, [r5, #0x4]\n0x5a48f0: cmp r0, #0x0\n0x5a48f4: moveq r0, #0x1\n0x5a48f8: str r3, [fp, var_20]\n0x5a4900: str r3, [sp, #0x34 + var_34]\n0x5a4904: mov r1, r6\n0x5a4908: ldm r4, {r2, r3}\n0x5a490c: bl amb_setProcessedPixel\n0x5a4914: sub sp, fp, #0x18",
+      "normalized_result": "0x5a48a8: mov ip, sp\n0x5a48ac: mov r2, #0xc\n0x5a48b0: push {r4, r5, r6, fp, ip, lr, pc}\n0x5a48b4: sub fp, ip, #0x4\n0x5a48b8: sub sp, sp, #0x1c\n0x5a48bc: sub r4, fp, #0x28\n0x5a48c0: mov r5, r1\n0x5a48c4: mov r6, r0\n0x5a48c8: mov r1, #0x0\n0x5a48cc: mov r0, r4\n0x5a48d0: bl memset\n0x5a48d4: ldrh r3, [r5]\n0x5a48d8: ldr r2, =0x9fd390\n0x5a48dc: str r3, [fp, var_28]\n0x5a48e0: ldrh r3, [r5, #0x2]\n0x5a48e4: ldr r0, [r2]\n0x5a48e8: str r3, [fp, var_24]\n0x5a48ec: ldrh r3, [r5, #0x4]\n0x5a48f0: cmp r0, #0x0\n0x5a48f4: moveq r0, #0x1\n0x5a48f8: str r3, [fp, var_20]\n0x5a4900: str r3, [sp, #0x34 + var_34]\n0x5a4904: mov r1, r6\n0x5a4908: ldm r4, {r2, r3}\n0x5a490c: bl amb_setProcessedPixel\n0x5a4914: sub sp, fp, #0x18",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "vDrvLcdimSpiSendDataSWModeMbyN": {
+    "result": "0x143124: mov ip, sp\n0x143128: push {r4, r5, r6, r7, fp, ip, lr, pc}\n0x14312c: sub fp, ip, #0x4\n0x143130: str lr, [sp, #0x1c + var_20]\n0x143134: bl __gnu_mcount_nc\n0x143138: mov r4, r1\n0x14313c: mov r5, r2\n0x143140: mov r1, #0x0\n0x143144: mov r2, #0x2\n0x143148: mov r7, r0\n0x14314c: ldr r0, =0xf002944c\n0x143150: bl vIO32Write1BMsk\n0x143154: ldr r0, =0xf0029440\n0x143158: lsl r1, r4, #4\n0x14315c: mov r2, #0xff0\n0x143160: ldr r6, =0xf0029000\n0x143164: bl vIO32Write2BMsk\n0x143168: ldr r0, =0xf0029442\n0x14316c: lsl r1, r5, #4\n0x143170: mov r2, #0xff0\n0x143174: bl vIO32Write2BMsk\n0x143178: bl u1DrvLcdimSpiRWProtect\n0x14317c: cmp r0, #0x0\n0x143184: mov r0, #0x3e8\n0x143188: bl vDrvLcdimSpiWaitReady\n0x14318c: bl u1DrvLcdimSpiRWProtect\n0x143190: cmp r0, #0x0\n0x143198: str r0, [r6, #0x404]\n0x14319c: ldr r0, =aSpiReadWaitFai\n0x1431a0: bl printk\n0x1431a8: mul r4, r5, r4\n0x1431ac: ldr r2, =0xf0029000\n0x1431b0: mov r3, #0x0\n0x1431b8: cmp r3, r4\n0x1431bc: ldrbne r1, [r7, r3]\n0x1431c0: addne r3, r3, #0x1\n0x1431c4: strne r1, [r2, #0x408]\n0x1431cc: mov r1, #0x1\n0x1431d0: ldr r0, =0xf002944c\n0x1431d4: mov r2, r1\n0x1431d8: bl vIO32Write1BMsk\n0x1431dc: ldr r0, =0xf4240\n0x1431e0: bl vDrvLcdimSpiWaitReady",
+    "evidence_id": "ev_b32ec98547e3706febada0d20d484b0cd15308665d1726dee58b593d72cfda76",
+    "evidence": {
+      "evidence_id": "ev_b32ec98547e3706febada0d20d484b0cd15308665d1726dee58b593d72cfda76",
+      "subject": {
+        "name": "dtv_driver.ko",
+        "digest": {
+          "sha256": "7c9beee7c57ce276357eb4ee8a031ea3c8e5eebd42230df5b073ae557633bea9"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/dtv_driver.ko"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_assembly",
+      "parameters": {
+        "procedure": "vDrvLcdimSpiSendDataSWModeMbyN",
+        "document": null
+      },
+      "raw_result": "0x143124: mov ip, sp\n0x143128: push {r4, r5, r6, r7, fp, ip, lr, pc}\n0x14312c: sub fp, ip, #0x4\n0x143130: str lr, [sp, #0x1c + var_20]\n0x143134: bl __gnu_mcount_nc\n0x143138: mov r4, r1\n0x14313c: mov r5, r2\n0x143140: mov r1, #0x0\n0x143144: mov r2, #0x2\n0x143148: mov r7, r0\n0x14314c: ldr r0, =0xf002944c\n0x143150: bl vIO32Write1BMsk\n0x143154: ldr r0, =0xf0029440\n0x143158: lsl r1, r4, #4\n0x14315c: mov r2, #0xff0\n0x143160: ldr r6, =0xf0029000\n0x143164: bl vIO32Write2BMsk\n0x143168: ldr r0, =0xf0029442\n0x14316c: lsl r1, r5, #4\n0x143170: mov r2, #0xff0\n0x143174: bl vIO32Write2BMsk\n0x143178: bl u1DrvLcdimSpiRWProtect\n0x14317c: cmp r0, #0x0\n0x143184: mov r0, #0x3e8\n0x143188: bl vDrvLcdimSpiWaitReady\n0x14318c: bl u1DrvLcdimSpiRWProtect\n0x143190: cmp r0, #0x0\n0x143198: str r0, [r6, #0x404]\n0x14319c: ldr r0, =aSpiReadWaitFai\n0x1431a0: bl printk\n0x1431a8: mul r4, r5, r4\n0x1431ac: ldr r2, =0xf0029000\n0x1431b0: mov r3, #0x0\n0x1431b8: cmp r3, r4\n0x1431bc: ldrbne r1, [r7, r3]\n0x1431c0: addne r3, r3, #0x1\n0x1431c4: strne r1, [r2, #0x408]\n0x1431cc: mov r1, #0x1\n0x1431d0: ldr r0, =0xf002944c\n0x1431d4: mov r2, r1\n0x1431d8: bl vIO32Write1BMsk\n0x1431dc: ldr r0, =0xf4240\n0x1431e0: bl vDrvLcdimSpiWaitReady",
+      "normalized_result": "0x143124: mov ip, sp\n0x143128: push {r4, r5, r6, r7, fp, ip, lr, pc}\n0x14312c: sub fp, ip, #0x4\n0x143130: str lr, [sp, #0x1c + var_20]\n0x143134: bl __gnu_mcount_nc\n0x143138: mov r4, r1\n0x14313c: mov r5, r2\n0x143140: mov r1, #0x0\n0x143144: mov r2, #0x2\n0x143148: mov r7, r0\n0x14314c: ldr r0, =0xf002944c\n0x143150: bl vIO32Write1BMsk\n0x143154: ldr r0, =0xf0029440\n0x143158: lsl r1, r4, #4\n0x14315c: mov r2, #0xff0\n0x143160: ldr r6, =0xf0029000\n0x143164: bl vIO32Write2BMsk\n0x143168: ldr r0, =0xf0029442\n0x14316c: lsl r1, r5, #4\n0x143170: mov r2, #0xff0\n0x143174: bl vIO32Write2BMsk\n0x143178: bl u1DrvLcdimSpiRWProtect\n0x14317c: cmp r0, #0x0\n0x143184: mov r0, #0x3e8\n0x143188: bl vDrvLcdimSpiWaitReady\n0x14318c: bl u1DrvLcdimSpiRWProtect\n0x143190: cmp r0, #0x0\n0x143198: str r0, [r6, #0x404]\n0x14319c: ldr r0, =aSpiReadWaitFai\n0x1431a0: bl printk\n0x1431a8: mul r4, r5, r4\n0x1431ac: ldr r2, =0xf0029000\n0x1431b0: mov r3, #0x0\n0x1431b8: cmp r3, r4\n0x1431bc: ldrbne r1, [r7, r3]\n0x1431c0: addne r3, r3, #0x1\n0x1431c4: strne r1, [r2, #0x408]\n0x1431cc: mov r1, #0x1\n0x1431d0: ldr r0, =0xf002944c\n0x1431d4: mov r2, r1\n0x1431d8: bl vIO32Write1BMsk\n0x1431dc: ldr r0, =0xf4240\n0x1431e0: bl vDrvLcdimSpiWaitReady",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "vDrvLcdimSpiWaitReady": {
+    "result": "0x142fc4: mov ip, sp\n0x142fc8: push {fp, ip, lr, pc}\n0x142fcc: sub fp, ip, #0x4\n0x142fd0: str lr, [sp, #0xc + var_10]\n0x142fd4: bl __gnu_mcount_nc\n0x142fd8: mov r3, #0x0\n0x142fe8: ldrb r2, [r1, #0x44c]\n0x142fec: ubfx r2, r2, #0x5, #0x1\n0x142ff0: cmp r2, #0x1\n0x142ff8: add r3, r3, #0x1\n0x142fe0: cmp r3, r0\n0x143008: mov r0, r2\n0x143000: mov r0, #0x0",
+    "evidence_id": "ev_ba9bd856f7ac4f0ecbce5e6d662fc7232641b960c41707ca367a6bc967ceff48",
+    "evidence": {
+      "evidence_id": "ev_ba9bd856f7ac4f0ecbce5e6d662fc7232641b960c41707ca367a6bc967ceff48",
+      "subject": {
+        "name": "dtv_driver.ko",
+        "digest": {
+          "sha256": "7c9beee7c57ce276357eb4ee8a031ea3c8e5eebd42230df5b073ae557633bea9"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/dtv_driver.ko"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_assembly",
+      "parameters": {
+        "procedure": "vDrvLcdimSpiWaitReady",
+        "document": null
+      },
+      "raw_result": "0x142fc4: mov ip, sp\n0x142fc8: push {fp, ip, lr, pc}\n0x142fcc: sub fp, ip, #0x4\n0x142fd0: str lr, [sp, #0xc + var_10]\n0x142fd4: bl __gnu_mcount_nc\n0x142fd8: mov r3, #0x0\n0x142fe8: ldrb r2, [r1, #0x44c]\n0x142fec: ubfx r2, r2, #0x5, #0x1\n0x142ff0: cmp r2, #0x1\n0x142ff8: add r3, r3, #0x1\n0x142fe0: cmp r3, r0\n0x143008: mov r0, r2\n0x143000: mov r0, #0x0",
+      "normalized_result": "0x142fc4: mov ip, sp\n0x142fc8: push {fp, ip, lr, pc}\n0x142fcc: sub fp, ip, #0x4\n0x142fd0: str lr, [sp, #0xc + var_10]\n0x142fd4: bl __gnu_mcount_nc\n0x142fd8: mov r3, #0x0\n0x142fe8: ldrb r2, [r1, #0x44c]\n0x142fec: ubfx r2, r2, #0x5, #0x1\n0x142ff0: cmp r2, #0x1\n0x142ff8: add r3, r3, #0x1\n0x142fe0: cmp r3, r0\n0x143008: mov r0, r2\n0x143000: mov r0, #0x0",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "bDrvLcdimSpiHWInit": {
+    "result": "0x142eb8: mov ip, sp\n0x142ebc: push {r4, fp, ip, lr, pc}\n0x142ec0: sub fp, ip, #0x4\n0x142ec4: sub sp, sp, #0xc\n0x142ec8: str lr, [sp, #0x1c + var_20]\n0x142ecc: bl __gnu_mcount_nc\n0x142ed0: ldr r4, =pParam\n0x142ed4: bl vDrvLcdimSpiSetAttr\n0x142ed8: ldr r3, [r4, #0x8]\n0x142edc: ldr r3, [r3, #0x8]\n0x142ee0: blx r3\n0x142ee4: ldr r1, [r4]\n0x142ee8: mov r0, #0x0\n0x142eec: ldrb r2, [r1, #0x27]\n0x142ef0: ldrb r3, [r1, #0x26]\n0x142ef4: ldrb r1, [r1, #0x8]\n0x142ef8: str r1, [sp, #0x1c + var_1C]\n0x142efc: ldr r1, =aSpiInitSuccess\n0x142f00: bl NPTV_IsLog\n0x142f04: mov r0, #0x0\n0x142f08: bl bDrvLcdimSpiSetPinmux\n0x142f0c: subs r4, r0, #0x0\n0x142f10: movne r0, #0x1\n0x142f18: ldr r1, =aFailToSetLocal\n0x142f1c: bl NPTV_IsLog\n0x142f24: sub sp, fp, #0x10",
+    "evidence_id": "ev_e5a591e508e39025f5d0006cd064aefd9956c421b8d291d8c35c0d80ee9e02a2",
+    "evidence": {
+      "evidence_id": "ev_e5a591e508e39025f5d0006cd064aefd9956c421b8d291d8c35c0d80ee9e02a2",
+      "subject": {
+        "name": "dtv_driver.ko",
+        "digest": {
+          "sha256": "7c9beee7c57ce276357eb4ee8a031ea3c8e5eebd42230df5b073ae557633bea9"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/dtv_driver.ko"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_assembly",
+      "parameters": {
+        "procedure": "bDrvLcdimSpiHWInit",
+        "document": null
+      },
+      "raw_result": "0x142eb8: mov ip, sp\n0x142ebc: push {r4, fp, ip, lr, pc}\n0x142ec0: sub fp, ip, #0x4\n0x142ec4: sub sp, sp, #0xc\n0x142ec8: str lr, [sp, #0x1c + var_20]\n0x142ecc: bl __gnu_mcount_nc\n0x142ed0: ldr r4, =pParam\n0x142ed4: bl vDrvLcdimSpiSetAttr\n0x142ed8: ldr r3, [r4, #0x8]\n0x142edc: ldr r3, [r3, #0x8]\n0x142ee0: blx r3\n0x142ee4: ldr r1, [r4]\n0x142ee8: mov r0, #0x0\n0x142eec: ldrb r2, [r1, #0x27]\n0x142ef0: ldrb r3, [r1, #0x26]\n0x142ef4: ldrb r1, [r1, #0x8]\n0x142ef8: str r1, [sp, #0x1c + var_1C]\n0x142efc: ldr r1, =aSpiInitSuccess\n0x142f00: bl NPTV_IsLog\n0x142f04: mov r0, #0x0\n0x142f08: bl bDrvLcdimSpiSetPinmux\n0x142f0c: subs r4, r0, #0x0\n0x142f10: movne r0, #0x1\n0x142f18: ldr r1, =aFailToSetLocal\n0x142f1c: bl NPTV_IsLog\n0x142f24: sub sp, fp, #0x10",
+      "normalized_result": "0x142eb8: mov ip, sp\n0x142ebc: push {r4, fp, ip, lr, pc}\n0x142ec0: sub fp, ip, #0x4\n0x142ec4: sub sp, sp, #0xc\n0x142ec8: str lr, [sp, #0x1c + var_20]\n0x142ecc: bl __gnu_mcount_nc\n0x142ed0: ldr r4, =pParam\n0x142ed4: bl vDrvLcdimSpiSetAttr\n0x142ed8: ldr r3, [r4, #0x8]\n0x142edc: ldr r3, [r3, #0x8]\n0x142ee0: blx r3\n0x142ee4: ldr r1, [r4]\n0x142ee8: mov r0, #0x0\n0x142eec: ldrb r2, [r1, #0x27]\n0x142ef0: ldrb r3, [r1, #0x26]\n0x142ef4: ldrb r1, [r1, #0x8]\n0x142ef8: str r1, [sp, #0x1c + var_1C]\n0x142efc: ldr r1, =aSpiInitSuccess\n0x142f00: bl NPTV_IsLog\n0x142f04: mov r0, #0x0\n0x142f08: bl bDrvLcdimSpiSetPinmux\n0x142f0c: subs r4, r0, #0x0\n0x142f10: movne r0, #0x1\n0x142f18: ldr r1, =aFailToSetLocal\n0x142f1c: bl NPTV_IsLog\n0x142f24: sub sp, fp, #0x10",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "IMamb_Fms_Execute": {
+    "result": "0x5a2ea4: mov ip, sp\n0x5a2ea8: mov r0, #0x0\n0x5a2eac: push {r4, r5, fp, ip, lr, pc}\n0x5a2eb0: sub fp, ip, #0x4\n0x5a2eb4: ldr r5, =0xfffffc3c\n0x5a2eb8: sub sp, sp, #0x3d0\n0x5a2ebc: sub r3, fp, #0x14\n0x5a2ec0: ldr r4, =0x9fd390\n0x5a2ec4: strh r0, [r3, r5]\n0x5a2ec8: ldr r3, [r4]\n0x5a2ecc: cmp r3, r0\n0x5a2ed4: add r1, r4, #0x4\n0x5a2ed8: bl IMamb_fpgaR_GetAmbiContent\n0x5a2edc: mov r0, #0x1\n0x5a2ee0: ldr r1, =0x9fd894\n0x5a2ee4: bl IMamb_fpgaR_GetAmbiContent\n0x5a2ee8: mov r0, #0x2\n0x5a2eec: ldr r1, =0x9fdd94\n0x5a2ef0: bl IMamb_fpgaR_GetAmbiContent\n0x5a2ef4: mov r2, #0x280\n0x5a2ef8: mov r3, #0x1\n0x5a2efc: stm sp, {r2, r3}\n0x5a2f00: mov r1, r4\n0x5a2f04: ldr r2, =0x9fd894\n0x5a2f08: ldr r0, [r1]!, #0x4\n0x5a2f0c: add r3, r2, #0x500\n0x5a2f10: bl amb_writeColorGrid\n0x5a2f14: ldr r0, [r4]\n0x5a2f18: bl amb_computeMeasurements\n0x5a2f1c: ldr r0, [r4]\n0x5a2f20: bl amb_computeAlgorithms\n0x5a2f24: ldr r0, [r4]\n0x5a2f28: bl amb_computeDriver\n0x5a2f2c: sub r1, fp, #0x3d4\n0x5a2f30: ldr r0, [r4]\n0x5a2f34: sub r1, r1, #0x1\n0x5a2f38: sub r2, fp, #0x3d8\n0x5a2f3c: bl amb_getOutputBuffer\n0x5a2f40: ldrb r3, [r4, #0xf04]\n0x5a2f44: cmp r3, #0x0\n0x5a2f4c: sub r3, fp, #0x14\n0x5a2f50: ldrh r1, [r3, r5]\n0x5a2f54: cmp r1, #0x0\n0x5a2f5c: sub r2, fp, #0x3d4\n0x5a2f60: ldrb r0, [r4, #0xf05]\n0x5a2f64: sub r2, r2, #0x1\n0x5a2f6c: mov r0, #0x0\n0x5a2f70: sub sp, fp, #0x14",
+    "evidence_id": "ev_9ccda6ceb5eaaf7fbd85d35e7405b2cf04d944dd929e4a405cdada38dc1c1239",
+    "evidence": {
+      "evidence_id": "ev_9ccda6ceb5eaaf7fbd85d35e7405b2cf04d944dd929e4a405cdada38dc1c1239",
+      "subject": {
+        "name": "dtv_driver.ko",
+        "digest": {
+          "sha256": "7c9beee7c57ce276357eb4ee8a031ea3c8e5eebd42230df5b073ae557633bea9"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/dtv_driver.ko"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_assembly",
+      "parameters": {
+        "procedure": "IMamb_Fms_Execute",
+        "document": null
+      },
+      "raw_result": "0x5a2ea4: mov ip, sp\n0x5a2ea8: mov r0, #0x0\n0x5a2eac: push {r4, r5, fp, ip, lr, pc}\n0x5a2eb0: sub fp, ip, #0x4\n0x5a2eb4: ldr r5, =0xfffffc3c\n0x5a2eb8: sub sp, sp, #0x3d0\n0x5a2ebc: sub r3, fp, #0x14\n0x5a2ec0: ldr r4, =0x9fd390\n0x5a2ec4: strh r0, [r3, r5]\n0x5a2ec8: ldr r3, [r4]\n0x5a2ecc: cmp r3, r0\n0x5a2ed4: add r1, r4, #0x4\n0x5a2ed8: bl IMamb_fpgaR_GetAmbiContent\n0x5a2edc: mov r0, #0x1\n0x5a2ee0: ldr r1, =0x9fd894\n0x5a2ee4: bl IMamb_fpgaR_GetAmbiContent\n0x5a2ee8: mov r0, #0x2\n0x5a2eec: ldr r1, =0x9fdd94\n0x5a2ef0: bl IMamb_fpgaR_GetAmbiContent\n0x5a2ef4: mov r2, #0x280\n0x5a2ef8: mov r3, #0x1\n0x5a2efc: stm sp, {r2, r3}\n0x5a2f00: mov r1, r4\n0x5a2f04: ldr r2, =0x9fd894\n0x5a2f08: ldr r0, [r1]!, #0x4\n0x5a2f0c: add r3, r2, #0x500\n0x5a2f10: bl amb_writeColorGrid\n0x5a2f14: ldr r0, [r4]\n0x5a2f18: bl amb_computeMeasurements\n0x5a2f1c: ldr r0, [r4]\n0x5a2f20: bl amb_computeAlgorithms\n0x5a2f24: ldr r0, [r4]\n0x5a2f28: bl amb_computeDriver\n0x5a2f2c: sub r1, fp, #0x3d4\n0x5a2f30: ldr r0, [r4]\n0x5a2f34: sub r1, r1, #0x1\n0x5a2f38: sub r2, fp, #0x3d8\n0x5a2f3c: bl amb_getOutputBuffer\n0x5a2f40: ldrb r3, [r4, #0xf04]\n0x5a2f44: cmp r3, #0x0\n0x5a2f4c: sub r3, fp, #0x14\n0x5a2f50: ldrh r1, [r3, r5]\n0x5a2f54: cmp r1, #0x0\n0x5a2f5c: sub r2, fp, #0x3d4\n0x5a2f60: ldrb r0, [r4, #0xf05]\n0x5a2f64: sub r2, r2, #0x1\n0x5a2f6c: mov r0, #0x0\n0x5a2f70: sub sp, fp, #0x14",
+      "normalized_result": "0x5a2ea4: mov ip, sp\n0x5a2ea8: mov r0, #0x0\n0x5a2eac: push {r4, r5, fp, ip, lr, pc}\n0x5a2eb0: sub fp, ip, #0x4\n0x5a2eb4: ldr r5, =0xfffffc3c\n0x5a2eb8: sub sp, sp, #0x3d0\n0x5a2ebc: sub r3, fp, #0x14\n0x5a2ec0: ldr r4, =0x9fd390\n0x5a2ec4: strh r0, [r3, r5]\n0x5a2ec8: ldr r3, [r4]\n0x5a2ecc: cmp r3, r0\n0x5a2ed4: add r1, r4, #0x4\n0x5a2ed8: bl IMamb_fpgaR_GetAmbiContent\n0x5a2edc: mov r0, #0x1\n0x5a2ee0: ldr r1, =0x9fd894\n0x5a2ee4: bl IMamb_fpgaR_GetAmbiContent\n0x5a2ee8: mov r0, #0x2\n0x5a2eec: ldr r1, =0x9fdd94\n0x5a2ef0: bl IMamb_fpgaR_GetAmbiContent\n0x5a2ef4: mov r2, #0x280\n0x5a2ef8: mov r3, #0x1\n0x5a2efc: stm sp, {r2, r3}\n0x5a2f00: mov r1, r4\n0x5a2f04: ldr r2, =0x9fd894\n0x5a2f08: ldr r0, [r1]!, #0x4\n0x5a2f0c: add r3, r2, #0x500\n0x5a2f10: bl amb_writeColorGrid\n0x5a2f14: ldr r0, [r4]\n0x5a2f18: bl amb_computeMeasurements\n0x5a2f1c: ldr r0, [r4]\n0x5a2f20: bl amb_computeAlgorithms\n0x5a2f24: ldr r0, [r4]\n0x5a2f28: bl amb_computeDriver\n0x5a2f2c: sub r1, fp, #0x3d4\n0x5a2f30: ldr r0, [r4]\n0x5a2f34: sub r1, r1, #0x1\n0x5a2f38: sub r2, fp, #0x3d8\n0x5a2f3c: bl amb_getOutputBuffer\n0x5a2f40: ldrb r3, [r4, #0xf04]\n0x5a2f44: cmp r3, #0x0\n0x5a2f4c: sub r3, fp, #0x14\n0x5a2f50: ldrh r1, [r3, r5]\n0x5a2f54: cmp r1, #0x0\n0x5a2f5c: sub r2, fp, #0x3d4\n0x5a2f60: ldrb r0, [r4, #0xf05]\n0x5a2f64: sub r2, r2, #0x1\n0x5a2f6c: mov r0, #0x0\n0x5a2f70: sub sp, fp, #0x14",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "IMamb_Eng_Execute": {
+    "result": "0x59ee50: mov ip, sp\n0x59ee54: push {r4, r5, fp, ip, lr, pc}\n0x59ee58: sub fp, ip, #0x4\n0x59ee5c: ldr r4, =0x9fadc0\n0x59ee60: sub sp, sp, #0x8\n0x59ee64: ldrb r3, [r4, #0xd]\n0x59ee68: cmp r3, #0x0\n0x59ee70: bl IMamb_Fms_Execute_ProjectionAL\n0x59ef64: mov r0, #0x0\n0x59ef68: sub sp, fp, #0x14\n0x59ee78: ldrb r3, [r4, #0xe]\n0x59ee7c: cmp r3, #0x0\n0x59ee84: sub r0, fp, #0x18\n0x59ee88: ldr r5, =0x9365bc\n0x59ee8c: bl IMamb_Fms_GetMode\n0x59ee90: ldr r3, [fp, var_18]\n0x59ee94: cmp r3, #0x5\n0x59ee9c: bl IMamb_IsSplashScreenOn\n0x59eea0: cmp r0, #0x0\n0x59eea8: bl IMamb_IsSplashScreenOn\n0x59eeac: cmp r0, #0x0\n0x59eeb4: ldr r1, =aImambengexecut\n0x59eeb8: str r0, [r5, #0x4]\n0x59eebc: ldr r0, =aX011fgussSplas\n0x59eec0: mov r2, r1\n0x59eedc: cmp r3, #0x0\n0x59eee0: subne r3, r3, #0x1\n0x59eee4: strne r3, [r2, #0x4]\n0x59eeec: str r1, [r2, #0x4]\n0x59ef00: ldr r0, [r4, #0x10]\n0x59ef04: movw r3, #0x177\n0x59ef08: add r0, r0, #0x1\n0x59ef0c: cmp r0, r3\n0x59ef10: str r0, [r4, #0x10]\n0x59ef18: cmp r0, #0x1f4\n0x59ef20: cmp r0, #0x32\n0x59ef24: moveq r0, #0x1\n0x59ef40: cmp r0, r3\n0x59ef48: mov r1, #0x5\n0x59ef4c: bl __aeabi_uidivmod\n0x59ef50: cmp r1, #0x0\n0x59ef38: bl IMamb_Eng_SetSunsetFinished\n0x59ef30: mov r0, #0x2\n0x59eef4: ldr r3, [r5]\n0x59eef8: cmp r3, #0x4\n0x59eec8: ldr r3, [r5, #0x4]\n0x59eecc: movw r1, #0xffff\n0x59eed0: ldr r2, =0x9365bc\n0x59eed4: cmp r3, r1",
+    "evidence_id": "ev_21cfa28b8fc1e2f915179213e48ace73aca7eba486f010688234124865a526e5",
+    "evidence": {
+      "evidence_id": "ev_21cfa28b8fc1e2f915179213e48ace73aca7eba486f010688234124865a526e5",
+      "subject": {
+        "name": "dtv_driver.ko",
+        "digest": {
+          "sha256": "7c9beee7c57ce276357eb4ee8a031ea3c8e5eebd42230df5b073ae557633bea9"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/dtv_driver.ko"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_assembly",
+      "parameters": {
+        "procedure": "IMamb_Eng_Execute",
+        "document": null
+      },
+      "raw_result": "0x59ee50: mov ip, sp\n0x59ee54: push {r4, r5, fp, ip, lr, pc}\n0x59ee58: sub fp, ip, #0x4\n0x59ee5c: ldr r4, =0x9fadc0\n0x59ee60: sub sp, sp, #0x8\n0x59ee64: ldrb r3, [r4, #0xd]\n0x59ee68: cmp r3, #0x0\n0x59ee70: bl IMamb_Fms_Execute_ProjectionAL\n0x59ef64: mov r0, #0x0\n0x59ef68: sub sp, fp, #0x14\n0x59ee78: ldrb r3, [r4, #0xe]\n0x59ee7c: cmp r3, #0x0\n0x59ee84: sub r0, fp, #0x18\n0x59ee88: ldr r5, =0x9365bc\n0x59ee8c: bl IMamb_Fms_GetMode\n0x59ee90: ldr r3, [fp, var_18]\n0x59ee94: cmp r3, #0x5\n0x59ee9c: bl IMamb_IsSplashScreenOn\n0x59eea0: cmp r0, #0x0\n0x59eea8: bl IMamb_IsSplashScreenOn\n0x59eeac: cmp r0, #0x0\n0x59eeb4: ldr r1, =aImambengexecut\n0x59eeb8: str r0, [r5, #0x4]\n0x59eebc: ldr r0, =aX011fgussSplas\n0x59eec0: mov r2, r1\n0x59eedc: cmp r3, #0x0\n0x59eee0: subne r3, r3, #0x1\n0x59eee4: strne r3, [r2, #0x4]\n0x59eeec: str r1, [r2, #0x4]\n0x59ef00: ldr r0, [r4, #0x10]\n0x59ef04: movw r3, #0x177\n0x59ef08: add r0, r0, #0x1\n0x59ef0c: cmp r0, r3\n0x59ef10: str r0, [r4, #0x10]\n0x59ef18: cmp r0, #0x1f4\n0x59ef20: cmp r0, #0x32\n0x59ef24: moveq r0, #0x1\n0x59ef40: cmp r0, r3\n0x59ef48: mov r1, #0x5\n0x59ef4c: bl __aeabi_uidivmod\n0x59ef50: cmp r1, #0x0\n0x59ef38: bl IMamb_Eng_SetSunsetFinished\n0x59ef30: mov r0, #0x2\n0x59eef4: ldr r3, [r5]\n0x59eef8: cmp r3, #0x4\n0x59eec8: ldr r3, [r5, #0x4]\n0x59eecc: movw r1, #0xffff\n0x59eed0: ldr r2, =0x9365bc\n0x59eed4: cmp r3, r1",
+      "normalized_result": "0x59ee50: mov ip, sp\n0x59ee54: push {r4, r5, fp, ip, lr, pc}\n0x59ee58: sub fp, ip, #0x4\n0x59ee5c: ldr r4, =0x9fadc0\n0x59ee60: sub sp, sp, #0x8\n0x59ee64: ldrb r3, [r4, #0xd]\n0x59ee68: cmp r3, #0x0\n0x59ee70: bl IMamb_Fms_Execute_ProjectionAL\n0x59ef64: mov r0, #0x0\n0x59ef68: sub sp, fp, #0x14\n0x59ee78: ldrb r3, [r4, #0xe]\n0x59ee7c: cmp r3, #0x0\n0x59ee84: sub r0, fp, #0x18\n0x59ee88: ldr r5, =0x9365bc\n0x59ee8c: bl IMamb_Fms_GetMode\n0x59ee90: ldr r3, [fp, var_18]\n0x59ee94: cmp r3, #0x5\n0x59ee9c: bl IMamb_IsSplashScreenOn\n0x59eea0: cmp r0, #0x0\n0x59eea8: bl IMamb_IsSplashScreenOn\n0x59eeac: cmp r0, #0x0\n0x59eeb4: ldr r1, =aImambengexecut\n0x59eeb8: str r0, [r5, #0x4]\n0x59eebc: ldr r0, =aX011fgussSplas\n0x59eec0: mov r2, r1\n0x59eedc: cmp r3, #0x0\n0x59eee0: subne r3, r3, #0x1\n0x59eee4: strne r3, [r2, #0x4]\n0x59eeec: str r1, [r2, #0x4]\n0x59ef00: ldr r0, [r4, #0x10]\n0x59ef04: movw r3, #0x177\n0x59ef08: add r0, r0, #0x1\n0x59ef0c: cmp r0, r3\n0x59ef10: str r0, [r4, #0x10]\n0x59ef18: cmp r0, #0x1f4\n0x59ef20: cmp r0, #0x32\n0x59ef24: moveq r0, #0x1\n0x59ef40: cmp r0, r3\n0x59ef48: mov r1, #0x5\n0x59ef4c: bl __aeabi_uidivmod\n0x59ef50: cmp r1, #0x0\n0x59ef38: bl IMamb_Eng_SetSunsetFinished\n0x59ef30: mov r0, #0x2\n0x59eef4: ldr r3, [r5]\n0x59eef8: cmp r3, #0x4\n0x59eec8: ldr r3, [r5, #0x4]\n0x59eecc: movw r1, #0xffff\n0x59eed0: ldr r2, =0x9365bc\n0x59eed4: cmp r3, r1",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "vDrvAmbiLitLightUpCmd": {
+    "result": "0x143520: mov ip, sp\n0x143524: push {r3, r4, r5, r6, fp, ip, lr, pc}\n0x143528: sub fp, ip, #0x4\n0x14352c: str lr, [sp, #0x1c + var_20]\n0x143530: bl __gnu_mcount_nc\n0x143534: mov r1, #0x0\n0x143538: mov r2, #0x4\n0x14353c: ldr r4, =0xf002944c\n0x143540: ldr r5, =0xf0029410\n0x143544: ldr r6, =0xf0029436\n0x143548: mov r0, r4\n0x14354c: bl vIO32Write1BMsk\n0x143550: mov r0, r4\n0x143554: mov r1, #0x0\n0x143558: movw r4, #0xfff\n0x14355c: mov r2, #0x2\n0x143560: bl vIO32Write1BMsk\n0x143564: mov r2, r4\n0x143568: ldr r0, =0xf0029412\n0x14356c: mov r1, #0x66\n0x143570: bl vIO32Write2BMsk\n0x143574: mov r0, r5\n0x143578: mov r1, #0x0\n0x14357c: mov r2, #0x10\n0x143580: bl vIO32Write1BMsk\n0x143584: mov r0, r5\n0x143588: mov r1, #0x0\n0x14358c: movw r5, #0xffff\n0x143590: mov r2, #0x1\n0x143594: bl vIO32Write1BMsk\n0x143598: mov r1, r4\n0x14359c: mov r2, r5\n0x1435a0: ldr r0, =0xf0029424\n0x1435a4: bl vIO32Write2BMsk\n0x1435a8: mov r1, r4\n0x1435ac: mov r2, r5\n0x1435b0: ldr r0, =0xf0029426\n0x1435b4: bl vIO32Write2BMsk\n0x1435b8: mov r2, r5\n0x1435bc: ldr r5, =0xf0029434\n0x1435c0: ldr r0, =0xf0029438\n0x1435c4: mov r1, #0xf\n0x1435c8: bl vIO32Write2BMsk\n0x1435cc: mov r0, r6\n0x1435d0: mov r2, r4\n0x1435d4: mov r1, #0xf\n0x1435d8: bl vIO32Write2BMsk\n0x1435dc: mov r0, r5\n0x1435e0: mov r2, r4\n0x1435e4: mov r1, #0xf\n0x1435e8: bl vIO32Write2BMsk\n0x1435ec: mov r0, r6\n0x1435f0: mov r2, r4\n0x1435f4: mov r1, #0x2\n0x1435f8: bl vIO32Write2BMsk\n0x1435fc: mov r2, r4\n0x143600: ldr r4, =0xf0029430\n0x143604: mov r0, r5\n0x143608: mov r1, #0x2\n0x14360c: bl vIO32Write2BMsk\n0x143610: mov r0, r4\n0x143614: mov r1, #0x0\n0x143618: mov r2, #0x4\n0x14361c: add r5, r5, #0x14\n0x143620: bl vIO32Write1BMsk\n0x143624: mov r0, r4\n0x143628: mov r1, #0x0\n0x14362c: mov r2, #0x2\n0x143630: bl vIO32Write1BMsk\n0x143634: mov r0, r4\n0x143638: mov r1, #0x0\n0x14363c: mov r2, #0x1\n0x143640: bl vIO32Write1BMsk\n0x143644: mov r0, r4\n0x143648: mov r1, #0x0\n0x14364c: mov r2, #0x40\n0x143650: bl vIO32Write1BMsk\n0x143654: mov r0, r4\n0x143658: mov r1, #0x0\n0x14365c: mov r2, #0x20\n0x143660: bl vIO32Write1BMsk\n0x143664: mov r0, r4\n0x143668: mov r1, #0x0\n0x14366c: mov r2, #0x10\n0x143670: add r4, r4, #0x1d\n0x143674: bl vIO32Write1BMsk\n0x143678: mov r1, #0x2\n0x14367c: mov r0, r4\n0x143680: mov r2, r1\n0x143684: bl vIO32Write1BMsk\n0x143688: ldr r0, =0xf0029423\n0x14368c: mov r1, #0x0\n0x143690: mov r2, #0xf\n0x143694: bl vIO32Write1BMsk\n0x143698: ldr r0, =0xf0029420\n0x14369c: mov r1, #0x0\n0x1436a0: mvn r2, #0xff000000\n0x1436a4: bl vIO32Write4BMsk\n0x1436a8: mov r0, r4\n0x1436ac: mov r1, #0x0\n0x1436b0: mov r2, #0x2\n0x1436b4: bl vIO32Write1BMsk\n0x1436b8: mov r0, r5\n0x1436bc: mov r1, #0x0\n0x1436c0: mov r2, #0x1\n0x1436c4: bl vIO32Write1BMsk\n0x1436c8: mov r0, r5\n0x1436cc: mov r1, #0x0\n0x1436d0: mov r2, #0x2\n0x1436d4: bl vIO32Write1BMsk\n0x1436d8: ldr r0, =0xf0029449\n0x1436dc: mov r1, #0x0\n0x1436e0: mov r2, #0x30\n0x1436e4: bl vIO32Write1BMsk\n0x1436e8: mov r1, #0x2\n0x1436ec: mov r0, r4\n0x1436f0: mov r2, r1\n0x1436f4: bl vIO32Write1BMsk\n0x1436f8: mov r0, r4\n0x1436fc: mov r1, #0x0\n0x143700: mov r2, #0x2\n0x143704: bl vIO32Write1BMsk\n0x143708: ldr r0, =0xf0029440\n0x14370c: mov r1, #0x1c0\n0x143710: mov r2, #0xff0\n0x143714: bl vIO32Write2BMsk\n0x143718: ldr r0, =0xf0029442\n0x14371c: mov r1, #0x10\n0x143720: mov r2, #0xff0\n0x143724: bl vIO32Write2BMsk\n0x143728: mov r0, r4\n0x14372c: ldr r4, =0xf000d36b\n0x143730: mov r1, #0x10\n0x143734: mov r2, #0x30\n0x143738: bl vIO32Write1BMsk\n0x14373c: mov r0, r4\n0x143740: mov r1, #0x8\n0x143744: mov r2, #0xc\n0x143748: bl vIO32Write1BMsk\n0x14374c: mov r0, r4\n0x143750: mov r1, #0x10\n0x143754: mov r2, #0x30\n0x143758: bl vIO32Write1BMsk",
+    "evidence_id": "ev_e4b0f72ce5ed34093e19f3918faf0b06f64641cbcf5ec138ffa348780fdb6bf9",
+    "evidence": {
+      "evidence_id": "ev_e4b0f72ce5ed34093e19f3918faf0b06f64641cbcf5ec138ffa348780fdb6bf9",
+      "subject": {
+        "name": "dtv_driver.ko",
+        "digest": {
+          "sha256": "7c9beee7c57ce276357eb4ee8a031ea3c8e5eebd42230df5b073ae557633bea9"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/dtv_driver.ko"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_assembly",
+      "parameters": {
+        "procedure": "vDrvAmbiLitLightUpCmd",
+        "document": null
+      },
+      "raw_result": "0x143520: mov ip, sp\n0x143524: push {r3, r4, r5, r6, fp, ip, lr, pc}\n0x143528: sub fp, ip, #0x4\n0x14352c: str lr, [sp, #0x1c + var_20]\n0x143530: bl __gnu_mcount_nc\n0x143534: mov r1, #0x0\n0x143538: mov r2, #0x4\n0x14353c: ldr r4, =0xf002944c\n0x143540: ldr r5, =0xf0029410\n0x143544: ldr r6, =0xf0029436\n0x143548: mov r0, r4\n0x14354c: bl vIO32Write1BMsk\n0x143550: mov r0, r4\n0x143554: mov r1, #0x0\n0x143558: movw r4, #0xfff\n0x14355c: mov r2, #0x2\n0x143560: bl vIO32Write1BMsk\n0x143564: mov r2, r4\n0x143568: ldr r0, =0xf0029412\n0x14356c: mov r1, #0x66\n0x143570: bl vIO32Write2BMsk\n0x143574: mov r0, r5\n0x143578: mov r1, #0x0\n0x14357c: mov r2, #0x10\n0x143580: bl vIO32Write1BMsk\n0x143584: mov r0, r5\n0x143588: mov r1, #0x0\n0x14358c: movw r5, #0xffff\n0x143590: mov r2, #0x1\n0x143594: bl vIO32Write1BMsk\n0x143598: mov r1, r4\n0x14359c: mov r2, r5\n0x1435a0: ldr r0, =0xf0029424\n0x1435a4: bl vIO32Write2BMsk\n0x1435a8: mov r1, r4\n0x1435ac: mov r2, r5\n0x1435b0: ldr r0, =0xf0029426\n0x1435b4: bl vIO32Write2BMsk\n0x1435b8: mov r2, r5\n0x1435bc: ldr r5, =0xf0029434\n0x1435c0: ldr r0, =0xf0029438\n0x1435c4: mov r1, #0xf\n0x1435c8: bl vIO32Write2BMsk\n0x1435cc: mov r0, r6\n0x1435d0: mov r2, r4\n0x1435d4: mov r1, #0xf\n0x1435d8: bl vIO32Write2BMsk\n0x1435dc: mov r0, r5\n0x1435e0: mov r2, r4\n0x1435e4: mov r1, #0xf\n0x1435e8: bl vIO32Write2BMsk\n0x1435ec: mov r0, r6\n0x1435f0: mov r2, r4\n0x1435f4: mov r1, #0x2\n0x1435f8: bl vIO32Write2BMsk\n0x1435fc: mov r2, r4\n0x143600: ldr r4, =0xf0029430\n0x143604: mov r0, r5\n0x143608: mov r1, #0x2\n0x14360c: bl vIO32Write2BMsk\n0x143610: mov r0, r4\n0x143614: mov r1, #0x0\n0x143618: mov r2, #0x4\n0x14361c: add r5, r5, #0x14\n0x143620: bl vIO32Write1BMsk\n0x143624: mov r0, r4\n0x143628: mov r1, #0x0\n0x14362c: mov r2, #0x2\n0x143630: bl vIO32Write1BMsk\n0x143634: mov r0, r4\n0x143638: mov r1, #0x0\n0x14363c: mov r2, #0x1\n0x143640: bl vIO32Write1BMsk\n0x143644: mov r0, r4\n0x143648: mov r1, #0x0\n0x14364c: mov r2, #0x40\n0x143650: bl vIO32Write1BMsk\n0x143654: mov r0, r4\n0x143658: mov r1, #0x0\n0x14365c: mov r2, #0x20\n0x143660: bl vIO32Write1BMsk\n0x143664: mov r0, r4\n0x143668: mov r1, #0x0\n0x14366c: mov r2, #0x10\n0x143670: add r4, r4, #0x1d\n0x143674: bl vIO32Write1BMsk\n0x143678: mov r1, #0x2\n0x14367c: mov r0, r4\n0x143680: mov r2, r1\n0x143684: bl vIO32Write1BMsk\n0x143688: ldr r0, =0xf0029423\n0x14368c: mov r1, #0x0\n0x143690: mov r2, #0xf\n0x143694: bl vIO32Write1BMsk\n0x143698: ldr r0, =0xf0029420\n0x14369c: mov r1, #0x0\n0x1436a0: mvn r2, #0xff000000\n0x1436a4: bl vIO32Write4BMsk\n0x1436a8: mov r0, r4\n0x1436ac: mov r1, #0x0\n0x1436b0: mov r2, #0x2\n0x1436b4: bl vIO32Write1BMsk\n0x1436b8: mov r0, r5\n0x1436bc: mov r1, #0x0\n0x1436c0: mov r2, #0x1\n0x1436c4: bl vIO32Write1BMsk\n0x1436c8: mov r0, r5\n0x1436cc: mov r1, #0x0\n0x1436d0: mov r2, #0x2\n0x1436d4: bl vIO32Write1BMsk\n0x1436d8: ldr r0, =0xf0029449\n0x1436dc: mov r1, #0x0\n0x1436e0: mov r2, #0x30\n0x1436e4: bl vIO32Write1BMsk\n0x1436e8: mov r1, #0x2\n0x1436ec: mov r0, r4\n0x1436f0: mov r2, r1\n0x1436f4: bl vIO32Write1BMsk\n0x1436f8: mov r0, r4\n0x1436fc: mov r1, #0x0\n0x143700: mov r2, #0x2\n0x143704: bl vIO32Write1BMsk\n0x143708: ldr r0, =0xf0029440\n0x14370c: mov r1, #0x1c0\n0x143710: mov r2, #0xff0\n0x143714: bl vIO32Write2BMsk\n0x143718: ldr r0, =0xf0029442\n0x14371c: mov r1, #0x10\n0x143720: mov r2, #0xff0\n0x143724: bl vIO32Write2BMsk\n0x143728: mov r0, r4\n0x14372c: ldr r4, =0xf000d36b\n0x143730: mov r1, #0x10\n0x143734: mov r2, #0x30\n0x143738: bl vIO32Write1BMsk\n0x14373c: mov r0, r4\n0x143740: mov r1, #0x8\n0x143744: mov r2, #0xc\n0x143748: bl vIO32Write1BMsk\n0x14374c: mov r0, r4\n0x143750: mov r1, #0x10\n0x143754: mov r2, #0x30\n0x143758: bl vIO32Write1BMsk",
+      "normalized_result": "0x143520: mov ip, sp\n0x143524: push {r3, r4, r5, r6, fp, ip, lr, pc}\n0x143528: sub fp, ip, #0x4\n0x14352c: str lr, [sp, #0x1c + var_20]\n0x143530: bl __gnu_mcount_nc\n0x143534: mov r1, #0x0\n0x143538: mov r2, #0x4\n0x14353c: ldr r4, =0xf002944c\n0x143540: ldr r5, =0xf0029410\n0x143544: ldr r6, =0xf0029436\n0x143548: mov r0, r4\n0x14354c: bl vIO32Write1BMsk\n0x143550: mov r0, r4\n0x143554: mov r1, #0x0\n0x143558: movw r4, #0xfff\n0x14355c: mov r2, #0x2\n0x143560: bl vIO32Write1BMsk\n0x143564: mov r2, r4\n0x143568: ldr r0, =0xf0029412\n0x14356c: mov r1, #0x66\n0x143570: bl vIO32Write2BMsk\n0x143574: mov r0, r5\n0x143578: mov r1, #0x0\n0x14357c: mov r2, #0x10\n0x143580: bl vIO32Write1BMsk\n0x143584: mov r0, r5\n0x143588: mov r1, #0x0\n0x14358c: movw r5, #0xffff\n0x143590: mov r2, #0x1\n0x143594: bl vIO32Write1BMsk\n0x143598: mov r1, r4\n0x14359c: mov r2, r5\n0x1435a0: ldr r0, =0xf0029424\n0x1435a4: bl vIO32Write2BMsk\n0x1435a8: mov r1, r4\n0x1435ac: mov r2, r5\n0x1435b0: ldr r0, =0xf0029426\n0x1435b4: bl vIO32Write2BMsk\n0x1435b8: mov r2, r5\n0x1435bc: ldr r5, =0xf0029434\n0x1435c0: ldr r0, =0xf0029438\n0x1435c4: mov r1, #0xf\n0x1435c8: bl vIO32Write2BMsk\n0x1435cc: mov r0, r6\n0x1435d0: mov r2, r4\n0x1435d4: mov r1, #0xf\n0x1435d8: bl vIO32Write2BMsk\n0x1435dc: mov r0, r5\n0x1435e0: mov r2, r4\n0x1435e4: mov r1, #0xf\n0x1435e8: bl vIO32Write2BMsk\n0x1435ec: mov r0, r6\n0x1435f0: mov r2, r4\n0x1435f4: mov r1, #0x2\n0x1435f8: bl vIO32Write2BMsk\n0x1435fc: mov r2, r4\n0x143600: ldr r4, =0xf0029430\n0x143604: mov r0, r5\n0x143608: mov r1, #0x2\n0x14360c: bl vIO32Write2BMsk\n0x143610: mov r0, r4\n0x143614: mov r1, #0x0\n0x143618: mov r2, #0x4\n0x14361c: add r5, r5, #0x14\n0x143620: bl vIO32Write1BMsk\n0x143624: mov r0, r4\n0x143628: mov r1, #0x0\n0x14362c: mov r2, #0x2\n0x143630: bl vIO32Write1BMsk\n0x143634: mov r0, r4\n0x143638: mov r1, #0x0\n0x14363c: mov r2, #0x1\n0x143640: bl vIO32Write1BMsk\n0x143644: mov r0, r4\n0x143648: mov r1, #0x0\n0x14364c: mov r2, #0x40\n0x143650: bl vIO32Write1BMsk\n0x143654: mov r0, r4\n0x143658: mov r1, #0x0\n0x14365c: mov r2, #0x20\n0x143660: bl vIO32Write1BMsk\n0x143664: mov r0, r4\n0x143668: mov r1, #0x0\n0x14366c: mov r2, #0x10\n0x143670: add r4, r4, #0x1d\n0x143674: bl vIO32Write1BMsk\n0x143678: mov r1, #0x2\n0x14367c: mov r0, r4\n0x143680: mov r2, r1\n0x143684: bl vIO32Write1BMsk\n0x143688: ldr r0, =0xf0029423\n0x14368c: mov r1, #0x0\n0x143690: mov r2, #0xf\n0x143694: bl vIO32Write1BMsk\n0x143698: ldr r0, =0xf0029420\n0x14369c: mov r1, #0x0\n0x1436a0: mvn r2, #0xff000000\n0x1436a4: bl vIO32Write4BMsk\n0x1436a8: mov r0, r4\n0x1436ac: mov r1, #0x0\n0x1436b0: mov r2, #0x2\n0x1436b4: bl vIO32Write1BMsk\n0x1436b8: mov r0, r5\n0x1436bc: mov r1, #0x0\n0x1436c0: mov r2, #0x1\n0x1436c4: bl vIO32Write1BMsk\n0x1436c8: mov r0, r5\n0x1436cc: mov r1, #0x0\n0x1436d0: mov r2, #0x2\n0x1436d4: bl vIO32Write1BMsk\n0x1436d8: ldr r0, =0xf0029449\n0x1436dc: mov r1, #0x0\n0x1436e0: mov r2, #0x30\n0x1436e4: bl vIO32Write1BMsk\n0x1436e8: mov r1, #0x2\n0x1436ec: mov r0, r4\n0x1436f0: mov r2, r1\n0x1436f4: bl vIO32Write1BMsk\n0x1436f8: mov r0, r4\n0x1436fc: mov r1, #0x0\n0x143700: mov r2, #0x2\n0x143704: bl vIO32Write1BMsk\n0x143708: ldr r0, =0xf0029440\n0x14370c: mov r1, #0x1c0\n0x143710: mov r2, #0xff0\n0x143714: bl vIO32Write2BMsk\n0x143718: ldr r0, =0xf0029442\n0x14371c: mov r1, #0x10\n0x143720: mov r2, #0xff0\n0x143724: bl vIO32Write2BMsk\n0x143728: mov r0, r4\n0x14372c: ldr r4, =0xf000d36b\n0x143730: mov r1, #0x10\n0x143734: mov r2, #0x30\n0x143738: bl vIO32Write1BMsk\n0x14373c: mov r0, r4\n0x143740: mov r1, #0x8\n0x143744: mov r2, #0xc\n0x143748: bl vIO32Write1BMsk\n0x14374c: mov r0, r4\n0x143750: mov r1, #0x10\n0x143754: mov r2, #0x30\n0x143758: bl vIO32Write1BMsk",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "amb_computeDriver": {
+    "result": "0x59608c: mov ip, sp\n0x596090: push {r4, fp, ip, lr, pc}\n0x596094: subs r4, r0, #0x0\n0x596098: sub fp, ip, #0x4\n0x59609c: sub sp, sp, #0xc\n0x5960a4: ldr r3, [r4, #0x3c]\n0x5960a8: cmp r3, #0x3\n0x5960b0: ldr r0, [r4, #0x8]\n0x5960b4: cmp r0, #0x0\n0x5960bc: ldr r3, [r0]\n0x5960c0: cmp r3, #0x1\n0x5960c8: ldr r3, [r4, #0x1c]\n0x5960cc: ldr ip, [r4, #0x14]\n0x5960d0: cmp r3, #0x8\n0x5961b4: ldr r3, [r4, #0x14]\n0x5961c8: ldrb r1, [r3, #0xca4]\n0x5961cc: cmp r1, #0x0\n0x5961d4: ldrb r1, [r3, #0xf24]\n0x5961d8: cmp r1, #0x0\n0x5961e0: subs r2, r2, #0x1\n0x5961e4: add r3, r3, #0x1\n0x5961bc: ldrb r1, [r3, #0xa24]\n0x5961c0: cmp r1, #0x0\n0x5961ec: mov r3, r2\n0x5961f8: ldr r2, [r4, #0x4]\n0x5961fc: str r3, [r2, #0x578]\n0x596214: mov r0, #0x0\n0x596220: sub sp, fp, #0x10\n0x59613c: ldr r3, [r4, #0x40]\n0x596198: add r1, ip, #0xa20\n0x59619c: add r2, ip, #0xca0\n0x5961a0: add r3, ip, #0xf20\n0x5961a4: add r1, r1, #0x4\n0x5961a8: add r2, r2, #0x4\n0x5961ac: add r3, r3, #0x4\n0x596178: add r1, ip, #0xa20\n0x59617c: add r2, ip, #0xca0\n0x596180: add r3, ip, #0xf20\n0x596184: add r1, r1, #0x4\n0x596188: add r2, r2, #0x4\n0x59618c: add r3, r3, #0x4\n0x596190: bl amb_proj_doLoungeLight\n0x596100: mov r3, #0x0\n0x596108: ldr r1, [r4, #0x14]\n0x59610c: add r1, r1, r3\n0x596110: strb r2, [r1, #0xa24]\n0x596114: ldr r1, [r4, #0x14]\n0x596118: add r1, r1, r3\n0x59611c: strb r2, [r1, #0xca4]\n0x596120: ldr r1, [r4, #0x14]\n0x596124: add r1, r1, r3\n0x596128: add r3, r3, #0x1\n0x59612c: cmp r3, #0x280\n0x596130: strb r2, [r1, #0xf24]\n0x596204: ldr r0, [r4, #0x4]\n0x596208: cmp r0, #0x0",
+    "evidence_id": "ev_2f3ca139890c0699313886a016d598c19fcde42e9e4e9d7fb979335bc2c42c69",
+    "evidence": {
+      "evidence_id": "ev_2f3ca139890c0699313886a016d598c19fcde42e9e4e9d7fb979335bc2c42c69",
+      "subject": {
+        "name": "dtv_driver.ko",
+        "digest": {
+          "sha256": "7c9beee7c57ce276357eb4ee8a031ea3c8e5eebd42230df5b073ae557633bea9"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/dtv_driver.ko"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_assembly",
+      "parameters": {
+        "procedure": "amb_computeDriver",
+        "document": null
+      },
+      "raw_result": "0x59608c: mov ip, sp\n0x596090: push {r4, fp, ip, lr, pc}\n0x596094: subs r4, r0, #0x0\n0x596098: sub fp, ip, #0x4\n0x59609c: sub sp, sp, #0xc\n0x5960a4: ldr r3, [r4, #0x3c]\n0x5960a8: cmp r3, #0x3\n0x5960b0: ldr r0, [r4, #0x8]\n0x5960b4: cmp r0, #0x0\n0x5960bc: ldr r3, [r0]\n0x5960c0: cmp r3, #0x1\n0x5960c8: ldr r3, [r4, #0x1c]\n0x5960cc: ldr ip, [r4, #0x14]\n0x5960d0: cmp r3, #0x8\n0x5961b4: ldr r3, [r4, #0x14]\n0x5961c8: ldrb r1, [r3, #0xca4]\n0x5961cc: cmp r1, #0x0\n0x5961d4: ldrb r1, [r3, #0xf24]\n0x5961d8: cmp r1, #0x0\n0x5961e0: subs r2, r2, #0x1\n0x5961e4: add r3, r3, #0x1\n0x5961bc: ldrb r1, [r3, #0xa24]\n0x5961c0: cmp r1, #0x0\n0x5961ec: mov r3, r2\n0x5961f8: ldr r2, [r4, #0x4]\n0x5961fc: str r3, [r2, #0x578]\n0x596214: mov r0, #0x0\n0x596220: sub sp, fp, #0x10\n0x59613c: ldr r3, [r4, #0x40]\n0x596198: add r1, ip, #0xa20\n0x59619c: add r2, ip, #0xca0\n0x5961a0: add r3, ip, #0xf20\n0x5961a4: add r1, r1, #0x4\n0x5961a8: add r2, r2, #0x4\n0x5961ac: add r3, r3, #0x4\n0x596178: add r1, ip, #0xa20\n0x59617c: add r2, ip, #0xca0\n0x596180: add r3, ip, #0xf20\n0x596184: add r1, r1, #0x4\n0x596188: add r2, r2, #0x4\n0x59618c: add r3, r3, #0x4\n0x596190: bl amb_proj_doLoungeLight\n0x596100: mov r3, #0x0\n0x596108: ldr r1, [r4, #0x14]\n0x59610c: add r1, r1, r3\n0x596110: strb r2, [r1, #0xa24]\n0x596114: ldr r1, [r4, #0x14]\n0x596118: add r1, r1, r3\n0x59611c: strb r2, [r1, #0xca4]\n0x596120: ldr r1, [r4, #0x14]\n0x596124: add r1, r1, r3\n0x596128: add r3, r3, #0x1\n0x59612c: cmp r3, #0x280\n0x596130: strb r2, [r1, #0xf24]\n0x596204: ldr r0, [r4, #0x4]\n0x596208: cmp r0, #0x0",
+      "normalized_result": "0x59608c: mov ip, sp\n0x596090: push {r4, fp, ip, lr, pc}\n0x596094: subs r4, r0, #0x0\n0x596098: sub fp, ip, #0x4\n0x59609c: sub sp, sp, #0xc\n0x5960a4: ldr r3, [r4, #0x3c]\n0x5960a8: cmp r3, #0x3\n0x5960b0: ldr r0, [r4, #0x8]\n0x5960b4: cmp r0, #0x0\n0x5960bc: ldr r3, [r0]\n0x5960c0: cmp r3, #0x1\n0x5960c8: ldr r3, [r4, #0x1c]\n0x5960cc: ldr ip, [r4, #0x14]\n0x5960d0: cmp r3, #0x8\n0x5961b4: ldr r3, [r4, #0x14]\n0x5961c8: ldrb r1, [r3, #0xca4]\n0x5961cc: cmp r1, #0x0\n0x5961d4: ldrb r1, [r3, #0xf24]\n0x5961d8: cmp r1, #0x0\n0x5961e0: subs r2, r2, #0x1\n0x5961e4: add r3, r3, #0x1\n0x5961bc: ldrb r1, [r3, #0xa24]\n0x5961c0: cmp r1, #0x0\n0x5961ec: mov r3, r2\n0x5961f8: ldr r2, [r4, #0x4]\n0x5961fc: str r3, [r2, #0x578]\n0x596214: mov r0, #0x0\n0x596220: sub sp, fp, #0x10\n0x59613c: ldr r3, [r4, #0x40]\n0x596198: add r1, ip, #0xa20\n0x59619c: add r2, ip, #0xca0\n0x5961a0: add r3, ip, #0xf20\n0x5961a4: add r1, r1, #0x4\n0x5961a8: add r2, r2, #0x4\n0x5961ac: add r3, r3, #0x4\n0x596178: add r1, ip, #0xa20\n0x59617c: add r2, ip, #0xca0\n0x596180: add r3, ip, #0xf20\n0x596184: add r1, r1, #0x4\n0x596188: add r2, r2, #0x4\n0x59618c: add r3, r3, #0x4\n0x596190: bl amb_proj_doLoungeLight\n0x596100: mov r3, #0x0\n0x596108: ldr r1, [r4, #0x14]\n0x59610c: add r1, r1, r3\n0x596110: strb r2, [r1, #0xa24]\n0x596114: ldr r1, [r4, #0x14]\n0x596118: add r1, r1, r3\n0x59611c: strb r2, [r1, #0xca4]\n0x596120: ldr r1, [r4, #0x14]\n0x596124: add r1, r1, r3\n0x596128: add r3, r3, #0x1\n0x59612c: cmp r3, #0x280\n0x596130: strb r2, [r1, #0xf24]\n0x596204: ldr r0, [r4, #0x4]\n0x596208: cmp r0, #0x0",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "amb_getOutputBufferNovatek": {
+    "result": "0x597b54: cmp r0, #0x0\n0x597b58: str lr, [sp, var_4]\n0x597b60: ldr r3, [r0, #0x4]\n0x597b64: cmp r3, #0x0\n0x597b6c: cmp r1, #0x0\n0x597b70: cmpne r2, #0x0\n0x597b78: ldr ip, [r0, #0x38]\n0x597b7c: cmp ip, #0x1\n0x597b84: ldr ip, [r0, #0x3c]\n0x597b88: cmp ip, #0x3\n0x597b8c: ldrne r3, [r3, #0x570]\n0x597b90: strhne r3, [r2]\n0x597b94: movne r3, #0x0\n0x597b9c: ldr r3, =0x9360b4\n0x597ba0: movw lr, #0x3c1\n0x597ba4: ldrb ip, [r3]\n0x597ba8: cmp ip, #0xf\n0x597bac: strb ip, [r1]\n0x597bb0: strh lr, [r2]\n0x597bb4: mov r2, r3\n0x597bb8: movne r3, #0x140\n0x597bc0: mov r3, #0x0\n0x597bc4: ldr ip, [r0, #0x14]\n0x597bc8: add ip, ip, r3\n0x597bcc: ldrb ip, [ip, #0xa24]\n0x597bd0: strb ip, [r1, #0x1]\n0x597bd4: ldr ip, [r0, #0x14]\n0x597bd8: add ip, ip, r3\n0x597bdc: ldrb ip, [ip, #0xca4]\n0x597be0: strb ip, [r1, #0x2]\n0x597be4: ldr ip, [r0, #0x14]\n0x597be8: add ip, ip, r3\n0x597c08: ldr ip, [r0, #0x14]\n0x597c0c: add ip, ip, r3\n0x597c10: ldrb ip, [ip, #0xa24]\n0x597c14: strb ip, [r1, #0x1]\n0x597c18: ldr ip, [r0, #0x14]\n0x597c1c: add ip, ip, r3\n0x597c20: ldrb ip, [ip, #0xca4]\n0x597c24: strb ip, [r1, #0x2]\n0x597c28: ldr ip, [r0, #0x14]\n0x597c2c: add ip, ip, r3\n0x597c30: add r3, r3, #0x1\n0x597c34: ldrb ip, [ip, #0xf24]\n0x597c38: cmp r3, #0x280\n0x597c3c: strb ip, [r1, #0x3]!\n0x597c44: mov r3, #0xf\n0x597c48: strb r3, [r2]\n0x597c74: mov r0, #0x0\n0x597c50: ldrh ip, [r2]\n0x597c54: cmp r3, ip\n0x597c5c: ldr ip, [r0, #0x4]\n0x597c60: add ip, ip, r3\n0x597c7c: mov r0, #0x0\n0x597c80: strh r0, [r2]\n0x597c88: mov r0, #0x2",
+    "evidence_id": "ev_217fff7f2efbc2d2ed10ed3f8bfeafa425fb18d88711fd2eb740a5c2895a982a",
+    "evidence": {
+      "evidence_id": "ev_217fff7f2efbc2d2ed10ed3f8bfeafa425fb18d88711fd2eb740a5c2895a982a",
+      "subject": {
+        "name": "dtv_driver.ko",
+        "digest": {
+          "sha256": "7c9beee7c57ce276357eb4ee8a031ea3c8e5eebd42230df5b073ae557633bea9"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/dtv_driver.ko"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_assembly",
+      "parameters": {
+        "procedure": "amb_getOutputBufferNovatek",
+        "document": null
+      },
+      "raw_result": "0x597b54: cmp r0, #0x0\n0x597b58: str lr, [sp, var_4]\n0x597b60: ldr r3, [r0, #0x4]\n0x597b64: cmp r3, #0x0\n0x597b6c: cmp r1, #0x0\n0x597b70: cmpne r2, #0x0\n0x597b78: ldr ip, [r0, #0x38]\n0x597b7c: cmp ip, #0x1\n0x597b84: ldr ip, [r0, #0x3c]\n0x597b88: cmp ip, #0x3\n0x597b8c: ldrne r3, [r3, #0x570]\n0x597b90: strhne r3, [r2]\n0x597b94: movne r3, #0x0\n0x597b9c: ldr r3, =0x9360b4\n0x597ba0: movw lr, #0x3c1\n0x597ba4: ldrb ip, [r3]\n0x597ba8: cmp ip, #0xf\n0x597bac: strb ip, [r1]\n0x597bb0: strh lr, [r2]\n0x597bb4: mov r2, r3\n0x597bb8: movne r3, #0x140\n0x597bc0: mov r3, #0x0\n0x597bc4: ldr ip, [r0, #0x14]\n0x597bc8: add ip, ip, r3\n0x597bcc: ldrb ip, [ip, #0xa24]\n0x597bd0: strb ip, [r1, #0x1]\n0x597bd4: ldr ip, [r0, #0x14]\n0x597bd8: add ip, ip, r3\n0x597bdc: ldrb ip, [ip, #0xca4]\n0x597be0: strb ip, [r1, #0x2]\n0x597be4: ldr ip, [r0, #0x14]\n0x597be8: add ip, ip, r3\n0x597c08: ldr ip, [r0, #0x14]\n0x597c0c: add ip, ip, r3\n0x597c10: ldrb ip, [ip, #0xa24]\n0x597c14: strb ip, [r1, #0x1]\n0x597c18: ldr ip, [r0, #0x14]\n0x597c1c: add ip, ip, r3\n0x597c20: ldrb ip, [ip, #0xca4]\n0x597c24: strb ip, [r1, #0x2]\n0x597c28: ldr ip, [r0, #0x14]\n0x597c2c: add ip, ip, r3\n0x597c30: add r3, r3, #0x1\n0x597c34: ldrb ip, [ip, #0xf24]\n0x597c38: cmp r3, #0x280\n0x597c3c: strb ip, [r1, #0x3]!\n0x597c44: mov r3, #0xf\n0x597c48: strb r3, [r2]\n0x597c74: mov r0, #0x0\n0x597c50: ldrh ip, [r2]\n0x597c54: cmp r3, ip\n0x597c5c: ldr ip, [r0, #0x4]\n0x597c60: add ip, ip, r3\n0x597c7c: mov r0, #0x0\n0x597c80: strh r0, [r2]\n0x597c88: mov r0, #0x2",
+      "normalized_result": "0x597b54: cmp r0, #0x0\n0x597b58: str lr, [sp, var_4]\n0x597b60: ldr r3, [r0, #0x4]\n0x597b64: cmp r3, #0x0\n0x597b6c: cmp r1, #0x0\n0x597b70: cmpne r2, #0x0\n0x597b78: ldr ip, [r0, #0x38]\n0x597b7c: cmp ip, #0x1\n0x597b84: ldr ip, [r0, #0x3c]\n0x597b88: cmp ip, #0x3\n0x597b8c: ldrne r3, [r3, #0x570]\n0x597b90: strhne r3, [r2]\n0x597b94: movne r3, #0x0\n0x597b9c: ldr r3, =0x9360b4\n0x597ba0: movw lr, #0x3c1\n0x597ba4: ldrb ip, [r3]\n0x597ba8: cmp ip, #0xf\n0x597bac: strb ip, [r1]\n0x597bb0: strh lr, [r2]\n0x597bb4: mov r2, r3\n0x597bb8: movne r3, #0x140\n0x597bc0: mov r3, #0x0\n0x597bc4: ldr ip, [r0, #0x14]\n0x597bc8: add ip, ip, r3\n0x597bcc: ldrb ip, [ip, #0xa24]\n0x597bd0: strb ip, [r1, #0x1]\n0x597bd4: ldr ip, [r0, #0x14]\n0x597bd8: add ip, ip, r3\n0x597bdc: ldrb ip, [ip, #0xca4]\n0x597be0: strb ip, [r1, #0x2]\n0x597be4: ldr ip, [r0, #0x14]\n0x597be8: add ip, ip, r3\n0x597c08: ldr ip, [r0, #0x14]\n0x597c0c: add ip, ip, r3\n0x597c10: ldrb ip, [ip, #0xa24]\n0x597c14: strb ip, [r1, #0x1]\n0x597c18: ldr ip, [r0, #0x14]\n0x597c1c: add ip, ip, r3\n0x597c20: ldrb ip, [ip, #0xca4]\n0x597c24: strb ip, [r1, #0x2]\n0x597c28: ldr ip, [r0, #0x14]\n0x597c2c: add ip, ip, r3\n0x597c30: add r3, r3, #0x1\n0x597c34: ldrb ip, [ip, #0xf24]\n0x597c38: cmp r3, #0x280\n0x597c3c: strb ip, [r1, #0x3]!\n0x597c44: mov r3, #0xf\n0x597c48: strb r3, [r2]\n0x597c74: mov r0, #0x0\n0x597c50: ldrh ip, [r2]\n0x597c54: cmp r3, ip\n0x597c5c: ldr ip, [r0, #0x4]\n0x597c60: add ip, ip, r3\n0x597c7c: mov r0, #0x0\n0x597c80: strh r0, [r2]\n0x597c88: mov r0, #0x2",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "IMamb_fpgaR_GetAmbiContent": {
+    "result": "0x188c: mov ip, sp\n0x1890: push {fp, ip, lr, pc}\n0x1894: sub fp, ip, #0x4\n0x1898: str lr, [sp, #0xc + var_10]\n0x189c: bl __gnu_mcount_nc\n0x18a0: bl vDrvAmbiLGetContent",
+    "evidence_id": "ev_89b81f1c89972243887c5bca62995c16cfae25bf6500a08c715e39cdb677d649",
+    "evidence": {
+      "evidence_id": "ev_89b81f1c89972243887c5bca62995c16cfae25bf6500a08c715e39cdb677d649",
+      "subject": {
+        "name": "dtv_driver.ko",
+        "digest": {
+          "sha256": "7c9beee7c57ce276357eb4ee8a031ea3c8e5eebd42230df5b073ae557633bea9"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/dtv_driver.ko"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_assembly",
+      "parameters": {
+        "procedure": "IMamb_fpgaR_GetAmbiContent",
+        "document": null
+      },
+      "raw_result": "0x188c: mov ip, sp\n0x1890: push {fp, ip, lr, pc}\n0x1894: sub fp, ip, #0x4\n0x1898: str lr, [sp, #0xc + var_10]\n0x189c: bl __gnu_mcount_nc\n0x18a0: bl vDrvAmbiLGetContent",
+      "normalized_result": "0x188c: mov ip, sp\n0x1890: push {fp, ip, lr, pc}\n0x1894: sub fp, ip, #0x4\n0x1898: str lr, [sp, #0xc + var_10]\n0x189c: bl __gnu_mcount_nc\n0x18a0: bl vDrvAmbiLGetContent",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "vDrvAmbiLitSysInit": {
+    "result": "0x190818: mov ip, sp\n0x19081c: push {r4, r5, r6, r7, r8, sb, fp, ip, lr, pc}\n0x190820: sub fp, ip, #0x4\n0x190824: str lr, [sp, #0x24 + var_28]\n0x190828: bl __gnu_mcount_nc\n0x19082c: bl PANEL_GetPanelWidth\n0x190830: mov r4, r0\n0x190834: bl PANEL_GetPanelHeight\n0x190838: mov r1, #0x14\n0x19083c: mov r7, r0\n0x190840: bl __aeabi_uidiv\n0x190844: mov r1, #0x14\n0x190848: mov r5, r0\n0x19084c: mov r0, r7\n0x190850: lsr r6, r4, #5\n0x190854: and sb, r4, #0x1f\n0x190858: bl __aeabi_uidivmod\n0x19085c: add r8, r1, r5\n0x190860: mov r1, #0x1\n0x190864: mov r2, r1\n0x190868: ldr r0, =0xf0027b00\n0x19086c: bl vIO32Write1BMsk\n0x190870: mov r1, #0x0\n0x190874: mov r2, #0xf8\n0x190878: ldr r0, =0xf0027b00\n0x19087c: add sb, sb, r6\n0x190880: bl vIO32Write1BMsk\n0x190884: mov r0, #0x0\n0x190888: bl vDrvAmbiLitSetMaskMode\n0x19088c: movw r3, #0x438\n0x190890: ldr r0, =0xf0027b01\n0x190894: cmp r7, r3\n0x190898: cmpls r4, #0x780\n0x19089c: mov r2, #0xf\n0x1908a0: movls r1, #0x4\n0x1908a4: movhi r1, #0x6\n0x1908a8: bl vIO32Write1BMsk\n0x1908ac: ldr r0, =0xf0027b04\n0x1908b0: mov r1, r6\n0x1908b4: mov r2, #0xff\n0x1908b8: bl vIO32Write1BMsk\n0x1908bc: ldr r0, =0xf0027b05\n0x1908c0: mov r1, r5\n0x1908c4: mov r2, #0xff\n0x1908c8: bl vIO32Write1BMsk\n0x1908cc: ldr r0, =0xf0027b06\n0x1908d0: mov r1, sb\n0x1908d4: mov r2, #0xff\n0x1908d8: bl vIO32Write1BMsk\n0x1908dc: mov r2, #0xff\n0x1908e0: ldr r0, =0xf0027b07\n0x1908e4: mov r1, r8\n0x1908e8: bl vIO32Write1BMsk\n0x1908ec: ldr r3, =0x990954\n0x1908f0: mov r2, #0x20\n0x1908f4: strb r2, [r3, #-0xcbc]\n0x1908f8: mov r2, #0x14\n0x1908fc: strb r2, [r3, #-0xcbb]",
+    "evidence_id": "ev_e9fd95fe87394590c7f553ea4d4d95b9c9a8e5b9f123004948c0453ee2f4fcce",
+    "evidence": {
+      "evidence_id": "ev_e9fd95fe87394590c7f553ea4d4d95b9c9a8e5b9f123004948c0453ee2f4fcce",
+      "subject": {
+        "name": "dtv_driver.ko",
+        "digest": {
+          "sha256": "7c9beee7c57ce276357eb4ee8a031ea3c8e5eebd42230df5b073ae557633bea9"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/dtv_driver.ko"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_assembly",
+      "parameters": {
+        "procedure": "vDrvAmbiLitSysInit",
+        "document": null
+      },
+      "raw_result": "0x190818: mov ip, sp\n0x19081c: push {r4, r5, r6, r7, r8, sb, fp, ip, lr, pc}\n0x190820: sub fp, ip, #0x4\n0x190824: str lr, [sp, #0x24 + var_28]\n0x190828: bl __gnu_mcount_nc\n0x19082c: bl PANEL_GetPanelWidth\n0x190830: mov r4, r0\n0x190834: bl PANEL_GetPanelHeight\n0x190838: mov r1, #0x14\n0x19083c: mov r7, r0\n0x190840: bl __aeabi_uidiv\n0x190844: mov r1, #0x14\n0x190848: mov r5, r0\n0x19084c: mov r0, r7\n0x190850: lsr r6, r4, #5\n0x190854: and sb, r4, #0x1f\n0x190858: bl __aeabi_uidivmod\n0x19085c: add r8, r1, r5\n0x190860: mov r1, #0x1\n0x190864: mov r2, r1\n0x190868: ldr r0, =0xf0027b00\n0x19086c: bl vIO32Write1BMsk\n0x190870: mov r1, #0x0\n0x190874: mov r2, #0xf8\n0x190878: ldr r0, =0xf0027b00\n0x19087c: add sb, sb, r6\n0x190880: bl vIO32Write1BMsk\n0x190884: mov r0, #0x0\n0x190888: bl vDrvAmbiLitSetMaskMode\n0x19088c: movw r3, #0x438\n0x190890: ldr r0, =0xf0027b01\n0x190894: cmp r7, r3\n0x190898: cmpls r4, #0x780\n0x19089c: mov r2, #0xf\n0x1908a0: movls r1, #0x4\n0x1908a4: movhi r1, #0x6\n0x1908a8: bl vIO32Write1BMsk\n0x1908ac: ldr r0, =0xf0027b04\n0x1908b0: mov r1, r6\n0x1908b4: mov r2, #0xff\n0x1908b8: bl vIO32Write1BMsk\n0x1908bc: ldr r0, =0xf0027b05\n0x1908c0: mov r1, r5\n0x1908c4: mov r2, #0xff\n0x1908c8: bl vIO32Write1BMsk\n0x1908cc: ldr r0, =0xf0027b06\n0x1908d0: mov r1, sb\n0x1908d4: mov r2, #0xff\n0x1908d8: bl vIO32Write1BMsk\n0x1908dc: mov r2, #0xff\n0x1908e0: ldr r0, =0xf0027b07\n0x1908e4: mov r1, r8\n0x1908e8: bl vIO32Write1BMsk\n0x1908ec: ldr r3, =0x990954\n0x1908f0: mov r2, #0x20\n0x1908f4: strb r2, [r3, #-0xcbc]\n0x1908f8: mov r2, #0x14\n0x1908fc: strb r2, [r3, #-0xcbb]",
+      "normalized_result": "0x190818: mov ip, sp\n0x19081c: push {r4, r5, r6, r7, r8, sb, fp, ip, lr, pc}\n0x190820: sub fp, ip, #0x4\n0x190824: str lr, [sp, #0x24 + var_28]\n0x190828: bl __gnu_mcount_nc\n0x19082c: bl PANEL_GetPanelWidth\n0x190830: mov r4, r0\n0x190834: bl PANEL_GetPanelHeight\n0x190838: mov r1, #0x14\n0x19083c: mov r7, r0\n0x190840: bl __aeabi_uidiv\n0x190844: mov r1, #0x14\n0x190848: mov r5, r0\n0x19084c: mov r0, r7\n0x190850: lsr r6, r4, #5\n0x190854: and sb, r4, #0x1f\n0x190858: bl __aeabi_uidivmod\n0x19085c: add r8, r1, r5\n0x190860: mov r1, #0x1\n0x190864: mov r2, r1\n0x190868: ldr r0, =0xf0027b00\n0x19086c: bl vIO32Write1BMsk\n0x190870: mov r1, #0x0\n0x190874: mov r2, #0xf8\n0x190878: ldr r0, =0xf0027b00\n0x19087c: add sb, sb, r6\n0x190880: bl vIO32Write1BMsk\n0x190884: mov r0, #0x0\n0x190888: bl vDrvAmbiLitSetMaskMode\n0x19088c: movw r3, #0x438\n0x190890: ldr r0, =0xf0027b01\n0x190894: cmp r7, r3\n0x190898: cmpls r4, #0x780\n0x19089c: mov r2, #0xf\n0x1908a0: movls r1, #0x4\n0x1908a4: movhi r1, #0x6\n0x1908a8: bl vIO32Write1BMsk\n0x1908ac: ldr r0, =0xf0027b04\n0x1908b0: mov r1, r6\n0x1908b4: mov r2, #0xff\n0x1908b8: bl vIO32Write1BMsk\n0x1908bc: ldr r0, =0xf0027b05\n0x1908c0: mov r1, r5\n0x1908c4: mov r2, #0xff\n0x1908c8: bl vIO32Write1BMsk\n0x1908cc: ldr r0, =0xf0027b06\n0x1908d0: mov r1, sb\n0x1908d4: mov r2, #0xff\n0x1908d8: bl vIO32Write1BMsk\n0x1908dc: mov r2, #0xff\n0x1908e0: ldr r0, =0xf0027b07\n0x1908e4: mov r1, r8\n0x1908e8: bl vIO32Write1BMsk\n0x1908ec: ldr r3, =0x990954\n0x1908f0: mov r2, #0x20\n0x1908f4: strb r2, [r3, #-0xcbc]\n0x1908f8: mov r2, #0x14\n0x1908fc: strb r2, [r3, #-0xcbb]",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "result": "0x1ae14: push.w {r4, r5, r6, r7, r8, sb, lr}\n0x1ae18: sub sp, #0x74\n0x1ae1a: mov r7, r0\n0x1ae1c: ldr r0, =0x188de\n0x1ae1e: add r6, sp, #0x3c\n0x1ae20: mov r8, r2\n0x1ae22: add r0, pc\n0x1ae24: mov r5, r1\n0x1ae26: ldr r0, [r0]\n0x1ae28: ldr r0, [r0]\n0x1ae2a: str r0, [sp, #0x90 + var_20]\n0x1ae2c: mov r0, r6\n0x1ae2e: blx _ZN7android6ParcelC1Ev@PLT\n0x1ae32: add r4, sp, #0x8\n0x1ae34: mov r0, r4\n0x1ae36: blx _ZN7android6ParcelC1Ev@PLT\n0x1ae3a: ldr r0, =0x188e4\n0x1ae3c: add r0, pc\n0x1ae3e: ldr r1, [r0]\n0x1ae40: mov r0, r6\n0x1ae42: blx _ZN7android6Parcel19writeInterfaceTokenERKNS_8String16E@PLT\n0x1ae46: mov r0, r6\n0x1ae48: movs r1, #0x0\n0x1ae4a: mov.w sb, #0x0\n0x1ae4e: blx _ZNK7android6Parcel15setDataPositionEj@PLT\n0x1ae52: mov r0, r6\n0x1ae54: mov r1, r5\n0x1ae56: blx _ZN7android6Parcel10writeInt32Ei@PLT\n0x1ae5a: mov r0, r6\n0x1ae5c: movs r1, #0x0\n0x1ae5e: blx _ZNK7android6Parcel15setDataPositionEj@PLT\n0x1ae62: ldr r0, [r7, #0x8]\n0x1ae64: mov r2, r6\n0x1ae66: mov r3, r4\n0x1ae68: ldr r1, [r0]\n0x1ae6a: ldr r7, [r1, #0x14]\n0x1ae6c: movs r1, #0x1d\n0x1ae6e: str.w sb, [sp, #0x90 + var_90]\n0x1ae72: blx r7\n0x1ae74: mov r4, r0\n0x1ae76: mov r0, r6\n0x1ae78: movs r1, #0x0\n0x1ae7a: blx _ZNK7android6Parcel15setDataPositionEj@PLT\n0x1ae80: add r4, sp, #0x8\n0x1ae82: mov r0, r4\n0x1ae84: blx _ZNK7android6Parcel9readInt32Ev@PLT\n0x1ae88: add.w r0, r5, r5, lsl #1\n0x1ae8c: mov r1, r8\n0x1ae8e: lsls r2, r0, #0x2\n0x1ae90: mov r0, r4\n0x1ae92: blx _ZNK7android6Parcel4readEPvj@PLT\n0x1ae98: add r0, sp, #0x8\n0x1ae9a: blx _ZN7android6ParcelD1Ev@PLT\n0x1ae9e: add r0, sp, #0x3c\n0x1aea0: blx _ZN7android6ParcelD1Ev@PLT\n0x1aea4: ldr r0, =0x18858\n0x1aea6: ldr r1, [sp, #0x90 + var_20]\n0x1aea8: add r0, pc\n0x1aeaa: ldr r0, [r0]\n0x1aeac: ldr r0, [r0]\n0x1aeae: subs r0, r0, r1\n0x1aeb0: ittt eq\n0x1aeb2: moveq r0, r4\n0x1aeb4: addeq sp, #0x74\n0x1aeb6: pop.weq {r4, r5, r6, r7, r8, sb, pc}",
+  "evidence_id": "ev_f9f264b77d1657435543d9e3c81e38a36af94d73c8cae1fc82699a6ad738695c",
+  "evidence": {
+    "evidence_id": "ev_f9f264b77d1657435543d9e3c81e38a36af94d73c8cae1fc82699a6ad738695c",
+    "subject": {
+      "name": "libambilight.so",
+      "digest": {
+        "sha256": "d20570babc64d9dc4d4547f2921bfdf256c7196fec8e3d587d58d653bc1a9525"
+      },
+      "format": "elf",
+      "architecture": "arm",
+      "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-port/libambilight.so"
+    },
+    "provider": {
+      "id": "hopper",
+      "name": "Hopper Disassembler",
+      "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+    },
+    "predicate_type": "rea.analysis",
+    "operation": "procedure_assembly",
+    "parameters": {
+      "procedure": "0x1ae14",
+      "document": null
+    },
+    "raw_result": "0x1ae14: push.w {r4, r5, r6, r7, r8, sb, lr}\n0x1ae18: sub sp, #0x74\n0x1ae1a: mov r7, r0\n0x1ae1c: ldr r0, =0x188de\n0x1ae1e: add r6, sp, #0x3c\n0x1ae20: mov r8, r2\n0x1ae22: add r0, pc\n0x1ae24: mov r5, r1\n0x1ae26: ldr r0, [r0]\n0x1ae28: ldr r0, [r0]\n0x1ae2a: str r0, [sp, #0x90 + var_20]\n0x1ae2c: mov r0, r6\n0x1ae2e: blx _ZN7android6ParcelC1Ev@PLT\n0x1ae32: add r4, sp, #0x8\n0x1ae34: mov r0, r4\n0x1ae36: blx _ZN7android6ParcelC1Ev@PLT\n0x1ae3a: ldr r0, =0x188e4\n0x1ae3c: add r0, pc\n0x1ae3e: ldr r1, [r0]\n0x1ae40: mov r0, r6\n0x1ae42: blx _ZN7android6Parcel19writeInterfaceTokenERKNS_8String16E@PLT\n0x1ae46: mov r0, r6\n0x1ae48: movs r1, #0x0\n0x1ae4a: mov.w sb, #0x0\n0x1ae4e: blx _ZNK7android6Parcel15setDataPositionEj@PLT\n0x1ae52: mov r0, r6\n0x1ae54: mov r1, r5\n0x1ae56: blx _ZN7android6Parcel10writeInt32Ei@PLT\n0x1ae5a: mov r0, r6\n0x1ae5c: movs r1, #0x0\n0x1ae5e: blx _ZNK7android6Parcel15setDataPositionEj@PLT\n0x1ae62: ldr r0, [r7, #0x8]\n0x1ae64: mov r2, r6\n0x1ae66: mov r3, r4\n0x1ae68: ldr r1, [r0]\n0x1ae6a: ldr r7, [r1, #0x14]\n0x1ae6c: movs r1, #0x1d\n0x1ae6e: str.w sb, [sp, #0x90 + var_90]\n0x1ae72: blx r7\n0x1ae74: mov r4, r0\n0x1ae76: mov r0, r6\n0x1ae78: movs r1, #0x0\n0x1ae7a: blx _ZNK7android6Parcel15setDataPositionEj@PLT\n0x1ae80: add r4, sp, #0x8\n0x1ae82: mov r0, r4\n0x1ae84: blx _ZNK7android6Parcel9readInt32Ev@PLT\n0x1ae88: add.w r0, r5, r5, lsl #1\n0x1ae8c: mov r1, r8\n0x1ae8e: lsls r2, r0, #0x2\n0x1ae90: mov r0, r4\n0x1ae92: blx _ZNK7android6Parcel4readEPvj@PLT\n0x1ae98: add r0, sp, #0x8\n0x1ae9a: blx _ZN7android6ParcelD1Ev@PLT\n0x1ae9e: add r0, sp, #0x3c\n0x1aea0: blx _ZN7android6ParcelD1Ev@PLT\n0x1aea4: ldr r0, =0x18858\n0x1aea6: ldr r1, [sp, #0x90 + var_20]\n0x1aea8: add r0, pc\n0x1aeaa: ldr r0, [r0]\n0x1aeac: ldr r0, [r0]\n0x1aeae: subs r0, r0, r1\n0x1aeb0: ittt eq\n0x1aeb2: moveq r0, r4\n0x1aeb4: addeq sp, #0x74\n0x1aeb6: pop.weq {r4, r5, r6, r7, r8, sb, pc}",
+    "normalized_result": "0x1ae14: push.w {r4, r5, r6, r7, r8, sb, lr}\n0x1ae18: sub sp, #0x74\n0x1ae1a: mov r7, r0\n0x1ae1c: ldr r0, =0x188de\n0x1ae1e: add r6, sp, #0x3c\n0x1ae20: mov r8, r2\n0x1ae22: add r0, pc\n0x1ae24: mov r5, r1\n0x1ae26: ldr r0, [r0]\n0x1ae28: ldr r0, [r0]\n0x1ae2a: str r0, [sp, #0x90 + var_20]\n0x1ae2c: mov r0, r6\n0x1ae2e: blx _ZN7android6ParcelC1Ev@PLT\n0x1ae32: add r4, sp, #0x8\n0x1ae34: mov r0, r4\n0x1ae36: blx _ZN7android6ParcelC1Ev@PLT\n0x1ae3a: ldr r0, =0x188e4\n0x1ae3c: add r0, pc\n0x1ae3e: ldr r1, [r0]\n0x1ae40: mov r0, r6\n0x1ae42: blx _ZN7android6Parcel19writeInterfaceTokenERKNS_8String16E@PLT\n0x1ae46: mov r0, r6\n0x1ae48: movs r1, #0x0\n0x1ae4a: mov.w sb, #0x0\n0x1ae4e: blx _ZNK7android6Parcel15setDataPositionEj@PLT\n0x1ae52: mov r0, r6\n0x1ae54: mov r1, r5\n0x1ae56: blx _ZN7android6Parcel10writeInt32Ei@PLT\n0x1ae5a: mov r0, r6\n0x1ae5c: movs r1, #0x0\n0x1ae5e: blx _ZNK7android6Parcel15setDataPositionEj@PLT\n0x1ae62: ldr r0, [r7, #0x8]\n0x1ae64: mov r2, r6\n0x1ae66: mov r3, r4\n0x1ae68: ldr r1, [r0]\n0x1ae6a: ldr r7, [r1, #0x14]\n0x1ae6c: movs r1, #0x1d\n0x1ae6e: str.w sb, [sp, #0x90 + var_90]\n0x1ae72: blx r7\n0x1ae74: mov r4, r0\n0x1ae76: mov r0, r6\n0x1ae78: movs r1, #0x0\n0x1ae7a: blx _ZNK7android6Parcel15setDataPositionEj@PLT\n0x1ae80: add r4, sp, #0x8\n0x1ae82: mov r0, r4\n0x1ae84: blx _ZNK7android6Parcel9readInt32Ev@PLT\n0x1ae88: add.w r0, r5, r5, lsl #1\n0x1ae8c: mov r1, r8\n0x1ae8e: lsls r2, r0, #0x2\n0x1ae90: mov r0, r4\n0x1ae92: blx _ZNK7android6Parcel4readEPvj@PLT\n0x1ae98: add r0, sp, #0x8\n0x1ae9a: blx _ZN7android6ParcelD1Ev@PLT\n0x1ae9e: add r0, sp, #0x3c\n0x1aea0: blx _ZN7android6ParcelD1Ev@PLT\n0x1aea4: ldr r0, =0x18858\n0x1aea6: ldr r1, [sp, #0x90 + var_20]\n0x1aea8: add r0, pc\n0x1aeaa: ldr r0, [r0]\n0x1aeac: ldr r0, [r0]\n0x1aeae: subs r0, r0, r1\n0x1aeb0: ittt eq\n0x1aeb2: moveq r0, r4\n0x1aeb4: addeq sp, #0x74\n0x1aeb6: pop.weq {r4, r5, r6, r7, r8, sb, pc}",
+    "confidence": "observed",
+    "authority": "shipped-artifact",
+    "environment": null,
+    "limitations": [
+      "Results depend on Hopper's completed static analysis."
+    ],
+    "locations": [],
+    "evidence_links": [],
+    "analysis_profile": {
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "parameters": {
+        "target_kind": "executable",
+        "target_format": "elf",
+        "architecture": "arm",
+        "available_architectures": [
+          "arm"
+        ],
+        "loader": {
+          "source": "derived",
+          "argument_count": 3,
+          "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+        }
+      },
+      "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+    }
+  }
+}

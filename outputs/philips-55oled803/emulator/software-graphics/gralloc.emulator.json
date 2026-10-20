@@ -1,0 +1,15 @@
+{
+  "purpose": "Emulator-only shared-memory allocation compatibility",
+  "stock_sha256": "f2436f67001cf48b34b894ca7b25cd5349a6f58b548b8b103c386c20b0d15a9a",
+  "output_sha256": "1da23a3bf729f69028526dff3fbfe376aed19ea96e9362544c99efbac39f32a9",
+  "changes": [
+    {
+      "offset": "0x120a",
+      "before": "06d1",
+      "after": "00bf",
+      "meaning": "BNE framebuffer allocation -> NOP; use stock ashmem path"
+    }
+  ],
+  "presentation": "Stock framebuffer post copies imported ashmem pixels into fb memory",
+  "original_preserved": true
+}

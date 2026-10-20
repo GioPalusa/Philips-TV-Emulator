@@ -1,0 +1,7 @@
+[   43.314068] type=1400 audit(42.505:34): avc: denied { execmem } for pid=1424 comm="BootAnimation" scontext=u:r:bootanim:s0 tcontext=u:r:bootanim:s0 tclass=process permissive=0
+[  201.135628] type=1400 audit(42.505:36): avc: denied { execmem } for pid=1424 comm="BootAnimation" scontext=u:r:bootanim:s0 tcontext=u:r:bootanim:s0 tclass=process permissive=0 duplicate messages suppressed
+[  201.423526] type=1400 audit(200.385:37): avc: denied { execmem } for pid=1188 comm="surfaceflinger" scontext=u:r:surfaceflinger:s0 tcontext=u:r:surfaceflinger:s0 tclass=process permissive=0
+[  214.667783] type=1400 audit(200.385:39): avc: denied { execmem } for pid=1188 comm="surfaceflinger" scontext=u:r:surfaceflinger:s0 tcontext=u:r:surfaceflinger:s0 tclass=process permissive=0 duplicate messages suppressed
+[  220.077837] type=1400 audit(219.345:41): avc: denied { execmem } for pid=2136 comm="BootAnimation" scontext=u:r:bootanim:s0 tcontext=u:r:bootanim:s0 tclass=process permissive=0
+ [  221.124690] type=1400 audit(219.350:43): avc: denied { execmem } for pid=2136 comm="BootAnimation" scontext=u:r:bootanim:s0 tcontext=u:r:bootanim:s0 tclass=process permissive=0 duplicate messages suppressed
+[  238.174430] type=1400 audit(237.105:46): avc: denied { execmem } for pid=2053 comm="surfaceflinger" scontext=u:r:surfaceflinger:s0 tcontext=u:r:surfaceflinger:s0 tclass=process permissive=0

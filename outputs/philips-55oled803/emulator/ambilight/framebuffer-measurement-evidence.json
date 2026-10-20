@@ -1,0 +1,44 @@
+{
+  "schema": "philips-framebuffer-measurement-evidence-v1",
+  "implementation": "Approximate raw OSD plane 2 first-region measurements; preserves stock firmware algorithm and SPI output.",
+  "descriptor_basis": "Same observed format-14 descriptor and byte selectors as philips-osd.inc, recovered from shipped driver.",
+  "sampling": "32\u00d720 cells; 4\u00d74 uniformly spaced samples per cell; averaged 8-bit RGB shifted left eight bits.",
+  "bounds": [
+    "Width 1..4096; height 1..2160; pitch >= width \u00d7 4.",
+    "Only format 14, uncompressed; byte selectors 0..3.",
+    "32-bit address range checked; all reads through RAM-only callback.",
+    "At most 81 reads per frame, maximum read size 16,384 bytes.",
+    "Frame atomically committed after all reads; QEMU invalid-source fallback is zero measurements."
+  ],
+  "tests": {
+    "portable": "Passed with clang -Wall -Wextra -Werror -fsanitize=address,undefined",
+    "coverage": [
+      "Full 32\u00d720 grid",
+      "4x4 cell averaging",
+      "padded pitch",
+      "RGB byte-selector swap",
+      "1x1 frame",
+      "disabled plane",
+      "unsupported format/compression",
+      "short pitch",
+      "address overflow",
+      "late RAM read failure leaves output unchanged"
+    ],
+    "qemu_integration": "Passed against qemu-amb-framebuffer; see qtest-measure-framebuffer.json. Verified actual guest RAM descriptor, byte selectors, register output, stable frame snapshot, next-frame bitmap change, default-off mode and shared IRQ regressions.",
+    "stock_firmware_framebuffer_response": "Pending end-to-end run"
+  },
+  "files": {
+    "mt5891_ambilight_framebuffer.c": "84fe8c9857d6960e6faa849ac4d33bc50810bfd9f526bc58ce06110be5a1e78c",
+    "mt5891_ambilight_framebuffer.h": "c0299e175f91c7809d51a91e2d66408442fc342b8476c7cb9a56afffa2b72c00",
+    "test_framebuffer.c": "831b976a701ce0649fe76803ddabd5da083d60b08f0dc07e29c591be92781a74",
+    "guest_mtamb_probe.c": "81f0eb600dae3b012eadf8fa12293a742f2c4f4f1dcb5771dba27c8ef4be52ec",
+    "guest_mtamb_probe_enabled": "a86717f358769b680b68724a11a9c54ad34f6264b64be8145026546f18bed7b6",
+    "guest_probe.ld": "03cc8941040f3a942219213c01c17ace57328715e7a3a54909eccf685c6aceba",
+    "emulator-ambilight-enabled.rc": "9dd859deae8034229a88d9ed0bdbc772fa58116829b7635265925e2346f8404c"
+  },
+  "limitations": [
+    "Approximates hardware measurement filter; not calibrated physical input.",
+    "Samples raw first OSD region only; no video-plane composition, scaling, mirror, flip, cropping, or additional regions.",
+    "Synthetic geometry remains; no measured physical LED ordering."
+  ]
+}

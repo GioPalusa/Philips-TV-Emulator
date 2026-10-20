@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>55OLED803 Ambilight trace</title>
+<style>
+body{background:#11151b;color:#e1e7ee;font:16px system-ui;margin:40px;max-width:1000px}
+h1{font-size:28px}p{color:#aebdcb;line-height:1.5}
+#pixels{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.pixel{width:100px;padding:8px;background:#202733;border-radius:8px;font:12px monospace}
+.color{height:60px;border-radius:4px;margin-bottom:8px}
+select,input,button{margin:8px 12px 8px 0}#status{color:#ffc877}
+button{padding:9px 14px;border:1px solid #68788d;border-radius:6px;background:#283647;color:white;cursor:pointer}
+button:disabled{opacity:.4;cursor:default}#frame{width:min(440px,70vw);vertical-align:middle}
+#conditions{font-size:14px}#frame-label{font:14px monospace}
+</style>
+<h1>Ambilight output trace</h1>
+<p>Inspect captured firmware output. SPI colors appear in wire order; physical
+LED placement and calibration have not yet been recovered.</p>
+<button id="recorded">Load recorded firmware response</button>
+<input id="file" type="file" accept=".jsonl,.json">
+<label>Stream <select id="stream"><option>processed</option><option>static</option><option>measured</option></select></label>
+<p id="conditions">The supplied recording contains actual stock-driver output with synthetic red measurement input and synthetic geometry. It is not a live feed.</p>
+<div><button id="play" disabled>Play recording</button>
+<label>Frame <input id="frame" type="range" min="0" max="0" value="0" disabled></label>
+<span id="frame-label"></span></div>
+<p id="status">No capture loaded. Load the verified recording or import decoded JSONL.</p>
+<div id="pixels"></div>
+<script src="verified-red-capture.js"></script>
+<script>
+const file=document.querySelector('#file'),stream=document.querySelector('#stream');
+const slider=document.querySelector('#frame'),play=document.querySelector('#play');
+let events=[],sequences=[],timer=null,recorded=false;
+function stop(){if(timer!==null)clearInterval(timer);timer=null;play.textContent='Play recording';}
+function configureFrames(peak=false){
+ stop();
+ sequences=[...new Set(events.filter(e=>e.stream===stream.value).map(e=>e.sequence??1))].sort((a,b)=>a-b);
+ slider.max=Math.max(0,sequences.length-1);slider.value=0;
+ slider.disabled=!sequences.length;play.disabled=sequences.length<2;
+ if(peak&&sequences.length){
+  let best=-1,bestSequence=sequences[0];
+  for(const e of events)if(e.stream===stream.value){
+   const intensity=Math.max(...e.rgb_application);
+   if(intensity>best){best=intensity;bestSequence=e.sequence??1;}
+  }
+  slider.value=sequences.indexOf(bestSequence);
+ }
+ render();
+}
+function render(){
+ const latest=new Map();
+ const sequence=sequences[Number(slider.value)];
+ for(const event of events) if(event.stream===stream.value&&(event.sequence??1)===sequence) latest.set(event.pixel,event);
+ document.querySelector('#pixels').replaceChildren();
+ for(const [index,event] of [...latest].sort((a,b)=>a[0]-b[0])){
+  const cell=document.createElement('div');cell.className='pixel';
+  const color=document.createElement('div');color.className='color';
+  color.style.background=`rgb(${event.rgb_application.map(c=>Math.max(0,Math.min(255,c))).join(',')})`;
+  cell.append(color,document.createTextNode(`#${index} · ${event.rgb_application.join(', ')}`));
+  document.querySelector('#pixels').append(cell);
+ }
+ document.querySelector('#frame-label').textContent=sequence===undefined?'':`Sequence ${sequence} · ${Number(slider.value)+1}/${sequences.length}`;
+ document.querySelector('#status').textContent=events.length?
+ `${latest.size} ${stream.value} pixels. ${recorded?'Recorded guest SPI output; display uses each raw channel’s high byte.':'Imported capture; provenance is supplied by the file.'}`:
+ 'No capture loaded. Load the verified recording or import decoded JSONL.';
+}
+file.onchange=async()=>{
+ if(!file.files.length)return;
+ try{
+  recorded=false;
+  events=(await file.files[0].text()).split(/\r?\n/).filter(x=>x.trim()).map(JSON.parse);
+  for(const e of events)if(e.schema!=='mtamb-pixel-v1'||!Number.isInteger(e.pixel)||e.pixel<1||e.pixel>255||
+    !['static','measured','processed'].includes(e.stream)||!Array.isArray(e.rgb_application)||
+    e.rgb_application.length!==3||!e.rgb_application.every(Number.isInteger)||
+    (e.sequence!==undefined&&(!Number.isInteger(e.sequence)||e.sequence<0)))throw Error('Invalid trace event');
+  document.querySelector('#conditions').textContent='Imported decoded capture. Playback advances 50 captured frames per second; capture timestamps are not available.';
+  configureFrames(true);
+ }catch(error){events=[];configureFrames();document.querySelector('#status').textContent=error.message;}
+};
+document.querySelector('#recorded').onclick=()=>{
+ const capture=window.VERIFIED_AMBILIGHT_CAPTURE;
+ if(!capture){document.querySelector('#status').textContent='Recorded dataset is unavailable. Import decoded JSONL instead.';return;}
+ recorded=true;stream.value='processed';
+ events=capture.frames.flatMap(f=>f.rgb16.map((rgb,i)=>({
+  schema:'mtamb-pixel-v1',sequence:f.sequence,stream:'processed',pixel:i+1,
+  rgb_application:rgb.map(v=>v>>8)
+ })));
+ document.querySelector('#conditions').textContent=capture.conditions+' Playback advances 50 captured frames per second; this is not a live feed.';
+ configureFrames(true);
+};
+stream.onchange=()=>configureFrames();slider.oninput=()=>{stop();render();};
+play.onclick=()=>{
+ if(timer!==null){stop();return;}
+ if(Number(slider.value)===sequences.length-1)slider.value=0;
+ play.textContent='Pause';
+ timer=setInterval(()=>{
+  if(Number(slider.value)>=sequences.length-1){stop();return;}
+  slider.value=Number(slider.value)+1;render();
+ },20);
+};
+</script>
+</html>

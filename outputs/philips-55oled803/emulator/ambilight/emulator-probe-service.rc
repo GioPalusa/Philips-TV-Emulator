@@ -1,0 +1,19 @@
+# DEVELOPMENT EMULATOR ONLY. Append only to a separate development initramfs.
+# Uses the credentials, shell entry point and existing SELinux domain of the
+# shipped dtv-svc service. It does not change the loaded SELinux policy.
+#
+# Stock on-boot occurs well before the later video/Ambilight initialization.
+# Delay 120 guest seconds so the probe observes the later initialized state.
+# The explicit mode-8 operation lasts two seconds and restores the prior mode.
+# Expected asset: regular executable system_file in the development /system.
+on boot
+    start emu-amb-probe
+
+service emu-amb-probe /sbin/sh -c "sleep 120; echo EMULATOR_AMBILIGHT_PROBE_BEGIN; /system/etc/emulator-assets/amb-probe; /system/etc/emulator-assets/amb-probe --synthetic-mode8; echo EMULATOR_AMBILIGHT_PROBE_END"
+    class late_start
+    user root
+    group root
+    console
+    disabled
+    oneshot
+    seclabel u:r:mt_dtv-svc:s0

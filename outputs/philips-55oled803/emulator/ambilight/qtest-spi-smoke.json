@@ -1,0 +1,45 @@
+{
+  "result": "passed",
+  "origin": "synthetic-qtest-mmio",
+  "android_booted": false,
+  "stock_ambilight_algorithm_executed": false,
+  "qemu": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-emulator/qemu-timer-ambi",
+  "checks": [
+    "ready-bit",
+    "byte FIFO via 32-bit writes",
+    "M*N dimensions",
+    "capture exact bytes",
+    "completion",
+    "hardware-0 decode"
+  ],
+  "capture": {
+    "schema": "mt5891-ambilight-spi-v1",
+    "sequence": 1,
+    "complete": true,
+    "m": 7,
+    "n": 4,
+    "data_hex": "9640000000000000ffff0000ffff0000ffff00000000200040008000"
+  },
+  "decoded_wire_rgb_u16": [
+    [
+      65535,
+      0,
+      0
+    ],
+    [
+      0,
+      65535,
+      0
+    ],
+    [
+      0,
+      0,
+      65535
+    ],
+    [
+      32768,
+      16384,
+      8192
+    ]
+  ]
+}

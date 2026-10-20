@@ -1,0 +1,6 @@
+SWIFTSHADER TEST BEGIN
+EGL 1.4 vendor=Google Inc.
+GLES vendor=Google Inc. renderer=Google SwiftShader version=OpenGL ES 2.0 SwiftShader 4.0.0.4
+PASS clear/readback red RGBA=255,0,0,255
+PASS shaders/triangle interior green; exterior preserved red
+SWIFTSHADER TEST PASS

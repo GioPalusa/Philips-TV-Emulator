@@ -1,0 +1,37 @@
+{
+  "run": "ui/runs/20261020-175512-1dc188",
+  "observations": [
+    {
+      "line": 861,
+      "text": "[   11.190080] init: Command 'mkdir /user_setting/rw 0777 system system' action=post-fs (/init.rc:716) returned 0 took 3.899ms."
+    },
+    {
+      "line": 6849,
+      "text": "TVUI_BOOT:1"
+    },
+    {
+      "line": 8349,
+      "text": "TVUI_KEY_dcfc642c1631:0"
+    },
+    {
+      "line": 5008,
+      "text": "01-01 00:04:55.395  2019  2019 F DEBUG   : pid: 1966, tid: 2004, name: stack_manager  >>> com.android.bluetooth <<<"
+    },
+    {
+      "line": 5573,
+      "text": "01-01 00:05:17.763  1492  1509 E ActivityManager: ANR in com.android.systemui"
+    }
+  ],
+  "SQLiteCantOpenDatabase_occurrences": 1,
+  "framework_boot_complete": true,
+  "virtual_home_accepted": true,
+  "screen_observed": "Actual stock Google dots and Android wordmark boot animation",
+  "full_launcher_verified": false,
+  "remaining": [
+    "Native TV service readiness waits",
+    "System UI/application ANRs under emulation load",
+    "Bluetooth alarm timer initialization aborts",
+    "Boot animation can continue after framework boot-complete flag"
+  ],
+  "physical_TV_modified": false
+}

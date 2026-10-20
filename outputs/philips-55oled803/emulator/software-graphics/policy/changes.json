@@ -1,0 +1,12 @@
+{
+  "rules_added": [
+    "allow bootanim bootanim:process execmem;",
+    "allow surfaceflinger surfaceflinger:process execmem;"
+  ],
+  "policy_version": 30,
+  "avtab_rules_before": 18052,
+  "avtab_rules_after": 18052,
+  "input_sha256": "8f6cb42c86456a75092502a923e58d89dc8460c80f349b33fe2dae31e1c2266d",
+  "output_sha256": "621e4c7a1fe7474608349c94060351a7fc82ff32cbc7b1bd9b03a37bfbedc238",
+  "proof": "Each permission addition reparses; reverting that addition and using equal-roundtrip canonical serialization yields byte-for-byte original canonical policy. Permissive-domain settings unchanged."
+}

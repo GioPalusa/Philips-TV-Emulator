@@ -1,0 +1,19 @@
+{
+  "purpose": "Emulator-only development ramdisk; not a physical-TV update",
+  "stock_sha256": "960d714b884a6a672980e3f518f08bf960539e196f6fd4ab050ef0ab26652ccd",
+  "output_sha256": "fb0253c34343364189e9332a916d44d1e93367ad261f7d812d95876ba20be28e",
+  "changed_entries": [
+    "default.prop",
+    "fstab.mt5891",
+    "init.rc",
+    "sepolicy"
+  ],
+  "preserved_entries": 69,
+  "system_verity_disabled": true,
+  "development_properties": {
+    "ro.hardware.gralloc": "emulator",
+    "ro.hardware.hwcomposer": "emulator"
+  },
+  "init_fragment_sha256": "897c31d48ffbb0840e6b9b7fa089499f2e246e4d517e02fe52802b5d74c3e268",
+  "sepolicy_sha256": "621e4c7a1fe7474608349c94060351a7fc82ff32cbc7b1bd9b03a37bfbedc238"
+}

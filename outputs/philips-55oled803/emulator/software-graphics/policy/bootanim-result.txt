@@ -1,0 +1,5 @@
+PASS policy_version=30 type=bootanim(173) class=process(2) permission=execmem(26)
+allow bootanim bootanim:process execmem;
+avtab_rules_before=18052 after=18052 old_mask=00217f7d new_mask=02217f7d
+PASS output reparses; reverting only this permission reproduces the original canonical policy byte-for-byte
+input_bytes=397972 output_bytes=397972

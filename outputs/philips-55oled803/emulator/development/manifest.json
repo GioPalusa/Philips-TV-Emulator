@@ -1,0 +1,58 @@
+{
+  "purpose": "Emulator development profile, not a physical TV firmware update",
+  "stock_image": "/Users/palusa/Documents/Codex/2026-10-20/my/outputs/philips-55oled803/emulator/stock-emmc-107.1.143.0.img",
+  "system_partition_sha256": "1c493308f0178ec4d622685e6e5e138b61e664bf83771d103d17d822617d46f3",
+  "ramdisk_sha256": "fb0253c34343364189e9332a916d44d1e93367ad261f7d812d95876ba20be28e",
+  "files": {
+    "/lib/egl/libEGL_swiftshader.so": {
+      "sha256": "d0f8f7c592910a4635e37650bcac5e9e22df06c4667347bea51d4294afd1aaf8",
+      "label": "system_file",
+      "mode": "0100644"
+    },
+    "/lib/egl/libGLESv2_swiftshader.so": {
+      "sha256": "dcdcdd081c050907e69d29ccd5b44e4065a52cc8fd906a657c0493ed2fb6d2b4",
+      "label": "system_file",
+      "mode": "0100644"
+    },
+    "/lib/egl/libGLESv1_CM_swiftshader.so": {
+      "sha256": "2d4c210e43856b6ccf71ab56b15509b98014e5ae934a6fd0436cdfe5f6fb370b",
+      "label": "system_file",
+      "mode": "0100644"
+    },
+    "/vendor/lib/hw/hwcomposer.emulator.so": {
+      "sha256": "a57e413f95339e0c4ab1c154272380feffa749a5a5c6e514a4550fa58c868b1e",
+      "label": "vendor_file",
+      "mode": "0100644"
+    },
+    "/etc/emulator-assets/render_test": {
+      "sha256": "c148467fd6a481cb03dda5457686f9caeb821595571f93ffebf21f4a9826af20",
+      "label": "system_file",
+      "mode": "0100755"
+    },
+    "/etc/emulator-assets/amb-probe": {
+      "sha256": "a86717f358769b680b68724a11a9c54ad34f6264b64be8145026546f18bed7b6",
+      "label": "system_file",
+      "mode": "0100755"
+    },
+    "/vendor/lib/hw/gralloc.emulator.so": {
+      "sha256": "1da23a3bf729f69028526dff3fbfe376aed19ea96e9362544c99efbac39f32a9",
+      "label": "vendor_file",
+      "mode": "0100644"
+    }
+  },
+  "renamed": {
+    "/system/lib/egl/libGLES_mali.so": "/system/lib/egl/libGLES_mali.so.disabled"
+  },
+  "system_verity_disabled": true,
+  "selinux_enforcing": true,
+  "additional_permissions": [
+    "bootanim self:process execmem",
+    "surfaceflinger self:process execmem"
+  ],
+  "ambilight_geometry": "Synthetic firmware fallback: 4 left, 9 top, 4 right",
+  "ambilight_mode": "Stock measured-input mode 8, enabled after 60 guest seconds",
+  "guest_disk_writes": "Launch with QEMU snapshot overlay",
+  "graphics_diagnostics": "Bounded framebuffer copy state and generated-code logging",
+  "gralloc": "Emulator ashmem-only allocation variant of exact stock fallback HAL",
+  "persistent_state_initialization": "Create /user_setting/rw 0777 system:system in post-fs before stock post-fs-data"
+}

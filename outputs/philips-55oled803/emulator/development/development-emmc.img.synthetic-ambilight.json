@@ -1,0 +1,59 @@
+{
+  "schema": "philips-emulator-synthetic-ambilight-profile-v1",
+  "profile": "synthetic-compiled-fallback-geometry",
+  "source_image": "/Users/palusa/Documents/Codex/2026-10-20/my/outputs/philips-55oled803/emulator/stock-emmc-107.1.143.0.img",
+  "destination_image": "/Users/palusa/Documents/Codex/2026-10-20/my/outputs/philips-55oled803/emulator/development/development-emmc.img",
+  "source_size": 15634268160,
+  "source_mtime_ns": 1792505532759479849,
+  "copy_method": "macOS clonefile; independent APFS copy-on-write clone",
+  "physical_tv_configuration": false,
+  "flash_to_physical_tv": false,
+  "stock_algorithms_run": false,
+  "source_nvm_sha256": "5647f05ec18958947d32874eeb788fa396a05d0bab7c1b71f112ceb7e9b31eee",
+  "destination_nvm_sha256": "55651de1fd909a98c479a9283d4f2aeea42a4887626a269253a2d997f7d0d100",
+  "changes": [
+    {
+      "partition": 26,
+      "offset_hex": "0x464",
+      "image_offset": 14620296292,
+      "before_hex": "0000",
+      "after_hex": "4c08"
+    }
+  ],
+  "options": {
+    "schema": "philips-ambilight-nvm-options-v1",
+    "nvm_partition": 26,
+    "offset_hex": "0x464",
+    "raw_hex": "4c0800",
+    "passes_support_gate": true,
+    "side_segments": 4,
+    "top_segments": 9,
+    "bottom_segments": 0,
+    "topology_version": 1,
+    "hardware_selection": 0,
+    "algorithm_hardware_variant": 0,
+    "mirror_flip_correction_enabled": false,
+    "matches_compiled_architecture": true,
+    "compiled_architecture_index": 10,
+    "limitations": [
+      "The firmware uses architecture index 10 when no tuple matches.",
+      "Valid flash tuning data can replace the compiled architecture table.",
+      "Passing the support gate does not prove the algorithm is running.",
+      "These bytes alone do not establish physical LED count or wiring order."
+    ]
+  },
+  "evidence": {
+    "module_sha256": "7c9beee7c57ce276357eb4ee8a031ea3c8e5eebd42230df5b073ae557633bea9",
+    "support_gate": "IMamb_Eng_Create 0x59fa8c",
+    "geometry_decode": "IMamb_Eng_Create 0x59fb34..0x59fb74",
+    "default_table": ".rodata+0x85dc6, 24 four-byte tuples",
+    "fallback_index": "IMamb_App_GetArchIndex 0x5a1d88: 10"
+  },
+  "limitations": [
+    "Only geometry is seeded; other NVM settings remain zero.",
+    "EEPROM_Init and its MSDC initializer do not validate checksums or erase storage.",
+    "No checksum surrounds the direct Ambilight option reads.",
+    "Other userspace initialization might later change NVM; observe boot logs.",
+    "No measurements of physical 55OLED803/12 topology are represented."
+  ]
+}

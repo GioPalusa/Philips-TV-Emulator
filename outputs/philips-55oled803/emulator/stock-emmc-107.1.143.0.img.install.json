@@ -1,0 +1,228 @@
+{
+  "model": "Philips 55OLED803/12",
+  "firmware": "TPM171E_R.107.001.143.000",
+  "disk_size_bytes": 15634268160,
+  "status": "Stock update payloads installed; no unique TV data",
+  "writes": [
+    {
+      "outer_entry": "uboot.bin.zip",
+      "member": "uboot.bin",
+      "disk_offset": 0,
+      "size_bytes": 801168,
+      "sha256": "377525f54b4373c8aa804ed6aaa2f331125751fc0a07bb5b872f166608475345",
+      "partition": "uboot"
+    },
+    {
+      "outer_entry": "uboot.bin.zip",
+      "member": "uboot.bin",
+      "disk_offset": 2097152,
+      "size_bytes": 801168,
+      "sha256": "377525f54b4373c8aa804ed6aaa2f331125751fc0a07bb5b872f166608475345",
+      "partition": "ubootB"
+    },
+    {
+      "outer_entry": "uenv.bin.zip",
+      "member": "uenv.bin",
+      "disk_offset": 59768832,
+      "size_bytes": 4984,
+      "sha256": "af7569a3ee66e6c2b6d65375ae592691f7d4f1dae3bb5f7bd410cbfa2e555577",
+      "partition": "uboot_env"
+    },
+    {
+      "outer_entry": "uenv.bin.zip",
+      "member": "uenv.bin",
+      "disk_offset": 61865984,
+      "size_bytes": 4984,
+      "sha256": "af7569a3ee66e6c2b6d65375ae592691f7d4f1dae3bb5f7bd410cbfa2e555577",
+      "partition": "ubootB_env"
+    },
+    {
+      "outer_entry": "recovery.img.zip",
+      "member": "recovery.img",
+      "disk_offset": 5242880,
+      "size_bytes": 20440364,
+      "sha256": "7a7f2bcfdfd6fbf23e7ef9d05f03d3f9210012f7f9665d134d34b6e09e5c3072",
+      "partition": "recovery"
+    },
+    {
+      "outer_entry": "recovery.img.zip",
+      "member": "recovery.img",
+      "disk_offset": 63963136,
+      "size_bytes": 20440364,
+      "sha256": "7a7f2bcfdfd6fbf23e7ef9d05f03d3f9210012f7f9665d134d34b6e09e5c3072",
+      "partition": "recoveryB"
+    },
+    {
+      "outer_entry": "boot.img.zip",
+      "member": "boot.img",
+      "disk_offset": 38797312,
+      "size_bytes": 12526888,
+      "sha256": "e1e15c5d0b24bb6ae82990a63e4351cac444b2036ac88d2ea4b150c6e7b30c74",
+      "partition": "boot"
+    },
+    {
+      "outer_entry": "rootfs.bin.zip",
+      "member": "rootfs.bin",
+      "disk_offset": 14313062400,
+      "size_bytes": 63963136,
+      "sha256": "8579ae027b134ec6c6d6083f788fd529f4a3ee7d80572fc2d019e5b220ba0057",
+      "partition": "linux_rootfs"
+    },
+    {
+      "outer_entry": "factory.img.zip",
+      "member": "factory.img",
+      "disk_offset": 14377025536,
+      "size_bytes": 12541952,
+      "sha256": "a218236362ea899d6ff3cec4bc9c44f79df51e5bb96af171f6742ad10ed44033",
+      "partition": "factory"
+    },
+    {
+      "outer_entry": "3rd_file.zip",
+      "member": "3rd_file",
+      "disk_offset": 14408482816,
+      "size_bytes": 134217728,
+      "sha256": "e7d923c49108c88ef266d790a4c900452357c60300bb6d0917df3e99055ce58b",
+      "partition": "3rd_ro"
+    },
+    {
+      "outer_entry": "tz.bin.lzhs.zip",
+      "member": "tz.bin.lzhs",
+      "disk_offset": 14612955136,
+      "size_bytes": 457360,
+      "sha256": "3349b67c79ad79830ebc751857bb7f6adb09220aa72afade1b6bb8f7620b350c",
+      "partition": "tzbp"
+    },
+    {
+      "outer_entry": "adsp.bin.zip",
+      "member": "adsp.bin",
+      "disk_offset": 14614003712,
+      "size_bytes": 3213460,
+      "sha256": "46ad1cbdfa9f8db816d4a980067f2470447272d7380767b27e9086cd4d94110b",
+      "partition": "adsp"
+    },
+    {
+      "outer_entry": "pq.bin.zip",
+      "member": "pq.bin",
+      "disk_offset": 14623440896,
+      "size_bytes": 10485760,
+      "sha256": "691f0f645d3ef7af91a8faa3e4c3a79b0ec316d8056067431a051de1fa11538b",
+      "partition": "pq"
+    },
+    {
+      "outer_entry": "AQ.bin.zip",
+      "member": "AQ.bin",
+      "disk_offset": 14644412416,
+      "size_bytes": 447417,
+      "sha256": "216d5b222872d07bb784800f9c80247d81826f8ad2249a0587e8a5ba6096724c",
+      "partition": "aq"
+    },
+    {
+      "outer_entry": "system1.img.zip",
+      "member": "system1.img",
+      "disk_offset": 118489088,
+      "size_bytes": 268435456,
+      "sha256": "1ec983bf0ab1fbd3a698bde4576203c11909f430e5d73ca2e6ffbba1b21236ba",
+      "partition": "system"
+    },
+    {
+      "outer_entry": "system2.img.zip",
+      "member": "system2.img",
+      "disk_offset": 386924544,
+      "size_bytes": 268435456,
+      "sha256": "f73dab0ea86a9341760b1d2956b208d33764c6b60b595c37dadcb5ff1c043eba",
+      "partition": "system"
+    },
+    {
+      "outer_entry": "system3.img.zip",
+      "member": "system3.img",
+      "disk_offset": 655360000,
+      "size_bytes": 268435456,
+      "sha256": "c84c467d27a0148040fbe4dc3777105edd3d5187852008fb98fd39784ab2c743",
+      "partition": "system"
+    },
+    {
+      "outer_entry": "system4.img.zip",
+      "member": "system4.img",
+      "disk_offset": 923795456,
+      "size_bytes": 268435456,
+      "sha256": "cd4fcafd2f9bca2eda8f958e80386a4f3187a99419503d12f5eac4772abf6f22",
+      "partition": "system"
+    },
+    {
+      "outer_entry": "system5.img.zip",
+      "member": "system5.img",
+      "disk_offset": 1192230912,
+      "size_bytes": 268435456,
+      "sha256": "5d8ffd27248299f76a325005c244ee1dc705397d2851402eb093ee2d957274d6",
+      "partition": "system"
+    },
+    {
+      "outer_entry": "system6.img.zip",
+      "member": "system6.img",
+      "disk_offset": 1460666368,
+      "size_bytes": 268435456,
+      "sha256": "511dc9e1a89c6010f285a19429683f235c20f289053ae71692e4ce141a7bcf99",
+      "partition": "system"
+    },
+    {
+      "outer_entry": "system7.img.zip",
+      "member": "system7.img",
+      "disk_offset": 1729101824,
+      "size_bytes": 268435456,
+      "sha256": "f7eb1020754a9801e4c00d986a3e7884616be5ce7606dd01cfb42605d41f6620",
+      "partition": "system"
+    },
+    {
+      "outer_entry": "system8.img.zip",
+      "member": "system8.img",
+      "disk_offset": 1997537280,
+      "size_bytes": 268435456,
+      "sha256": "a9808b106d5eab40e6eca89067d7925b1abf6eeb95b101dcd5bf4502b11316c6",
+      "partition": "system"
+    }
+  ],
+  "formatted_ext4": [
+    "userdata",
+    "cache",
+    "factory_setting",
+    "3rd_rw",
+    "usersetting"
+  ],
+  "default_files": [
+    {
+      "entry_prefix": "user_setting",
+      "files": 20055,
+      "size_bytes": 47574969,
+      "outer_entry": "user_setting.zip"
+    },
+    {
+      "entry_prefix": "cache",
+      "files": 11,
+      "size_bytes": 1347142,
+      "outer_entry": "cache.zip"
+    },
+    {
+      "entry_prefix": "tvupgrades",
+      "files": 1,
+      "size_bytes": 25,
+      "outer_entry": "tvupgrades.zip"
+    },
+    {
+      "entry_prefix": "edid",
+      "files": 9,
+      "size_bytes": 1695,
+      "outer_entry": "edid.zip"
+    }
+  ],
+  "ext4_profile": {
+    "block_size": 4096,
+    "root_owner": "0:0",
+    "disabled_features": [
+      "metadata_csum",
+      "metadata_csum_seed",
+      "64bit",
+      "orphan_file"
+    ],
+    "target_kernel": "3.10.79"
+  }
+}

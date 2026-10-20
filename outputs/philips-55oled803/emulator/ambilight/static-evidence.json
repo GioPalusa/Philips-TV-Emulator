@@ -1,0 +1,1162 @@
+{
+  "AlCommon_setPixelArray": {
+    "result": "    sp = sp - 0x18;\n    r5 = arg0;\n    asm { ldrd       r3, r0, [r4] };\n    asm { strd       r0, r6, [sp, #0x18 + var_18] };\n    __android_log_print();\n    pthread_mutex_lock(0x3427c);\n    __aeabi_memcpy();\n    *dword_34480 = r5;\n    pthread_mutex_unlock(0x3427c);\n    pthread_mutex_lock(0x34278);\n    __aeabi_memcpy();\n    pthread_mutex_unlock(0x34278);\n    if (*(int8_t *)byte_34638 == 0x0) {\n            *(int8_t *)byte_34638 = 0x1;\n            pthread_mutex_lock(0x34274);\n            pthread_cond_signal(0x3463c);\n            pthread_mutex_unlock(0x34274);\n    }\n    return 0x0;\n",
+    "evidence_id": "ev_a03be0057b39ff494d62b1b9456ce2e90db5e5eef709eff2b3dabcce42f17289",
+    "evidence": {
+      "evidence_id": "ev_a03be0057b39ff494d62b1b9456ce2e90db5e5eef709eff2b3dabcce42f17289",
+      "subject": {
+        "name": "libambilight.so",
+        "digest": {
+          "sha256": "d20570babc64d9dc4d4547f2921bfdf256c7196fec8e3d587d58d653bc1a9525"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-port/libambilight.so"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_pseudo_code",
+      "parameters": {
+        "procedure": "AlCommon_setPixelArray",
+        "document": null
+      },
+      "raw_result": "    sp = sp - 0x18;\n    r5 = arg0;\n    asm { ldrd       r3, r0, [r4] };\n    asm { strd       r0, r6, [sp, #0x18 + var_18] };\n    __android_log_print();\n    pthread_mutex_lock(0x3427c);\n    __aeabi_memcpy();\n    *dword_34480 = r5;\n    pthread_mutex_unlock(0x3427c);\n    pthread_mutex_lock(0x34278);\n    __aeabi_memcpy();\n    pthread_mutex_unlock(0x34278);\n    if (*(int8_t *)byte_34638 == 0x0) {\n            *(int8_t *)byte_34638 = 0x1;\n            pthread_mutex_lock(0x34274);\n            pthread_cond_signal(0x3463c);\n            pthread_mutex_unlock(0x34274);\n    }\n    return 0x0;\n",
+      "normalized_result": "    sp = sp - 0x18;\n    r5 = arg0;\n    asm { ldrd       r3, r0, [r4] };\n    asm { strd       r0, r6, [sp, #0x18 + var_18] };\n    __android_log_print();\n    pthread_mutex_lock(0x3427c);\n    __aeabi_memcpy();\n    *dword_34480 = r5;\n    pthread_mutex_unlock(0x3427c);\n    pthread_mutex_lock(0x34278);\n    __aeabi_memcpy();\n    pthread_mutex_unlock(0x34278);\n    if (*(int8_t *)byte_34638 == 0x0) {\n            *(int8_t *)byte_34638 = 0x1;\n            pthread_mutex_lock(0x34274);\n            pthread_cond_signal(0x3463c);\n            pthread_mutex_unlock(0x34274);\n    }\n    return 0x0;\n",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "AlCommon_getProcessedPixelArray": {
+    "result": "    r1 = arg1;\n    r4 = arg0;\n    var_18 = **dword_33704;\n    if (r4 >= 0x1) {\n            r6 = r1 + 0x8;\n            r5 = &decomp_var_1c8;\n            do {\n                    MTAMB_GetProcessedPixel();\n                    r6[0xfffffffffffffffe] = *r5 >> 0x8;\n                    r6[0xffffffffffffffff] = r5[0x1] >> 0x8;\n                    r0 = r5[0x2];\n                    r5 = r5 + 0xc;\n                    *r6 = r0 >> 0x8;\n                    r6 = r6 + 0xc;\n            } while (r4 != &arg_1);\n    }\n    r0 = *dword_33704;\n    r0 = *r0;\n    r0 = r0 - var_18;\n    bool_3 = r0 == 0x0;\n    bool_2 = r0 == 0x0;\n    if (r0 == 0x0) {\n            asm { movseq     r0, #0x0 };\n    }\n    if (bool_2) {\n            asm { addeq      sp, #0x1b4 };\n    }\n    if (!bool_3) {\n            __stack_chk_fail();\n    }\n    return r0;\n",
+    "evidence_id": "ev_fd83510b06f8c81caaec0512b5383ae049bf044cebb31f86a487c8632b06c916",
+    "evidence": {
+      "evidence_id": "ev_fd83510b06f8c81caaec0512b5383ae049bf044cebb31f86a487c8632b06c916",
+      "subject": {
+        "name": "libambilight.so",
+        "digest": {
+          "sha256": "d20570babc64d9dc4d4547f2921bfdf256c7196fec8e3d587d58d653bc1a9525"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-port/libambilight.so"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_pseudo_code",
+      "parameters": {
+        "procedure": "AlCommon_getProcessedPixelArray",
+        "document": null
+      },
+      "raw_result": "    r1 = arg1;\n    r4 = arg0;\n    var_18 = **dword_33704;\n    if (r4 >= 0x1) {\n            r6 = r1 + 0x8;\n            r5 = &decomp_var_1c8;\n            do {\n                    MTAMB_GetProcessedPixel();\n                    r6[0xfffffffffffffffe] = *r5 >> 0x8;\n                    r6[0xffffffffffffffff] = r5[0x1] >> 0x8;\n                    r0 = r5[0x2];\n                    r5 = r5 + 0xc;\n                    *r6 = r0 >> 0x8;\n                    r6 = r6 + 0xc;\n            } while (r4 != &arg_1);\n    }\n    r0 = *dword_33704;\n    r0 = *r0;\n    r0 = r0 - var_18;\n    bool_3 = r0 == 0x0;\n    bool_2 = r0 == 0x0;\n    if (r0 == 0x0) {\n            asm { movseq     r0, #0x0 };\n    }\n    if (bool_2) {\n            asm { addeq      sp, #0x1b4 };\n    }\n    if (!bool_3) {\n            __stack_chk_fail();\n    }\n    return r0;\n",
+      "normalized_result": "    r1 = arg1;\n    r4 = arg0;\n    var_18 = **dword_33704;\n    if (r4 >= 0x1) {\n            r6 = r1 + 0x8;\n            r5 = &decomp_var_1c8;\n            do {\n                    MTAMB_GetProcessedPixel();\n                    r6[0xfffffffffffffffe] = *r5 >> 0x8;\n                    r6[0xffffffffffffffff] = r5[0x1] >> 0x8;\n                    r0 = r5[0x2];\n                    r5 = r5 + 0xc;\n                    *r6 = r0 >> 0x8;\n                    r6 = r6 + 0xc;\n            } while (r4 != &arg_1);\n    }\n    r0 = *dword_33704;\n    r0 = *r0;\n    r0 = r0 - var_18;\n    bool_3 = r0 == 0x0;\n    bool_2 = r0 == 0x0;\n    if (r0 == 0x0) {\n            asm { movseq     r0, #0x0 };\n    }\n    if (bool_2) {\n            asm { addeq      sp, #0x1b4 };\n    }\n    if (!bool_3) {\n            __stack_chk_fail();\n    }\n    return r0;\n",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "AlCommon_init": {
+    "result": "    r4 = &var_18;\n    var_14 = **(\"faceIN17IAmbilightManager23IFeatureChangedListenerEEE0_NS_10IInterfaceE\" + 0x274ee);\n    var_18 = 0x0;\n    MTAMB_GetConfigValue();\n    if (0xffffffff > 0x9) {\n            asm { movshi     r0, #0x2 };\n    }\n    *dword_341a0 = 0x0;\n    MTAMB_GetConfigValue();\n    *dword_341b4 = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341a4 = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341cc = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341d0 = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341d4 = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341b0 = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341d8 = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341dc = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341e0 = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341c8 = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341e4 = var_18;\n    MTAMB_GetConfigValue();\n    MTAMB_GetConfigValue();\n    r5 = 0x1;\n    r4 = 0x341f0;\n    do {\n            MTAMB_GetAlignments();\n            r5 = r5 + 0x1;\n            r4 = r4 + 0xa;\n    } while (r5 != 0xd);\n    MTAMB_GetConfiguration();\n    *(int8_t *)byte_3426c = 0x0;\n    pthread_create(0x34270, 0x0, 0x28e25, 0x0);\n    if (pthread_mutex_init(0x34274, 0x0) != 0x0) {\n            __android_log_print();\n    }\n    if (pthread_mutex_init(0x34278, 0x0) != 0x0) {\n            __android_log_print();\n    }\n    if (pthread_mutex_init(0x3427c, 0x0) != 0x0) {\n            __android_log_print();\n    }\n    if (pthread_mutex_init(0x34280, 0x0) != 0x0) {\n            __android_log_print();\n    }\n    AlCommon_cacheLastStatus();\n    r0 = *dword_33704;\n    r0 = *r0;\n    r0 = r0 - var_14;\n    bool_7 = r0 == 0x0;\n    bool_6 = r0 == 0x0;\n    if (r0 == 0x0) {\n            asm { movseq     r0, #0x0 };\n    }\n    if (bool_6) {\n            asm { addeq      sp, #0x8 };\n    }\n    if (!bool_7) {\n            __stack_chk_fail();\n    }\n    return r0;\n",
+    "evidence_id": "ev_ea940ca119f7d361543aa894aab81d4c01851f1fae80d422cc05ed11bad2ca28",
+    "evidence": {
+      "evidence_id": "ev_ea940ca119f7d361543aa894aab81d4c01851f1fae80d422cc05ed11bad2ca28",
+      "subject": {
+        "name": "libambilight.so",
+        "digest": {
+          "sha256": "d20570babc64d9dc4d4547f2921bfdf256c7196fec8e3d587d58d653bc1a9525"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-port/libambilight.so"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_pseudo_code",
+      "parameters": {
+        "procedure": "AlCommon_init",
+        "document": null
+      },
+      "raw_result": "    r4 = &var_18;\n    var_14 = **(\"faceIN17IAmbilightManager23IFeatureChangedListenerEEE0_NS_10IInterfaceE\" + 0x274ee);\n    var_18 = 0x0;\n    MTAMB_GetConfigValue();\n    if (0xffffffff > 0x9) {\n            asm { movshi     r0, #0x2 };\n    }\n    *dword_341a0 = 0x0;\n    MTAMB_GetConfigValue();\n    *dword_341b4 = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341a4 = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341cc = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341d0 = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341d4 = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341b0 = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341d8 = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341dc = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341e0 = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341c8 = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341e4 = var_18;\n    MTAMB_GetConfigValue();\n    MTAMB_GetConfigValue();\n    r5 = 0x1;\n    r4 = 0x341f0;\n    do {\n            MTAMB_GetAlignments();\n            r5 = r5 + 0x1;\n            r4 = r4 + 0xa;\n    } while (r5 != 0xd);\n    MTAMB_GetConfiguration();\n    *(int8_t *)byte_3426c = 0x0;\n    pthread_create(0x34270, 0x0, 0x28e25, 0x0);\n    if (pthread_mutex_init(0x34274, 0x0) != 0x0) {\n            __android_log_print();\n    }\n    if (pthread_mutex_init(0x34278, 0x0) != 0x0) {\n            __android_log_print();\n    }\n    if (pthread_mutex_init(0x3427c, 0x0) != 0x0) {\n            __android_log_print();\n    }\n    if (pthread_mutex_init(0x34280, 0x0) != 0x0) {\n            __android_log_print();\n    }\n    AlCommon_cacheLastStatus();\n    r0 = *dword_33704;\n    r0 = *r0;\n    r0 = r0 - var_14;\n    bool_7 = r0 == 0x0;\n    bool_6 = r0 == 0x0;\n    if (r0 == 0x0) {\n            asm { movseq     r0, #0x0 };\n    }\n    if (bool_6) {\n            asm { addeq      sp, #0x8 };\n    }\n    if (!bool_7) {\n            __stack_chk_fail();\n    }\n    return r0;\n",
+      "normalized_result": "    r4 = &var_18;\n    var_14 = **(\"faceIN17IAmbilightManager23IFeatureChangedListenerEEE0_NS_10IInterfaceE\" + 0x274ee);\n    var_18 = 0x0;\n    MTAMB_GetConfigValue();\n    if (0xffffffff > 0x9) {\n            asm { movshi     r0, #0x2 };\n    }\n    *dword_341a0 = 0x0;\n    MTAMB_GetConfigValue();\n    *dword_341b4 = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341a4 = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341cc = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341d0 = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341d4 = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341b0 = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341d8 = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341dc = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341e0 = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341c8 = var_18;\n    MTAMB_GetConfigValue();\n    *dword_341e4 = var_18;\n    MTAMB_GetConfigValue();\n    MTAMB_GetConfigValue();\n    r5 = 0x1;\n    r4 = 0x341f0;\n    do {\n            MTAMB_GetAlignments();\n            r5 = r5 + 0x1;\n            r4 = r4 + 0xa;\n    } while (r5 != 0xd);\n    MTAMB_GetConfiguration();\n    *(int8_t *)byte_3426c = 0x0;\n    pthread_create(0x34270, 0x0, 0x28e25, 0x0);\n    if (pthread_mutex_init(0x34274, 0x0) != 0x0) {\n            __android_log_print();\n    }\n    if (pthread_mutex_init(0x34278, 0x0) != 0x0) {\n            __android_log_print();\n    }\n    if (pthread_mutex_init(0x3427c, 0x0) != 0x0) {\n            __android_log_print();\n    }\n    if (pthread_mutex_init(0x34280, 0x0) != 0x0) {\n            __android_log_print();\n    }\n    AlCommon_cacheLastStatus();\n    r0 = *dword_33704;\n    r0 = *r0;\n    r0 = r0 - var_14;\n    bool_7 = r0 == 0x0;\n    bool_6 = r0 == 0x0;\n    if (r0 == 0x0) {\n            asm { movseq     r0, #0x0 };\n    }\n    if (bool_6) {\n            asm { addeq      sp, #0x8 };\n    }\n    if (!bool_7) {\n            __stack_chk_fail();\n    }\n    return r0;\n",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "0x1abec": {
+    "result": "    var_20 = **dword_33704;\n    android::Parcel::Parcel();\n    android::Parcel::Parcel();\n    android::Parcel::writeInterfaceToken(&decomp_var_54);\n    android::Parcel::setDataPosition(&decomp_var_54);\n    android::Parcel::writeInt32(&decomp_var_54);\n    android::Parcel::write(&decomp_var_54, r2);\n    android::Parcel::setDataPosition(&decomp_var_54);\n    r0 = arg0[0x2];\n    r0 = (*(*r0 + 0x14))(r0, 0x1a, &decomp_var_54, &decomp_var_88, r9);\n    r5 = r0;\n    r0 = android::Parcel::setDataPosition(&decomp_var_54);\n    if (r5 == 0x0) {\n            android::Parcel::readInt32();\n    }\n    android::Parcel::~Parcel();\n    android::Parcel::~Parcel();\n    r0 = *(\"g\" + 0x1ac84);\n    r0 = *r0;\n    r0 = r0 - var_20;\n    bool_3 = r0 == 0x0;\n    bool_2 = r0 == 0x0;\n    if (r0 == 0x0) {\n            asm { moveq      r0, r5 };\n    }\n    if (bool_2) {\n            asm { addeq      sp, #0x74 };\n    }\n    if (!bool_3) {\n            __stack_chk_fail();\n    }\n    return r0;\n",
+    "evidence_id": "ev_b525c537aacd69a231e4f6696e919687983b4403e3889648a86b3724df0a3a25",
+    "evidence": {
+      "evidence_id": "ev_b525c537aacd69a231e4f6696e919687983b4403e3889648a86b3724df0a3a25",
+      "subject": {
+        "name": "libambilight.so",
+        "digest": {
+          "sha256": "d20570babc64d9dc4d4547f2921bfdf256c7196fec8e3d587d58d653bc1a9525"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-port/libambilight.so"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_pseudo_code",
+      "parameters": {
+        "procedure": "0x1abec",
+        "document": null
+      },
+      "raw_result": "    var_20 = **dword_33704;\n    android::Parcel::Parcel();\n    android::Parcel::Parcel();\n    android::Parcel::writeInterfaceToken(&decomp_var_54);\n    android::Parcel::setDataPosition(&decomp_var_54);\n    android::Parcel::writeInt32(&decomp_var_54);\n    android::Parcel::write(&decomp_var_54, r2);\n    android::Parcel::setDataPosition(&decomp_var_54);\n    r0 = arg0[0x2];\n    r0 = (*(*r0 + 0x14))(r0, 0x1a, &decomp_var_54, &decomp_var_88, r9);\n    r5 = r0;\n    r0 = android::Parcel::setDataPosition(&decomp_var_54);\n    if (r5 == 0x0) {\n            android::Parcel::readInt32();\n    }\n    android::Parcel::~Parcel();\n    android::Parcel::~Parcel();\n    r0 = *(\"g\" + 0x1ac84);\n    r0 = *r0;\n    r0 = r0 - var_20;\n    bool_3 = r0 == 0x0;\n    bool_2 = r0 == 0x0;\n    if (r0 == 0x0) {\n            asm { moveq      r0, r5 };\n    }\n    if (bool_2) {\n            asm { addeq      sp, #0x74 };\n    }\n    if (!bool_3) {\n            __stack_chk_fail();\n    }\n    return r0;\n",
+      "normalized_result": "    var_20 = **dword_33704;\n    android::Parcel::Parcel();\n    android::Parcel::Parcel();\n    android::Parcel::writeInterfaceToken(&decomp_var_54);\n    android::Parcel::setDataPosition(&decomp_var_54);\n    android::Parcel::writeInt32(&decomp_var_54);\n    android::Parcel::write(&decomp_var_54, r2);\n    android::Parcel::setDataPosition(&decomp_var_54);\n    r0 = arg0[0x2];\n    r0 = (*(*r0 + 0x14))(r0, 0x1a, &decomp_var_54, &decomp_var_88, r9);\n    r5 = r0;\n    r0 = android::Parcel::setDataPosition(&decomp_var_54);\n    if (r5 == 0x0) {\n            android::Parcel::readInt32();\n    }\n    android::Parcel::~Parcel();\n    android::Parcel::~Parcel();\n    r0 = *(\"g\" + 0x1ac84);\n    r0 = *r0;\n    r0 = r0 - var_20;\n    bool_3 = r0 == 0x0;\n    bool_2 = r0 == 0x0;\n    if (r0 == 0x0) {\n            asm { moveq      r0, r5 };\n    }\n    if (bool_2) {\n            asm { addeq      sp, #0x74 };\n    }\n    if (!bool_3) {\n            __stack_chk_fail();\n    }\n    return r0;\n",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "asm:0x28e24": {
+    "result": "0x28e24: push.w {r4, r5, r6, r7, r8, sb, sl, fp, lr}\n0x28e28: sub sp, #0x1c4\n0x28e2a: ldr r5, =0xb43c\n0x28e2c: add r7, sp, #0x4\n0x28e2e: ldr.w sl, =0xb640\n0x28e32: add r0, sp, #0x10\n0x28e34: ldr.w fp, =0xb63e\n0x28e38: add r5, pc\n0x28e3a: ldr r4, =0xb42c\n0x28e3c: add sl, pc\n0x28e3e: add fp, pc\n0x28e40: mov.w r8, #0x0\n0x28e44: add r4, pc\n0x28e46: orr r0, r0, #0x4\n0x28e54: ldr r0, =0xb626\n0x28e56: add r0, pc\n0x28e58: str.w r8, [r0]\n0x28e5c: mov r0, r4\n0x28e5e: blx pthread_mutex_lock@PLT\n0x28e62: ldr r0, =0xb7d2\n0x28e64: mov r1, r4\n0x28e66: add r0, pc\n0x28e68: blx pthread_cond_wait@PLT\n0x28e6c: mov r0, r4\n0x28e4c: ldr r0, =0xb7e6\n0x28e4e: add r0, pc\n0x28e50: ldrb r0, [r0]\n0x28e9c: ldr.w sb, [sp, #0x1e8 + var_1E8]\n0x28ea4: movs r0, #0x2\n0x28eaa: ldr r0, [sb, #-0x4]\n0x28eae: adds r6, #0x1\n0x28eb0: mov r1, r7\n0x28eb2: lsls r0, r0, #0x8\n0x28eb4: str r0, [sp, #0x1e8 + var_1E4]\n0x28eb6: ldr.w r0, [sb]\n0x28eba: lsls r0, r0, #0x8\n0x28ebc: str r0, [sp, #0x1e8 + var_1E0]\n0x28ebe: ldr.w r0, [sb, #0x4]\n0x28ec2: lsls r0, r0, #0x8\n0x28ec4: str r0, [sp, #0x1e8 + var_1DC]\n0x28ec6: uxtb r0, r6\n0x28ec8: blx MTAMB_SetStaticPixel@PLT\n0x28ecc: ldr.w r0, [fp]\n0x28ed0: add.w sb, sb, #0xc\n0x28ed4: cmp r6, r0\n0x28e72: mov r0, r5\n0x28e74: blx pthread_mutex_lock@PLT\n0x28e78: ldr r1, =0xb604\n0x28e7a: add r0, sp, #0x10\n0x28e7c: mov.w r2, #0x1b0\n0x28e80: add r1, pc\n0x28e82: blx __aeabi_memcpy8@PLT\n0x28e86: ldr r0, =0xb7ac\n0x28e88: add r0, pc\n0x28e8a: strb.w r8, [r0]\n0x28e8e: mov r0, r5\n0x28e90: blx pthread_mutex_unlock@PLT\n0x28e94: ldr.w r0, [sl]\n0x28e98: cmp r0, #0x1",
+    "evidence_id": "ev_26f75c75ffb53a1eb1170b32ee9a1d4f06b5cb3b79af187369f7d7d988064fbf",
+    "evidence": {
+      "evidence_id": "ev_26f75c75ffb53a1eb1170b32ee9a1d4f06b5cb3b79af187369f7d7d988064fbf",
+      "subject": {
+        "name": "libambilight.so",
+        "digest": {
+          "sha256": "d20570babc64d9dc4d4547f2921bfdf256c7196fec8e3d587d58d653bc1a9525"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-port/libambilight.so"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_assembly",
+      "parameters": {
+        "procedure": "0x28e24",
+        "document": null
+      },
+      "raw_result": "0x28e24: push.w {r4, r5, r6, r7, r8, sb, sl, fp, lr}\n0x28e28: sub sp, #0x1c4\n0x28e2a: ldr r5, =0xb43c\n0x28e2c: add r7, sp, #0x4\n0x28e2e: ldr.w sl, =0xb640\n0x28e32: add r0, sp, #0x10\n0x28e34: ldr.w fp, =0xb63e\n0x28e38: add r5, pc\n0x28e3a: ldr r4, =0xb42c\n0x28e3c: add sl, pc\n0x28e3e: add fp, pc\n0x28e40: mov.w r8, #0x0\n0x28e44: add r4, pc\n0x28e46: orr r0, r0, #0x4\n0x28e54: ldr r0, =0xb626\n0x28e56: add r0, pc\n0x28e58: str.w r8, [r0]\n0x28e5c: mov r0, r4\n0x28e5e: blx pthread_mutex_lock@PLT\n0x28e62: ldr r0, =0xb7d2\n0x28e64: mov r1, r4\n0x28e66: add r0, pc\n0x28e68: blx pthread_cond_wait@PLT\n0x28e6c: mov r0, r4\n0x28e4c: ldr r0, =0xb7e6\n0x28e4e: add r0, pc\n0x28e50: ldrb r0, [r0]\n0x28e9c: ldr.w sb, [sp, #0x1e8 + var_1E8]\n0x28ea4: movs r0, #0x2\n0x28eaa: ldr r0, [sb, #-0x4]\n0x28eae: adds r6, #0x1\n0x28eb0: mov r1, r7\n0x28eb2: lsls r0, r0, #0x8\n0x28eb4: str r0, [sp, #0x1e8 + var_1E4]\n0x28eb6: ldr.w r0, [sb]\n0x28eba: lsls r0, r0, #0x8\n0x28ebc: str r0, [sp, #0x1e8 + var_1E0]\n0x28ebe: ldr.w r0, [sb, #0x4]\n0x28ec2: lsls r0, r0, #0x8\n0x28ec4: str r0, [sp, #0x1e8 + var_1DC]\n0x28ec6: uxtb r0, r6\n0x28ec8: blx MTAMB_SetStaticPixel@PLT\n0x28ecc: ldr.w r0, [fp]\n0x28ed0: add.w sb, sb, #0xc\n0x28ed4: cmp r6, r0\n0x28e72: mov r0, r5\n0x28e74: blx pthread_mutex_lock@PLT\n0x28e78: ldr r1, =0xb604\n0x28e7a: add r0, sp, #0x10\n0x28e7c: mov.w r2, #0x1b0\n0x28e80: add r1, pc\n0x28e82: blx __aeabi_memcpy8@PLT\n0x28e86: ldr r0, =0xb7ac\n0x28e88: add r0, pc\n0x28e8a: strb.w r8, [r0]\n0x28e8e: mov r0, r5\n0x28e90: blx pthread_mutex_unlock@PLT\n0x28e94: ldr.w r0, [sl]\n0x28e98: cmp r0, #0x1",
+      "normalized_result": "0x28e24: push.w {r4, r5, r6, r7, r8, sb, sl, fp, lr}\n0x28e28: sub sp, #0x1c4\n0x28e2a: ldr r5, =0xb43c\n0x28e2c: add r7, sp, #0x4\n0x28e2e: ldr.w sl, =0xb640\n0x28e32: add r0, sp, #0x10\n0x28e34: ldr.w fp, =0xb63e\n0x28e38: add r5, pc\n0x28e3a: ldr r4, =0xb42c\n0x28e3c: add sl, pc\n0x28e3e: add fp, pc\n0x28e40: mov.w r8, #0x0\n0x28e44: add r4, pc\n0x28e46: orr r0, r0, #0x4\n0x28e54: ldr r0, =0xb626\n0x28e56: add r0, pc\n0x28e58: str.w r8, [r0]\n0x28e5c: mov r0, r4\n0x28e5e: blx pthread_mutex_lock@PLT\n0x28e62: ldr r0, =0xb7d2\n0x28e64: mov r1, r4\n0x28e66: add r0, pc\n0x28e68: blx pthread_cond_wait@PLT\n0x28e6c: mov r0, r4\n0x28e4c: ldr r0, =0xb7e6\n0x28e4e: add r0, pc\n0x28e50: ldrb r0, [r0]\n0x28e9c: ldr.w sb, [sp, #0x1e8 + var_1E8]\n0x28ea4: movs r0, #0x2\n0x28eaa: ldr r0, [sb, #-0x4]\n0x28eae: adds r6, #0x1\n0x28eb0: mov r1, r7\n0x28eb2: lsls r0, r0, #0x8\n0x28eb4: str r0, [sp, #0x1e8 + var_1E4]\n0x28eb6: ldr.w r0, [sb]\n0x28eba: lsls r0, r0, #0x8\n0x28ebc: str r0, [sp, #0x1e8 + var_1E0]\n0x28ebe: ldr.w r0, [sb, #0x4]\n0x28ec2: lsls r0, r0, #0x8\n0x28ec4: str r0, [sp, #0x1e8 + var_1DC]\n0x28ec6: uxtb r0, r6\n0x28ec8: blx MTAMB_SetStaticPixel@PLT\n0x28ecc: ldr.w r0, [fp]\n0x28ed0: add.w sb, sb, #0xc\n0x28ed4: cmp r6, r0\n0x28e72: mov r0, r5\n0x28e74: blx pthread_mutex_lock@PLT\n0x28e78: ldr r1, =0xb604\n0x28e7a: add r0, sp, #0x10\n0x28e7c: mov.w r2, #0x1b0\n0x28e80: add r1, pc\n0x28e82: blx __aeabi_memcpy8@PLT\n0x28e86: ldr r0, =0xb7ac\n0x28e88: add r0, pc\n0x28e8a: strb.w r8, [r0]\n0x28e8e: mov r0, r5\n0x28e90: blx pthread_mutex_unlock@PLT\n0x28e94: ldr.w r0, [sl]\n0x28e98: cmp r0, #0x1",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "asm:AlCommon_setPixelArray": {
+    "result": "0x28538: push {r4, r5, r6, lr}\n0x2853a: sub sp, #0x8\n0x2853c: mov r4, r1\n0x2853e: ldr r1, =0x51f1\n0x28540: ldr r2, =0x52f9\n0x28542: mov r5, r0\n0x28544: ldrd r3, r0, [r4]\n0x28548: add r1, pc\n0x2854a: ldr r6, [r4, #0x8]\n0x2854c: add r2, pc\n0x2854e: strd r0, r6, [sp, #0x18 + var_18]\n0x28552: movs r0, #0x3\n0x28554: blx __android_log_print@PLT\n0x28558: ldr r6, =0xbd1e\n0x2855a: add r6, pc\n0x2855c: mov r0, r6\n0x2855e: blx pthread_mutex_lock@PLT\n0x28562: ldr r0, =0xbd62\n0x28564: mov r1, r4\n0x28566: mov.w r2, #0x1b0\n0x2856a: add r0, pc\n0x2856c: blx __aeabi_memcpy@PLT\n0x28570: ldr r0, =0xbf0a\n0x28572: add r0, pc\n0x28574: str r5, [r0]\n0x28576: mov r0, r6\n0x28578: blx pthread_mutex_unlock@PLT\n0x2857c: ldr r5, =0xbcf6\n0x2857e: add r5, pc\n0x28580: mov r0, r5\n0x28582: blx pthread_mutex_lock@PLT\n0x28586: ldr r0, =0xbef6\n0x28588: mov r1, r4\n0x2858a: mov.w r2, #0x1b0\n0x2858e: add r0, pc\n0x28590: blx __aeabi_memcpy@PLT\n0x28594: mov r0, r5\n0x28596: blx pthread_mutex_unlock@PLT\n0x2859a: ldr r0, =0xc098\n0x2859c: add r0, pc\n0x2859e: ldrb r0, [r0]\n0x285a2: ldr r0, =0xc08c\n0x285a4: movs r1, #0x1\n0x285a6: ldr r4, =0xbcc6\n0x285a8: add r0, pc\n0x285aa: add r4, pc\n0x285ac: strb r1, [r0]\n0x285ae: mov r0, r4\n0x285b0: blx pthread_mutex_lock@PLT\n0x285b4: ldr r0, =0xc082\n0x285b6: add r0, pc\n0x285b8: blx pthread_cond_signal@PLT\n0x285bc: mov r0, r4\n0x285c2: movs r0, #0x0\n0x285c4: add sp, #0x8",
+    "evidence_id": "ev_c2076d8e4cc0d8d4226240a483e8cf7dd6dd80f8a4b551a83c52ac835382c8a6",
+    "evidence": {
+      "evidence_id": "ev_c2076d8e4cc0d8d4226240a483e8cf7dd6dd80f8a4b551a83c52ac835382c8a6",
+      "subject": {
+        "name": "libambilight.so",
+        "digest": {
+          "sha256": "d20570babc64d9dc4d4547f2921bfdf256c7196fec8e3d587d58d653bc1a9525"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-port/libambilight.so"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_assembly",
+      "parameters": {
+        "procedure": "AlCommon_setPixelArray",
+        "document": null
+      },
+      "raw_result": "0x28538: push {r4, r5, r6, lr}\n0x2853a: sub sp, #0x8\n0x2853c: mov r4, r1\n0x2853e: ldr r1, =0x51f1\n0x28540: ldr r2, =0x52f9\n0x28542: mov r5, r0\n0x28544: ldrd r3, r0, [r4]\n0x28548: add r1, pc\n0x2854a: ldr r6, [r4, #0x8]\n0x2854c: add r2, pc\n0x2854e: strd r0, r6, [sp, #0x18 + var_18]\n0x28552: movs r0, #0x3\n0x28554: blx __android_log_print@PLT\n0x28558: ldr r6, =0xbd1e\n0x2855a: add r6, pc\n0x2855c: mov r0, r6\n0x2855e: blx pthread_mutex_lock@PLT\n0x28562: ldr r0, =0xbd62\n0x28564: mov r1, r4\n0x28566: mov.w r2, #0x1b0\n0x2856a: add r0, pc\n0x2856c: blx __aeabi_memcpy@PLT\n0x28570: ldr r0, =0xbf0a\n0x28572: add r0, pc\n0x28574: str r5, [r0]\n0x28576: mov r0, r6\n0x28578: blx pthread_mutex_unlock@PLT\n0x2857c: ldr r5, =0xbcf6\n0x2857e: add r5, pc\n0x28580: mov r0, r5\n0x28582: blx pthread_mutex_lock@PLT\n0x28586: ldr r0, =0xbef6\n0x28588: mov r1, r4\n0x2858a: mov.w r2, #0x1b0\n0x2858e: add r0, pc\n0x28590: blx __aeabi_memcpy@PLT\n0x28594: mov r0, r5\n0x28596: blx pthread_mutex_unlock@PLT\n0x2859a: ldr r0, =0xc098\n0x2859c: add r0, pc\n0x2859e: ldrb r0, [r0]\n0x285a2: ldr r0, =0xc08c\n0x285a4: movs r1, #0x1\n0x285a6: ldr r4, =0xbcc6\n0x285a8: add r0, pc\n0x285aa: add r4, pc\n0x285ac: strb r1, [r0]\n0x285ae: mov r0, r4\n0x285b0: blx pthread_mutex_lock@PLT\n0x285b4: ldr r0, =0xc082\n0x285b6: add r0, pc\n0x285b8: blx pthread_cond_signal@PLT\n0x285bc: mov r0, r4\n0x285c2: movs r0, #0x0\n0x285c4: add sp, #0x8",
+      "normalized_result": "0x28538: push {r4, r5, r6, lr}\n0x2853a: sub sp, #0x8\n0x2853c: mov r4, r1\n0x2853e: ldr r1, =0x51f1\n0x28540: ldr r2, =0x52f9\n0x28542: mov r5, r0\n0x28544: ldrd r3, r0, [r4]\n0x28548: add r1, pc\n0x2854a: ldr r6, [r4, #0x8]\n0x2854c: add r2, pc\n0x2854e: strd r0, r6, [sp, #0x18 + var_18]\n0x28552: movs r0, #0x3\n0x28554: blx __android_log_print@PLT\n0x28558: ldr r6, =0xbd1e\n0x2855a: add r6, pc\n0x2855c: mov r0, r6\n0x2855e: blx pthread_mutex_lock@PLT\n0x28562: ldr r0, =0xbd62\n0x28564: mov r1, r4\n0x28566: mov.w r2, #0x1b0\n0x2856a: add r0, pc\n0x2856c: blx __aeabi_memcpy@PLT\n0x28570: ldr r0, =0xbf0a\n0x28572: add r0, pc\n0x28574: str r5, [r0]\n0x28576: mov r0, r6\n0x28578: blx pthread_mutex_unlock@PLT\n0x2857c: ldr r5, =0xbcf6\n0x2857e: add r5, pc\n0x28580: mov r0, r5\n0x28582: blx pthread_mutex_lock@PLT\n0x28586: ldr r0, =0xbef6\n0x28588: mov r1, r4\n0x2858a: mov.w r2, #0x1b0\n0x2858e: add r0, pc\n0x28590: blx __aeabi_memcpy@PLT\n0x28594: mov r0, r5\n0x28596: blx pthread_mutex_unlock@PLT\n0x2859a: ldr r0, =0xc098\n0x2859c: add r0, pc\n0x2859e: ldrb r0, [r0]\n0x285a2: ldr r0, =0xc08c\n0x285a4: movs r1, #0x1\n0x285a6: ldr r4, =0xbcc6\n0x285a8: add r0, pc\n0x285aa: add r4, pc\n0x285ac: strb r1, [r0]\n0x285ae: mov r0, r4\n0x285b0: blx pthread_mutex_lock@PLT\n0x285b4: ldr r0, =0xc082\n0x285b6: add r0, pc\n0x285b8: blx pthread_cond_signal@PLT\n0x285bc: mov r0, r4\n0x285c2: movs r0, #0x0\n0x285c4: add sp, #0x8",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "asm:AlCommon_getProcessedPixelArray": {
+    "result": "0x28758: push {r4, r5, r6, r7, lr}\n0x2875a: sub sp, #0x1b4\n0x2875c: mov r4, r0\n0x2875e: ldr r0, =0xaf9e\n0x28760: cmp r4, #0x1\n0x28762: add r0, pc\n0x28764: ldr r0, [r0]\n0x28766: ldr r0, [r0]\n0x28768: str r0, [sp, #0x1c8 + var_18]\n0x2876c: add.w r6, r1, #0x8\n0x28770: movs r7, #0x0\n0x28774: adds r7, #0x1\n0x28776: mov r1, r5\n0x28778: uxtb r0, r7\n0x2877a: blx MTAMB_GetProcessedPixel@PLT\n0x2877e: ldr r0, [r5]\n0x28780: cmp r4, r7\n0x28782: lsr.w r0, r0, #0x8\n0x28786: str r0, [r6, #-0x8]\n0x2878a: ldr r0, [r5, #0x4]\n0x2878c: lsr.w r0, r0, #0x8\n0x28790: str r0, [r6, #-0x4]\n0x28794: ldr r0, [r5, #0x8]\n0x28796: add.w r5, r5, #0xc\n0x2879a: lsr.w r0, r0, #0x8\n0x2879e: str r0, [r6]\n0x287a0: add.w r6, r6, #0xc\n0x287a6: ldr r0, =0xaf56\n0x287a8: ldr r1, [sp, #0x1c8 + var_18]\n0x287aa: add r0, pc\n0x287ac: ldr r0, [r0]\n0x287ae: ldr r0, [r0]\n0x287b0: subs r0, r0, r1\n0x287b2: ittt eq\n0x287b4: movseq r0, #0x0\n0x287b6: addeq sp, #0x1b4\n0x287b8: popeq {r4, r5, r6, r7, pc}",
+    "evidence_id": "ev_19a5de59dbe705348caf41c1f568e3c09cd4fff789d17ad844b0de589e6d6db5",
+    "evidence": {
+      "evidence_id": "ev_19a5de59dbe705348caf41c1f568e3c09cd4fff789d17ad844b0de589e6d6db5",
+      "subject": {
+        "name": "libambilight.so",
+        "digest": {
+          "sha256": "d20570babc64d9dc4d4547f2921bfdf256c7196fec8e3d587d58d653bc1a9525"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-port/libambilight.so"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_assembly",
+      "parameters": {
+        "procedure": "AlCommon_getProcessedPixelArray",
+        "document": null
+      },
+      "raw_result": "0x28758: push {r4, r5, r6, r7, lr}\n0x2875a: sub sp, #0x1b4\n0x2875c: mov r4, r0\n0x2875e: ldr r0, =0xaf9e\n0x28760: cmp r4, #0x1\n0x28762: add r0, pc\n0x28764: ldr r0, [r0]\n0x28766: ldr r0, [r0]\n0x28768: str r0, [sp, #0x1c8 + var_18]\n0x2876c: add.w r6, r1, #0x8\n0x28770: movs r7, #0x0\n0x28774: adds r7, #0x1\n0x28776: mov r1, r5\n0x28778: uxtb r0, r7\n0x2877a: blx MTAMB_GetProcessedPixel@PLT\n0x2877e: ldr r0, [r5]\n0x28780: cmp r4, r7\n0x28782: lsr.w r0, r0, #0x8\n0x28786: str r0, [r6, #-0x8]\n0x2878a: ldr r0, [r5, #0x4]\n0x2878c: lsr.w r0, r0, #0x8\n0x28790: str r0, [r6, #-0x4]\n0x28794: ldr r0, [r5, #0x8]\n0x28796: add.w r5, r5, #0xc\n0x2879a: lsr.w r0, r0, #0x8\n0x2879e: str r0, [r6]\n0x287a0: add.w r6, r6, #0xc\n0x287a6: ldr r0, =0xaf56\n0x287a8: ldr r1, [sp, #0x1c8 + var_18]\n0x287aa: add r0, pc\n0x287ac: ldr r0, [r0]\n0x287ae: ldr r0, [r0]\n0x287b0: subs r0, r0, r1\n0x287b2: ittt eq\n0x287b4: movseq r0, #0x0\n0x287b6: addeq sp, #0x1b4\n0x287b8: popeq {r4, r5, r6, r7, pc}",
+      "normalized_result": "0x28758: push {r4, r5, r6, r7, lr}\n0x2875a: sub sp, #0x1b4\n0x2875c: mov r4, r0\n0x2875e: ldr r0, =0xaf9e\n0x28760: cmp r4, #0x1\n0x28762: add r0, pc\n0x28764: ldr r0, [r0]\n0x28766: ldr r0, [r0]\n0x28768: str r0, [sp, #0x1c8 + var_18]\n0x2876c: add.w r6, r1, #0x8\n0x28770: movs r7, #0x0\n0x28774: adds r7, #0x1\n0x28776: mov r1, r5\n0x28778: uxtb r0, r7\n0x2877a: blx MTAMB_GetProcessedPixel@PLT\n0x2877e: ldr r0, [r5]\n0x28780: cmp r4, r7\n0x28782: lsr.w r0, r0, #0x8\n0x28786: str r0, [r6, #-0x8]\n0x2878a: ldr r0, [r5, #0x4]\n0x2878c: lsr.w r0, r0, #0x8\n0x28790: str r0, [r6, #-0x4]\n0x28794: ldr r0, [r5, #0x8]\n0x28796: add.w r5, r5, #0xc\n0x2879a: lsr.w r0, r0, #0x8\n0x2879e: str r0, [r6]\n0x287a0: add.w r6, r6, #0xc\n0x287a6: ldr r0, =0xaf56\n0x287a8: ldr r1, [sp, #0x1c8 + var_18]\n0x287aa: add r0, pc\n0x287ac: ldr r0, [r0]\n0x287ae: ldr r0, [r0]\n0x287b0: subs r0, r0, r1\n0x287b2: ittt eq\n0x287b4: movseq r0, #0x0\n0x287b6: addeq sp, #0x1b4\n0x287b8: popeq {r4, r5, r6, r7, pc}",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "MTAMB_SetStaticPixel": {
+    "result": "    decomp_var_8 = r4;\n    r4 = arg0;\n    var_10 = r4;\n    r0 = _DRV_GetMtalDeviceHandle();\n    r0 = ioctl(r0, 0x40083010, &var_10);\n    r5 = mtal_ioctl_result(\"MTAMB_SetStaticPixel\", r0);\n    if ((*(int8_t *)(*dword_a5d7c + 0x1) & 0x10) != 0x0) {\n            printf(\"[MTAMB]:%s\\n\", \"MTAMB_SetStaticPixel\");\n            printf(\"[UserSpace] - MTAMB_SetStaticPixel -pixel = %d\\n \", r4);\n    }\n    r0 = r5;\n    &var_10 = &decomp_var_8;\n    return r0;\n",
+    "evidence_id": "ev_debcfed7222273feb653777971d789787f43a07be2384d911ce49a6ae01d4ba8",
+    "evidence": {
+      "evidence_id": "ev_debcfed7222273feb653777971d789787f43a07be2384d911ce49a6ae01d4ba8",
+      "subject": {
+        "name": "libmtal.so",
+        "digest": {
+          "sha256": "b2939a08ac5e342508c3d52359a735fe821db41b8fe17589ab111af651cb514c"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/libmtal.so"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_pseudo_code",
+      "parameters": {
+        "procedure": "MTAMB_SetStaticPixel",
+        "document": null
+      },
+      "raw_result": "    decomp_var_8 = r4;\n    r4 = arg0;\n    var_10 = r4;\n    r0 = _DRV_GetMtalDeviceHandle();\n    r0 = ioctl(r0, 0x40083010, &var_10);\n    r5 = mtal_ioctl_result(\"MTAMB_SetStaticPixel\", r0);\n    if ((*(int8_t *)(*dword_a5d7c + 0x1) & 0x10) != 0x0) {\n            printf(\"[MTAMB]:%s\\n\", \"MTAMB_SetStaticPixel\");\n            printf(\"[UserSpace] - MTAMB_SetStaticPixel -pixel = %d\\n \", r4);\n    }\n    r0 = r5;\n    &var_10 = &decomp_var_8;\n    return r0;\n",
+      "normalized_result": "    decomp_var_8 = r4;\n    r4 = arg0;\n    var_10 = r4;\n    r0 = _DRV_GetMtalDeviceHandle();\n    r0 = ioctl(r0, 0x40083010, &var_10);\n    r5 = mtal_ioctl_result(\"MTAMB_SetStaticPixel\", r0);\n    if ((*(int8_t *)(*dword_a5d7c + 0x1) & 0x10) != 0x0) {\n            printf(\"[MTAMB]:%s\\n\", \"MTAMB_SetStaticPixel\");\n            printf(\"[UserSpace] - MTAMB_SetStaticPixel -pixel = %d\\n \", r4);\n    }\n    r0 = r5;\n    &var_10 = &decomp_var_8;\n    return r0;\n",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "MTAMB_GetProcessedPixel": {
+    "result": "    decomp_var_8 = r4;\n    r4 = arg0;\n    var_10 = r4;\n    r0 = _DRV_GetMtalDeviceHandle();\n    r0 = ioctl(r0, 0x4008301b, &var_10);\n    r5 = mtal_ioctl_result(\"MTAMB_GetProcessedPixel\", r0);\n    if ((*(int8_t *)(*dword_a5d7c + 0x1) & 0x10) != 0x0) {\n            printf(\"[MTAMB]:%s\\n\", \"MTAMB_GetProcessedPixel\");\n            printf(\"[UserSpace] - MTAMB_GetProcessedPixel -pixel = %d\\n \", r4);\n    }\n    r0 = r5;\n    &var_10 = &decomp_var_8;\n    return r0;\n",
+    "evidence_id": "ev_b7085fc6f2208a49f809be6c8cedb4c20f27d2a8c71b5e5ff5400338f27546d5",
+    "evidence": {
+      "evidence_id": "ev_b7085fc6f2208a49f809be6c8cedb4c20f27d2a8c71b5e5ff5400338f27546d5",
+      "subject": {
+        "name": "libmtal.so",
+        "digest": {
+          "sha256": "b2939a08ac5e342508c3d52359a735fe821db41b8fe17589ab111af651cb514c"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/libmtal.so"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_pseudo_code",
+      "parameters": {
+        "procedure": "MTAMB_GetProcessedPixel",
+        "document": null
+      },
+      "raw_result": "    decomp_var_8 = r4;\n    r4 = arg0;\n    var_10 = r4;\n    r0 = _DRV_GetMtalDeviceHandle();\n    r0 = ioctl(r0, 0x4008301b, &var_10);\n    r5 = mtal_ioctl_result(\"MTAMB_GetProcessedPixel\", r0);\n    if ((*(int8_t *)(*dword_a5d7c + 0x1) & 0x10) != 0x0) {\n            printf(\"[MTAMB]:%s\\n\", \"MTAMB_GetProcessedPixel\");\n            printf(\"[UserSpace] - MTAMB_GetProcessedPixel -pixel = %d\\n \", r4);\n    }\n    r0 = r5;\n    &var_10 = &decomp_var_8;\n    return r0;\n",
+      "normalized_result": "    decomp_var_8 = r4;\n    r4 = arg0;\n    var_10 = r4;\n    r0 = _DRV_GetMtalDeviceHandle();\n    r0 = ioctl(r0, 0x4008301b, &var_10);\n    r5 = mtal_ioctl_result(\"MTAMB_GetProcessedPixel\", r0);\n    if ((*(int8_t *)(*dword_a5d7c + 0x1) & 0x10) != 0x0) {\n            printf(\"[MTAMB]:%s\\n\", \"MTAMB_GetProcessedPixel\");\n            printf(\"[UserSpace] - MTAMB_GetProcessedPixel -pixel = %d\\n \", r4);\n    }\n    r0 = r5;\n    &var_10 = &decomp_var_8;\n    return r0;\n",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "MTAMB_GetConfiguration": {
+    "result": "    decomp_var_8 = r4;\n    r4 = arg3;\n    asm { stm        sp, {r0, r1, r2, r4} };\n    r0 = _DRV_GetMtalDeviceHandle();\n    r0 = ioctl(r0, 0x4010300f, &decomp_var_18);\n    r5 = mtal_ioctl_result(\"MTAMB_GetConfiguration\", r0);\n    if ((*(int8_t *)(*dword_a5d7c + 0x1) & 0x10) != 0x0) {\n            printf(\"[MTAMB]:%s\\n\", \"MTAMB_GetConfiguration\");\n            printf(\"[UserSpace] - MTAMB_GetConfiguration -version = %d\\n \", *(int8_t *)r4);\n    }\n    r0 = r5;\n    &decomp_var_18 = &decomp_var_8;\n    return r0;\n",
+    "evidence_id": "ev_81b0fb8bfb58c9962d9d2899e948c09c9c849cef8d058159e42365ff011bd4cd",
+    "evidence": {
+      "evidence_id": "ev_81b0fb8bfb58c9962d9d2899e948c09c9c849cef8d058159e42365ff011bd4cd",
+      "subject": {
+        "name": "libmtal.so",
+        "digest": {
+          "sha256": "b2939a08ac5e342508c3d52359a735fe821db41b8fe17589ab111af651cb514c"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/libmtal.so"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_pseudo_code",
+      "parameters": {
+        "procedure": "MTAMB_GetConfiguration",
+        "document": null
+      },
+      "raw_result": "    decomp_var_8 = r4;\n    r4 = arg3;\n    asm { stm        sp, {r0, r1, r2, r4} };\n    r0 = _DRV_GetMtalDeviceHandle();\n    r0 = ioctl(r0, 0x4010300f, &decomp_var_18);\n    r5 = mtal_ioctl_result(\"MTAMB_GetConfiguration\", r0);\n    if ((*(int8_t *)(*dword_a5d7c + 0x1) & 0x10) != 0x0) {\n            printf(\"[MTAMB]:%s\\n\", \"MTAMB_GetConfiguration\");\n            printf(\"[UserSpace] - MTAMB_GetConfiguration -version = %d\\n \", *(int8_t *)r4);\n    }\n    r0 = r5;\n    &decomp_var_18 = &decomp_var_8;\n    return r0;\n",
+      "normalized_result": "    decomp_var_8 = r4;\n    r4 = arg3;\n    asm { stm        sp, {r0, r1, r2, r4} };\n    r0 = _DRV_GetMtalDeviceHandle();\n    r0 = ioctl(r0, 0x4010300f, &decomp_var_18);\n    r5 = mtal_ioctl_result(\"MTAMB_GetConfiguration\", r0);\n    if ((*(int8_t *)(*dword_a5d7c + 0x1) & 0x10) != 0x0) {\n            printf(\"[MTAMB]:%s\\n\", \"MTAMB_GetConfiguration\");\n            printf(\"[UserSpace] - MTAMB_GetConfiguration -version = %d\\n \", *(int8_t *)r4);\n    }\n    r0 = r5;\n    &decomp_var_18 = &decomp_var_8;\n    return r0;\n",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "MTAMB_Init": {
+    "result": "    r4 = mtal_ioctl_result(\"MTAMB_Init\", ioctl(_DRV_GetMtalDeviceHandle(), 0x4004305f, 0x0));\n    if ((*(int8_t *)(*dword_a5d7c + 0x1) & 0x10) != 0x0) {\n            printf(\"[MTAMB]:%s\\n\", \"MTAMB_Init\");\n            printf(\"[UserSpace] - MTAMB_Init\\n \");\n    }\n    r0 = r4;\n    return r0;\n",
+    "evidence_id": "ev_0b4b507a8bb7de48bf348a2dfe94f38589507a9cccdaa8623aa8faad7933a0cd",
+    "evidence": {
+      "evidence_id": "ev_0b4b507a8bb7de48bf348a2dfe94f38589507a9cccdaa8623aa8faad7933a0cd",
+      "subject": {
+        "name": "libmtal.so",
+        "digest": {
+          "sha256": "b2939a08ac5e342508c3d52359a735fe821db41b8fe17589ab111af651cb514c"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/libmtal.so"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_pseudo_code",
+      "parameters": {
+        "procedure": "MTAMB_Init",
+        "document": null
+      },
+      "raw_result": "    r4 = mtal_ioctl_result(\"MTAMB_Init\", ioctl(_DRV_GetMtalDeviceHandle(), 0x4004305f, 0x0));\n    if ((*(int8_t *)(*dword_a5d7c + 0x1) & 0x10) != 0x0) {\n            printf(\"[MTAMB]:%s\\n\", \"MTAMB_Init\");\n            printf(\"[UserSpace] - MTAMB_Init\\n \");\n    }\n    r0 = r4;\n    return r0;\n",
+      "normalized_result": "    r4 = mtal_ioctl_result(\"MTAMB_Init\", ioctl(_DRV_GetMtalDeviceHandle(), 0x4004305f, 0x0));\n    if ((*(int8_t *)(*dword_a5d7c + 0x1) & 0x10) != 0x0) {\n            printf(\"[MTAMB]:%s\\n\", \"MTAMB_Init\");\n            printf(\"[UserSpace] - MTAMB_Init\\n \");\n    }\n    r0 = r4;\n    return r0;\n",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "MTAL_Init": {
+    "result": "    r1 = OpenMtalDeviceHandle();\n    r0 = 0xffffffff;\n    if (r1 != 0x0) {\n            r1 = SC_InitLib();\n            r0 = 0x0;\n            if (r1 != 0x0) {\n                    puts(\"Couldn't initilize SC library!\");\n                    r0 = 0xffffffff;\n            }\n    }\n    return r0;\n",
+    "evidence_id": "ev_b7c944832b6a215a99ae14ae4fc46f40447a09eddcc8014014a0ef862f048533",
+    "evidence": {
+      "evidence_id": "ev_b7c944832b6a215a99ae14ae4fc46f40447a09eddcc8014014a0ef862f048533",
+      "subject": {
+        "name": "libmtal.so",
+        "digest": {
+          "sha256": "b2939a08ac5e342508c3d52359a735fe821db41b8fe17589ab111af651cb514c"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/libmtal.so"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_pseudo_code",
+      "parameters": {
+        "procedure": "MTAL_Init",
+        "document": null
+      },
+      "raw_result": "    r1 = OpenMtalDeviceHandle();\n    r0 = 0xffffffff;\n    if (r1 != 0x0) {\n            r1 = SC_InitLib();\n            r0 = 0x0;\n            if (r1 != 0x0) {\n                    puts(\"Couldn't initilize SC library!\");\n                    r0 = 0xffffffff;\n            }\n    }\n    return r0;\n",
+      "normalized_result": "    r1 = OpenMtalDeviceHandle();\n    r0 = 0xffffffff;\n    if (r1 != 0x0) {\n            r1 = SC_InitLib();\n            r0 = 0x0;\n            if (r1 != 0x0) {\n                    puts(\"Couldn't initilize SC library!\");\n                    r0 = 0xffffffff;\n            }\n    }\n    return r0;\n",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "asm:MTAMB_SetStaticPixel": {
+    "result": "0x1fe54: push {r4, r5, fp, lr}\n0x1fe58: add fp, sp, #0x8\n0x1fe5c: sub sp, sp, #0x8\n0x1fe60: mov r4, r0\n0x1fe64: str r4, [sp, #0x10 + var_10]\n0x1fe68: str r1, [sp, #0x10 + var_C]\n0x1fe6c: bl _DRV_GetMtalDeviceHandle\n0x1fe70: movw r1, #0x3010\n0x1fe74: mov r2, sp\n0x1fe78: movt r1, #0x4008\n0x1fe7c: bl ioctl@PLT\n0x1fe80: mov r1, r0\n0x1fe84: ldr r0, =0x6d20a\n0x1fe88: add r0, pc, r0\n0x1fe8c: bl mtal_ioctl_result\n0x1fe90: mov r5, r0\n0x1fe94: ldr r0, =0x85edc\n0x1fe98: ldr r0, [pc, r0]\n0x1fe9c: ldrb r0, [r0, #0x1]\n0x1fea0: tst r0, #0x10\n0x1fea8: ldr r0, =0x6ccc8\n0x1feac: ldr r1, =0x6d1de\n0x1feb0: add r0, pc, r0\n0x1feb4: add r1, pc, r1\n0x1feb8: bl printf@PLT\n0x1febc: ldr r0, =0x6d1e3\n0x1fec0: mov r1, r4\n0x1fec4: add r0, pc, r0\n0x1fecc: mov r0, r5\n0x1fed0: sub sp, fp, #0x8",
+    "evidence_id": "ev_1eeb386afbf35cf313c99b3f0abe6d531de57903ea142ff7454186fa354e96f6",
+    "evidence": {
+      "evidence_id": "ev_1eeb386afbf35cf313c99b3f0abe6d531de57903ea142ff7454186fa354e96f6",
+      "subject": {
+        "name": "libmtal.so",
+        "digest": {
+          "sha256": "b2939a08ac5e342508c3d52359a735fe821db41b8fe17589ab111af651cb514c"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/libmtal.so"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_assembly",
+      "parameters": {
+        "procedure": "MTAMB_SetStaticPixel",
+        "document": null
+      },
+      "raw_result": "0x1fe54: push {r4, r5, fp, lr}\n0x1fe58: add fp, sp, #0x8\n0x1fe5c: sub sp, sp, #0x8\n0x1fe60: mov r4, r0\n0x1fe64: str r4, [sp, #0x10 + var_10]\n0x1fe68: str r1, [sp, #0x10 + var_C]\n0x1fe6c: bl _DRV_GetMtalDeviceHandle\n0x1fe70: movw r1, #0x3010\n0x1fe74: mov r2, sp\n0x1fe78: movt r1, #0x4008\n0x1fe7c: bl ioctl@PLT\n0x1fe80: mov r1, r0\n0x1fe84: ldr r0, =0x6d20a\n0x1fe88: add r0, pc, r0\n0x1fe8c: bl mtal_ioctl_result\n0x1fe90: mov r5, r0\n0x1fe94: ldr r0, =0x85edc\n0x1fe98: ldr r0, [pc, r0]\n0x1fe9c: ldrb r0, [r0, #0x1]\n0x1fea0: tst r0, #0x10\n0x1fea8: ldr r0, =0x6ccc8\n0x1feac: ldr r1, =0x6d1de\n0x1feb0: add r0, pc, r0\n0x1feb4: add r1, pc, r1\n0x1feb8: bl printf@PLT\n0x1febc: ldr r0, =0x6d1e3\n0x1fec0: mov r1, r4\n0x1fec4: add r0, pc, r0\n0x1fecc: mov r0, r5\n0x1fed0: sub sp, fp, #0x8",
+      "normalized_result": "0x1fe54: push {r4, r5, fp, lr}\n0x1fe58: add fp, sp, #0x8\n0x1fe5c: sub sp, sp, #0x8\n0x1fe60: mov r4, r0\n0x1fe64: str r4, [sp, #0x10 + var_10]\n0x1fe68: str r1, [sp, #0x10 + var_C]\n0x1fe6c: bl _DRV_GetMtalDeviceHandle\n0x1fe70: movw r1, #0x3010\n0x1fe74: mov r2, sp\n0x1fe78: movt r1, #0x4008\n0x1fe7c: bl ioctl@PLT\n0x1fe80: mov r1, r0\n0x1fe84: ldr r0, =0x6d20a\n0x1fe88: add r0, pc, r0\n0x1fe8c: bl mtal_ioctl_result\n0x1fe90: mov r5, r0\n0x1fe94: ldr r0, =0x85edc\n0x1fe98: ldr r0, [pc, r0]\n0x1fe9c: ldrb r0, [r0, #0x1]\n0x1fea0: tst r0, #0x10\n0x1fea8: ldr r0, =0x6ccc8\n0x1feac: ldr r1, =0x6d1de\n0x1feb0: add r0, pc, r0\n0x1feb4: add r1, pc, r1\n0x1feb8: bl printf@PLT\n0x1febc: ldr r0, =0x6d1e3\n0x1fec0: mov r1, r4\n0x1fec4: add r0, pc, r0\n0x1fecc: mov r0, r5\n0x1fed0: sub sp, fp, #0x8",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "asm:OpenMtalDeviceHandle": {
+    "result": "0x2eb14: push {r4, r5, fp, lr}\n0x2eb18: add fp, sp, #0x8\n0x2eb1c: sub sp, sp, #0x40\n0x2eb20: ldr r0, =0x780b0\n0x2eb24: add r0, pc, r0\n0x2eb28: bl pthread_mutex_lock@PLT\n0x2eb2c: ldr r0, =0x77520\n0x2eb30: ldr r0, [pc, r0]\n0x2eb34: cmn r0, #0x1\n0x2eb3c: ldr r0, =dword_value_147484\n0x2eb40: mov r4, #0x1\n0x2eb44: add r0, pc, r0\n0x2eb48: ldr r1, [r0]\n0x2eb4c: adds r1, r1, #0x1\n0x2eb50: mvneq r1, #0x0\n0x2eb54: str r1, [r0]\n0x2ebec: ldr r0, =0x77fe4\n0x2ebf0: add r0, pc, r0\n0x2ebf4: bl pthread_mutex_unlock@PLT\n0x2ebf8: mov r0, r4\n0x2ebfc: sub sp, fp, #0x8\n0x2eb5c: ldr r0, =0x62ceb\n0x2eb60: mov r4, sp\n0x2eb64: ldr r1, =0x62ceb\n0x2eb68: add r2, pc, r0\n0x2eb6c: mov r0, r4\n0x2eb70: add r3, pc, r1\n0x2eb74: mov r1, #0x40\n0x2eb78: bl snprintf@PLT\n0x2eb7c: mov r0, r4\n0x2eb80: mov r1, #0x2\n0x2eb84: bl open@PLT\n0x2eb88: ldr r1, =0x774bc\n0x2eb8c: mov r4, #0x1\n0x2eb90: cmp r0, #0x0\n0x2eb94: str r0, [pc, r1]\n0x2eb9c: ldr r0, =0x62cab\n0x2eba0: mov r5, sp\n0x2eba4: ldr r1, =0x62cb0\n0x2eba8: add r2, pc, r0\n0x2ebac: mov r0, r5\n0x2ebb0: add r3, pc, r1\n0x2ebb4: mov r1, #0x40\n0x2ebb8: bl snprintf@PLT\n0x2ebbc: mov r0, r5\n0x2ebc0: mov r1, #0x2\n0x2ebc4: bl open@PLT\n0x2ebc8: ldr r1, =0x77480\n0x2ebcc: cmp r0, #0x0\n0x2ebd0: str r0, [pc, r1]\n0x2ebd8: ldr r0, =0x62c8c\n0x2ebdc: mov r1, sp\n0x2ebe0: add r0, pc, r0\n0x2ebe4: bl printf@PLT",
+    "evidence_id": "ev_8f4cfbe015ef91fe07bdbe105901c68a6968d9577d549a41928c4e9ec8dab3dd",
+    "evidence": {
+      "evidence_id": "ev_8f4cfbe015ef91fe07bdbe105901c68a6968d9577d549a41928c4e9ec8dab3dd",
+      "subject": {
+        "name": "libmtal.so",
+        "digest": {
+          "sha256": "b2939a08ac5e342508c3d52359a735fe821db41b8fe17589ab111af651cb514c"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/libmtal.so"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_assembly",
+      "parameters": {
+        "procedure": "OpenMtalDeviceHandle",
+        "document": null
+      },
+      "raw_result": "0x2eb14: push {r4, r5, fp, lr}\n0x2eb18: add fp, sp, #0x8\n0x2eb1c: sub sp, sp, #0x40\n0x2eb20: ldr r0, =0x780b0\n0x2eb24: add r0, pc, r0\n0x2eb28: bl pthread_mutex_lock@PLT\n0x2eb2c: ldr r0, =0x77520\n0x2eb30: ldr r0, [pc, r0]\n0x2eb34: cmn r0, #0x1\n0x2eb3c: ldr r0, =dword_value_147484\n0x2eb40: mov r4, #0x1\n0x2eb44: add r0, pc, r0\n0x2eb48: ldr r1, [r0]\n0x2eb4c: adds r1, r1, #0x1\n0x2eb50: mvneq r1, #0x0\n0x2eb54: str r1, [r0]\n0x2ebec: ldr r0, =0x77fe4\n0x2ebf0: add r0, pc, r0\n0x2ebf4: bl pthread_mutex_unlock@PLT\n0x2ebf8: mov r0, r4\n0x2ebfc: sub sp, fp, #0x8\n0x2eb5c: ldr r0, =0x62ceb\n0x2eb60: mov r4, sp\n0x2eb64: ldr r1, =0x62ceb\n0x2eb68: add r2, pc, r0\n0x2eb6c: mov r0, r4\n0x2eb70: add r3, pc, r1\n0x2eb74: mov r1, #0x40\n0x2eb78: bl snprintf@PLT\n0x2eb7c: mov r0, r4\n0x2eb80: mov r1, #0x2\n0x2eb84: bl open@PLT\n0x2eb88: ldr r1, =0x774bc\n0x2eb8c: mov r4, #0x1\n0x2eb90: cmp r0, #0x0\n0x2eb94: str r0, [pc, r1]\n0x2eb9c: ldr r0, =0x62cab\n0x2eba0: mov r5, sp\n0x2eba4: ldr r1, =0x62cb0\n0x2eba8: add r2, pc, r0\n0x2ebac: mov r0, r5\n0x2ebb0: add r3, pc, r1\n0x2ebb4: mov r1, #0x40\n0x2ebb8: bl snprintf@PLT\n0x2ebbc: mov r0, r5\n0x2ebc0: mov r1, #0x2\n0x2ebc4: bl open@PLT\n0x2ebc8: ldr r1, =0x77480\n0x2ebcc: cmp r0, #0x0\n0x2ebd0: str r0, [pc, r1]\n0x2ebd8: ldr r0, =0x62c8c\n0x2ebdc: mov r1, sp\n0x2ebe0: add r0, pc, r0\n0x2ebe4: bl printf@PLT",
+      "normalized_result": "0x2eb14: push {r4, r5, fp, lr}\n0x2eb18: add fp, sp, #0x8\n0x2eb1c: sub sp, sp, #0x40\n0x2eb20: ldr r0, =0x780b0\n0x2eb24: add r0, pc, r0\n0x2eb28: bl pthread_mutex_lock@PLT\n0x2eb2c: ldr r0, =0x77520\n0x2eb30: ldr r0, [pc, r0]\n0x2eb34: cmn r0, #0x1\n0x2eb3c: ldr r0, =dword_value_147484\n0x2eb40: mov r4, #0x1\n0x2eb44: add r0, pc, r0\n0x2eb48: ldr r1, [r0]\n0x2eb4c: adds r1, r1, #0x1\n0x2eb50: mvneq r1, #0x0\n0x2eb54: str r1, [r0]\n0x2ebec: ldr r0, =0x77fe4\n0x2ebf0: add r0, pc, r0\n0x2ebf4: bl pthread_mutex_unlock@PLT\n0x2ebf8: mov r0, r4\n0x2ebfc: sub sp, fp, #0x8\n0x2eb5c: ldr r0, =0x62ceb\n0x2eb60: mov r4, sp\n0x2eb64: ldr r1, =0x62ceb\n0x2eb68: add r2, pc, r0\n0x2eb6c: mov r0, r4\n0x2eb70: add r3, pc, r1\n0x2eb74: mov r1, #0x40\n0x2eb78: bl snprintf@PLT\n0x2eb7c: mov r0, r4\n0x2eb80: mov r1, #0x2\n0x2eb84: bl open@PLT\n0x2eb88: ldr r1, =0x774bc\n0x2eb8c: mov r4, #0x1\n0x2eb90: cmp r0, #0x0\n0x2eb94: str r0, [pc, r1]\n0x2eb9c: ldr r0, =0x62cab\n0x2eba0: mov r5, sp\n0x2eba4: ldr r1, =0x62cb0\n0x2eba8: add r2, pc, r0\n0x2ebac: mov r0, r5\n0x2ebb0: add r3, pc, r1\n0x2ebb4: mov r1, #0x40\n0x2ebb8: bl snprintf@PLT\n0x2ebbc: mov r0, r5\n0x2ebc0: mov r1, #0x2\n0x2ebc4: bl open@PLT\n0x2ebc8: ldr r1, =0x77480\n0x2ebcc: cmp r0, #0x0\n0x2ebd0: str r0, [pc, r1]\n0x2ebd8: ldr r0, =0x62c8c\n0x2ebdc: mov r1, sp\n0x2ebe0: add r0, pc, r0\n0x2ebe4: bl printf@PLT",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "asm:MTAMB_GetConfiguration": {
+    "result": "0x1f7c0: push {r4, r5, fp, lr}\n0x1f7c4: add fp, sp, #0x8\n0x1f7c8: sub sp, sp, #0x10\n0x1f7cc: mov r4, r3\n0x1f7d0: stm sp, {r0, r1, r2, r4}\n0x1f7d4: bl _DRV_GetMtalDeviceHandle\n0x1f7d8: movw r1, #0x300f\n0x1f7dc: mov r2, sp\n0x1f7e0: movt r1, #0x4010\n0x1f7e4: bl ioctl@PLT\n0x1f7e8: mov r1, r0\n0x1f7ec: ldr r0, =0x6d737\n0x1f7f0: add r0, pc, r0\n0x1f7f4: bl mtal_ioctl_result\n0x1f7f8: mov r5, r0\n0x1f7fc: ldr r0, =0x86574\n0x1f800: ldr r0, [pc, r0]\n0x1f804: ldrb r0, [r0, #0x1]\n0x1f808: tst r0, #0x10\n0x1f810: ldr r0, =0x6d360\n0x1f814: ldr r1, =0x6d70b\n0x1f818: add r0, pc, r0\n0x1f81c: add r1, pc, r1\n0x1f820: bl printf@PLT\n0x1f824: ldr r0, =0x6d712\n0x1f828: ldrb r1, [r4]\n0x1f82c: add r0, pc, r0\n0x1f834: mov r0, r5\n0x1f838: sub sp, fp, #0x8",
+    "evidence_id": "ev_ac595d5ff37086bab1bd99df2eef3d7770fec8d8483c0c1ebb8b5d6cb1055907",
+    "evidence": {
+      "evidence_id": "ev_ac595d5ff37086bab1bd99df2eef3d7770fec8d8483c0c1ebb8b5d6cb1055907",
+      "subject": {
+        "name": "libmtal.so",
+        "digest": {
+          "sha256": "b2939a08ac5e342508c3d52359a735fe821db41b8fe17589ab111af651cb514c"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/libmtal.so"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_assembly",
+      "parameters": {
+        "procedure": "MTAMB_GetConfiguration",
+        "document": null
+      },
+      "raw_result": "0x1f7c0: push {r4, r5, fp, lr}\n0x1f7c4: add fp, sp, #0x8\n0x1f7c8: sub sp, sp, #0x10\n0x1f7cc: mov r4, r3\n0x1f7d0: stm sp, {r0, r1, r2, r4}\n0x1f7d4: bl _DRV_GetMtalDeviceHandle\n0x1f7d8: movw r1, #0x300f\n0x1f7dc: mov r2, sp\n0x1f7e0: movt r1, #0x4010\n0x1f7e4: bl ioctl@PLT\n0x1f7e8: mov r1, r0\n0x1f7ec: ldr r0, =0x6d737\n0x1f7f0: add r0, pc, r0\n0x1f7f4: bl mtal_ioctl_result\n0x1f7f8: mov r5, r0\n0x1f7fc: ldr r0, =0x86574\n0x1f800: ldr r0, [pc, r0]\n0x1f804: ldrb r0, [r0, #0x1]\n0x1f808: tst r0, #0x10\n0x1f810: ldr r0, =0x6d360\n0x1f814: ldr r1, =0x6d70b\n0x1f818: add r0, pc, r0\n0x1f81c: add r1, pc, r1\n0x1f820: bl printf@PLT\n0x1f824: ldr r0, =0x6d712\n0x1f828: ldrb r1, [r4]\n0x1f82c: add r0, pc, r0\n0x1f834: mov r0, r5\n0x1f838: sub sp, fp, #0x8",
+      "normalized_result": "0x1f7c0: push {r4, r5, fp, lr}\n0x1f7c4: add fp, sp, #0x8\n0x1f7c8: sub sp, sp, #0x10\n0x1f7cc: mov r4, r3\n0x1f7d0: stm sp, {r0, r1, r2, r4}\n0x1f7d4: bl _DRV_GetMtalDeviceHandle\n0x1f7d8: movw r1, #0x300f\n0x1f7dc: mov r2, sp\n0x1f7e0: movt r1, #0x4010\n0x1f7e4: bl ioctl@PLT\n0x1f7e8: mov r1, r0\n0x1f7ec: ldr r0, =0x6d737\n0x1f7f0: add r0, pc, r0\n0x1f7f4: bl mtal_ioctl_result\n0x1f7f8: mov r5, r0\n0x1f7fc: ldr r0, =0x86574\n0x1f800: ldr r0, [pc, r0]\n0x1f804: ldrb r0, [r0, #0x1]\n0x1f808: tst r0, #0x10\n0x1f810: ldr r0, =0x6d360\n0x1f814: ldr r1, =0x6d70b\n0x1f818: add r0, pc, r0\n0x1f81c: add r1, pc, r1\n0x1f820: bl printf@PLT\n0x1f824: ldr r0, =0x6d712\n0x1f828: ldrb r1, [r4]\n0x1f82c: add r0, pc, r0\n0x1f834: mov r0, r5\n0x1f838: sub sp, fp, #0x8",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "asm:MTAMB_GetStaticPixel": {
+    "result": "0x1feec: push {r4, r5, fp, lr}\n0x1fef0: add fp, sp, #0x8\n0x1fef4: sub sp, sp, #0x8\n0x1fef8: mov r4, r0\n0x1fefc: str r4, [sp, #0x10 + var_10]\n0x1ff00: str r1, [sp, #0x10 + var_C]\n0x1ff04: bl _DRV_GetMtalDeviceHandle\n0x1ff08: movw r1, #0x3011\n0x1ff0c: mov r2, sp\n0x1ff10: movt r1, #0x4008\n0x1ff14: bl ioctl@PLT\n0x1ff18: mov r1, r0\n0x1ff1c: ldr r0, =0x6d1b8\n0x1ff20: add r0, pc, r0\n0x1ff24: bl mtal_ioctl_result\n0x1ff28: mov r5, r0\n0x1ff2c: ldr r0, =0x85e44\n0x1ff30: ldr r0, [pc, r0]\n0x1ff34: ldrb r0, [r0, #0x1]\n0x1ff38: tst r0, #0x10\n0x1ff40: ldr r0, =0x6cc30\n0x1ff44: ldr r1, =0x6d18c\n0x1ff48: add r0, pc, r0\n0x1ff4c: add r1, pc, r1\n0x1ff50: bl printf@PLT\n0x1ff54: ldr r0, =0x6d191\n0x1ff58: mov r1, r4\n0x1ff5c: add r0, pc, r0\n0x1ff64: mov r0, r5\n0x1ff68: sub sp, fp, #0x8",
+    "evidence_id": "ev_fc44c68424b24bcf822ea71f7114d4e0167fdc16efafb2faeac8e78df57051d3",
+    "evidence": {
+      "evidence_id": "ev_fc44c68424b24bcf822ea71f7114d4e0167fdc16efafb2faeac8e78df57051d3",
+      "subject": {
+        "name": "libmtal.so",
+        "digest": {
+          "sha256": "b2939a08ac5e342508c3d52359a735fe821db41b8fe17589ab111af651cb514c"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/libmtal.so"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_assembly",
+      "parameters": {
+        "procedure": "MTAMB_GetStaticPixel",
+        "document": null
+      },
+      "raw_result": "0x1feec: push {r4, r5, fp, lr}\n0x1fef0: add fp, sp, #0x8\n0x1fef4: sub sp, sp, #0x8\n0x1fef8: mov r4, r0\n0x1fefc: str r4, [sp, #0x10 + var_10]\n0x1ff00: str r1, [sp, #0x10 + var_C]\n0x1ff04: bl _DRV_GetMtalDeviceHandle\n0x1ff08: movw r1, #0x3011\n0x1ff0c: mov r2, sp\n0x1ff10: movt r1, #0x4008\n0x1ff14: bl ioctl@PLT\n0x1ff18: mov r1, r0\n0x1ff1c: ldr r0, =0x6d1b8\n0x1ff20: add r0, pc, r0\n0x1ff24: bl mtal_ioctl_result\n0x1ff28: mov r5, r0\n0x1ff2c: ldr r0, =0x85e44\n0x1ff30: ldr r0, [pc, r0]\n0x1ff34: ldrb r0, [r0, #0x1]\n0x1ff38: tst r0, #0x10\n0x1ff40: ldr r0, =0x6cc30\n0x1ff44: ldr r1, =0x6d18c\n0x1ff48: add r0, pc, r0\n0x1ff4c: add r1, pc, r1\n0x1ff50: bl printf@PLT\n0x1ff54: ldr r0, =0x6d191\n0x1ff58: mov r1, r4\n0x1ff5c: add r0, pc, r0\n0x1ff64: mov r0, r5\n0x1ff68: sub sp, fp, #0x8",
+      "normalized_result": "0x1feec: push {r4, r5, fp, lr}\n0x1fef0: add fp, sp, #0x8\n0x1fef4: sub sp, sp, #0x8\n0x1fef8: mov r4, r0\n0x1fefc: str r4, [sp, #0x10 + var_10]\n0x1ff00: str r1, [sp, #0x10 + var_C]\n0x1ff04: bl _DRV_GetMtalDeviceHandle\n0x1ff08: movw r1, #0x3011\n0x1ff0c: mov r2, sp\n0x1ff10: movt r1, #0x4008\n0x1ff14: bl ioctl@PLT\n0x1ff18: mov r1, r0\n0x1ff1c: ldr r0, =0x6d1b8\n0x1ff20: add r0, pc, r0\n0x1ff24: bl mtal_ioctl_result\n0x1ff28: mov r5, r0\n0x1ff2c: ldr r0, =0x85e44\n0x1ff30: ldr r0, [pc, r0]\n0x1ff34: ldrb r0, [r0, #0x1]\n0x1ff38: tst r0, #0x10\n0x1ff40: ldr r0, =0x6cc30\n0x1ff44: ldr r1, =0x6d18c\n0x1ff48: add r0, pc, r0\n0x1ff4c: add r1, pc, r1\n0x1ff50: bl printf@PLT\n0x1ff54: ldr r0, =0x6d191\n0x1ff58: mov r1, r4\n0x1ff5c: add r0, pc, r0\n0x1ff64: mov r0, r5\n0x1ff68: sub sp, fp, #0x8",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "asm:MTAMB_SetMeasuredPixel": {
+    "result": "0x20314: push {r4, r5, fp, lr}\n0x20318: add fp, sp, #0x8\n0x2031c: sub sp, sp, #0x8\n0x20320: mov r4, r0\n0x20324: str r4, [sp, #0x10 + var_10]\n0x20328: str r1, [sp, #0x10 + var_C]\n0x2032c: bl _DRV_GetMtalDeviceHandle\n0x20330: movw r1, #0x3014\n0x20334: mov r2, sp\n0x20338: movt r1, #0x4008\n0x2033c: bl ioctl@PLT\n0x20340: mov r1, r0\n0x20344: ldr r0, =0x6cfcb\n0x20348: add r0, pc, r0\n0x2034c: bl mtal_ioctl_result\n0x20350: mov r5, r0\n0x20354: ldr r0, =0x85a1c\n0x20358: ldr r0, [pc, r0]\n0x2035c: ldrb r0, [r0, #0x1]\n0x20360: tst r0, #0x10\n0x20368: ldr r0, =0x6c808\n0x2036c: ldr r1, =0x6cf9f\n0x20370: add r0, pc, r0\n0x20374: add r1, pc, r1\n0x20378: bl printf@PLT\n0x2037c: ldr r0, =0x6cfa6\n0x20380: mov r1, r4\n0x20384: add r0, pc, r0\n0x2038c: mov r0, r5\n0x20390: sub sp, fp, #0x8",
+    "evidence_id": "ev_7c7244d0883888a5bf4065a1714d3d93f465506a3443569bb8dac198ae611cb3",
+    "evidence": {
+      "evidence_id": "ev_7c7244d0883888a5bf4065a1714d3d93f465506a3443569bb8dac198ae611cb3",
+      "subject": {
+        "name": "libmtal.so",
+        "digest": {
+          "sha256": "b2939a08ac5e342508c3d52359a735fe821db41b8fe17589ab111af651cb514c"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/libmtal.so"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_assembly",
+      "parameters": {
+        "procedure": "MTAMB_SetMeasuredPixel",
+        "document": null
+      },
+      "raw_result": "0x20314: push {r4, r5, fp, lr}\n0x20318: add fp, sp, #0x8\n0x2031c: sub sp, sp, #0x8\n0x20320: mov r4, r0\n0x20324: str r4, [sp, #0x10 + var_10]\n0x20328: str r1, [sp, #0x10 + var_C]\n0x2032c: bl _DRV_GetMtalDeviceHandle\n0x20330: movw r1, #0x3014\n0x20334: mov r2, sp\n0x20338: movt r1, #0x4008\n0x2033c: bl ioctl@PLT\n0x20340: mov r1, r0\n0x20344: ldr r0, =0x6cfcb\n0x20348: add r0, pc, r0\n0x2034c: bl mtal_ioctl_result\n0x20350: mov r5, r0\n0x20354: ldr r0, =0x85a1c\n0x20358: ldr r0, [pc, r0]\n0x2035c: ldrb r0, [r0, #0x1]\n0x20360: tst r0, #0x10\n0x20368: ldr r0, =0x6c808\n0x2036c: ldr r1, =0x6cf9f\n0x20370: add r0, pc, r0\n0x20374: add r1, pc, r1\n0x20378: bl printf@PLT\n0x2037c: ldr r0, =0x6cfa6\n0x20380: mov r1, r4\n0x20384: add r0, pc, r0\n0x2038c: mov r0, r5\n0x20390: sub sp, fp, #0x8",
+      "normalized_result": "0x20314: push {r4, r5, fp, lr}\n0x20318: add fp, sp, #0x8\n0x2031c: sub sp, sp, #0x8\n0x20320: mov r4, r0\n0x20324: str r4, [sp, #0x10 + var_10]\n0x20328: str r1, [sp, #0x10 + var_C]\n0x2032c: bl _DRV_GetMtalDeviceHandle\n0x20330: movw r1, #0x3014\n0x20334: mov r2, sp\n0x20338: movt r1, #0x4008\n0x2033c: bl ioctl@PLT\n0x20340: mov r1, r0\n0x20344: ldr r0, =0x6cfcb\n0x20348: add r0, pc, r0\n0x2034c: bl mtal_ioctl_result\n0x20350: mov r5, r0\n0x20354: ldr r0, =0x85a1c\n0x20358: ldr r0, [pc, r0]\n0x2035c: ldrb r0, [r0, #0x1]\n0x20360: tst r0, #0x10\n0x20368: ldr r0, =0x6c808\n0x2036c: ldr r1, =0x6cf9f\n0x20370: add r0, pc, r0\n0x20374: add r1, pc, r1\n0x20378: bl printf@PLT\n0x2037c: ldr r0, =0x6cfa6\n0x20380: mov r1, r4\n0x20384: add r0, pc, r0\n0x2038c: mov r0, r5\n0x20390: sub sp, fp, #0x8",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "asm:MTAMB_SetProcessedPixel": {
+    "result": "0x20444: push {r4, r5, fp, lr}\n0x20448: add fp, sp, #0x8\n0x2044c: sub sp, sp, #0x8\n0x20450: mov r4, r0\n0x20454: str r4, [sp, #0x10 + var_10]\n0x20458: str r1, [sp, #0x10 + var_C]\n0x2045c: bl _DRV_GetMtalDeviceHandle\n0x20460: movw r1, #0x301a\n0x20464: mov r2, sp\n0x20468: movt r1, #0x4008\n0x2046c: bl ioctl@PLT\n0x20470: mov r1, r0\n0x20474: ldr r0, =0x6cf2f\n0x20478: add r0, pc, r0\n0x2047c: bl mtal_ioctl_result\n0x20480: mov r5, r0\n0x20484: ldr r0, =0x858ec\n0x20488: ldr r0, [pc, r0]\n0x2048c: ldrb r0, [r0, #0x1]\n0x20490: tst r0, #0x10\n0x20498: ldr r0, =0x6c6d8\n0x2049c: ldr r1, =0x6cf03\n0x204a0: add r0, pc, r0\n0x204a4: add r1, pc, r1\n0x204a8: bl printf@PLT\n0x204ac: ldr r0, =0x6cf0b\n0x204b0: mov r1, r4\n0x204b4: add r0, pc, r0\n0x204bc: mov r0, r5\n0x204c0: sub sp, fp, #0x8",
+    "evidence_id": "ev_7d285e1e70d84f7bf8a799ac2d93442fd25f7614f01ecd402f1e4f32f92a5536",
+    "evidence": {
+      "evidence_id": "ev_7d285e1e70d84f7bf8a799ac2d93442fd25f7614f01ecd402f1e4f32f92a5536",
+      "subject": {
+        "name": "libmtal.so",
+        "digest": {
+          "sha256": "b2939a08ac5e342508c3d52359a735fe821db41b8fe17589ab111af651cb514c"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/libmtal.so"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_assembly",
+      "parameters": {
+        "procedure": "MTAMB_SetProcessedPixel",
+        "document": null
+      },
+      "raw_result": "0x20444: push {r4, r5, fp, lr}\n0x20448: add fp, sp, #0x8\n0x2044c: sub sp, sp, #0x8\n0x20450: mov r4, r0\n0x20454: str r4, [sp, #0x10 + var_10]\n0x20458: str r1, [sp, #0x10 + var_C]\n0x2045c: bl _DRV_GetMtalDeviceHandle\n0x20460: movw r1, #0x301a\n0x20464: mov r2, sp\n0x20468: movt r1, #0x4008\n0x2046c: bl ioctl@PLT\n0x20470: mov r1, r0\n0x20474: ldr r0, =0x6cf2f\n0x20478: add r0, pc, r0\n0x2047c: bl mtal_ioctl_result\n0x20480: mov r5, r0\n0x20484: ldr r0, =0x858ec\n0x20488: ldr r0, [pc, r0]\n0x2048c: ldrb r0, [r0, #0x1]\n0x20490: tst r0, #0x10\n0x20498: ldr r0, =0x6c6d8\n0x2049c: ldr r1, =0x6cf03\n0x204a0: add r0, pc, r0\n0x204a4: add r1, pc, r1\n0x204a8: bl printf@PLT\n0x204ac: ldr r0, =0x6cf0b\n0x204b0: mov r1, r4\n0x204b4: add r0, pc, r0\n0x204bc: mov r0, r5\n0x204c0: sub sp, fp, #0x8",
+      "normalized_result": "0x20444: push {r4, r5, fp, lr}\n0x20448: add fp, sp, #0x8\n0x2044c: sub sp, sp, #0x8\n0x20450: mov r4, r0\n0x20454: str r4, [sp, #0x10 + var_10]\n0x20458: str r1, [sp, #0x10 + var_C]\n0x2045c: bl _DRV_GetMtalDeviceHandle\n0x20460: movw r1, #0x301a\n0x20464: mov r2, sp\n0x20468: movt r1, #0x4008\n0x2046c: bl ioctl@PLT\n0x20470: mov r1, r0\n0x20474: ldr r0, =0x6cf2f\n0x20478: add r0, pc, r0\n0x2047c: bl mtal_ioctl_result\n0x20480: mov r5, r0\n0x20484: ldr r0, =0x858ec\n0x20488: ldr r0, [pc, r0]\n0x2048c: ldrb r0, [r0, #0x1]\n0x20490: tst r0, #0x10\n0x20498: ldr r0, =0x6c6d8\n0x2049c: ldr r1, =0x6cf03\n0x204a0: add r0, pc, r0\n0x204a4: add r1, pc, r1\n0x204a8: bl printf@PLT\n0x204ac: ldr r0, =0x6cf0b\n0x204b0: mov r1, r4\n0x204b4: add r0, pc, r0\n0x204bc: mov r0, r5\n0x204c0: sub sp, fp, #0x8",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "asm:MTAMB_GetProcessedPixelArray": {
+    "result": "0x2027c: push {r4, r5, fp, lr}\n0x20280: add fp, sp, #0x8\n0x20284: sub sp, sp, #0x8\n0x20288: mov r4, r0\n0x2028c: str r4, [sp, #0x10 + var_10]\n0x20290: str r1, [sp, #0x10 + var_C]\n0x20294: bl _DRV_GetMtalDeviceHandle\n0x20298: movw r1, #0x3019\n0x2029c: mov r2, sp\n0x202a0: movt r1, #0x4008\n0x202a4: bl ioctl@PLT\n0x202a8: mov r1, r0\n0x202ac: ldr r0, =0x6d007\n0x202b0: add r0, pc, r0\n0x202b4: bl mtal_ioctl_result\n0x202b8: mov r5, r0\n0x202bc: ldr r0, =0x85ab4\n0x202c0: ldr r0, [pc, r0]\n0x202c4: ldrb r0, [r0, #0x1]\n0x202c8: tst r0, #0x10\n0x202d0: ldr r0, =0x6c8a0\n0x202d4: ldr r1, =0x6cfdb\n0x202d8: add r0, pc, r0\n0x202dc: add r1, pc, r1\n0x202e0: bl printf@PLT\n0x202e4: ldr r0, =0x6cfe8\n0x202e8: mov r1, r4\n0x202ec: add r0, pc, r0\n0x202f4: mov r0, r5\n0x202f8: sub sp, fp, #0x8",
+    "evidence_id": "ev_6a2e424c01d97804f6827daa80ca90633d4d43400ea55f8b0d9b0986d13ad80f",
+    "evidence": {
+      "evidence_id": "ev_6a2e424c01d97804f6827daa80ca90633d4d43400ea55f8b0d9b0986d13ad80f",
+      "subject": {
+        "name": "libmtal.so",
+        "digest": {
+          "sha256": "b2939a08ac5e342508c3d52359a735fe821db41b8fe17589ab111af651cb514c"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/libmtal.so"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_assembly",
+      "parameters": {
+        "procedure": "MTAMB_GetProcessedPixelArray",
+        "document": null
+      },
+      "raw_result": "0x2027c: push {r4, r5, fp, lr}\n0x20280: add fp, sp, #0x8\n0x20284: sub sp, sp, #0x8\n0x20288: mov r4, r0\n0x2028c: str r4, [sp, #0x10 + var_10]\n0x20290: str r1, [sp, #0x10 + var_C]\n0x20294: bl _DRV_GetMtalDeviceHandle\n0x20298: movw r1, #0x3019\n0x2029c: mov r2, sp\n0x202a0: movt r1, #0x4008\n0x202a4: bl ioctl@PLT\n0x202a8: mov r1, r0\n0x202ac: ldr r0, =0x6d007\n0x202b0: add r0, pc, r0\n0x202b4: bl mtal_ioctl_result\n0x202b8: mov r5, r0\n0x202bc: ldr r0, =0x85ab4\n0x202c0: ldr r0, [pc, r0]\n0x202c4: ldrb r0, [r0, #0x1]\n0x202c8: tst r0, #0x10\n0x202d0: ldr r0, =0x6c8a0\n0x202d4: ldr r1, =0x6cfdb\n0x202d8: add r0, pc, r0\n0x202dc: add r1, pc, r1\n0x202e0: bl printf@PLT\n0x202e4: ldr r0, =0x6cfe8\n0x202e8: mov r1, r4\n0x202ec: add r0, pc, r0\n0x202f4: mov r0, r5\n0x202f8: sub sp, fp, #0x8",
+      "normalized_result": "0x2027c: push {r4, r5, fp, lr}\n0x20280: add fp, sp, #0x8\n0x20284: sub sp, sp, #0x8\n0x20288: mov r4, r0\n0x2028c: str r4, [sp, #0x10 + var_10]\n0x20290: str r1, [sp, #0x10 + var_C]\n0x20294: bl _DRV_GetMtalDeviceHandle\n0x20298: movw r1, #0x3019\n0x2029c: mov r2, sp\n0x202a0: movt r1, #0x4008\n0x202a4: bl ioctl@PLT\n0x202a8: mov r1, r0\n0x202ac: ldr r0, =0x6d007\n0x202b0: add r0, pc, r0\n0x202b4: bl mtal_ioctl_result\n0x202b8: mov r5, r0\n0x202bc: ldr r0, =0x85ab4\n0x202c0: ldr r0, [pc, r0]\n0x202c4: ldrb r0, [r0, #0x1]\n0x202c8: tst r0, #0x10\n0x202d0: ldr r0, =0x6c8a0\n0x202d4: ldr r1, =0x6cfdb\n0x202d8: add r0, pc, r0\n0x202dc: add r1, pc, r1\n0x202e0: bl printf@PLT\n0x202e4: ldr r0, =0x6cfe8\n0x202e8: mov r1, r4\n0x202ec: add r0, pc, r0\n0x202f4: mov r0, r5\n0x202f8: sub sp, fp, #0x8",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  },
+  "OpenMtalDeviceHandle": {
+    "result": "    decomp_var_8 = r4;\n    pthread_mutex_lock(0xa6bdc);\n    if (*dword_a6058 != -0x1) {\n            r4 = 0x1;\n            r1 = *dword_a6bd8;\n            r1 = r1 + 0x1;\n            if (r1 == 0x0) {\n                    r1 = 0xffffffff;\n            }\n            *dword_a6bd8 = r1;\n    }\n    else {\n            snprintf(&decomp_var_48, 0x40, \"/dev/%s\", 0x91863);\n            r0 = open(&decomp_var_48, 0x2);\n            r4 = 0x1;\n            *dword_a6058 = r0;\n            if (r0 < 0x0) {\n                    r4 = 0x1;\n                    snprintf(&decomp_var_48, 0x40, \"/dev/%s\", \"mtal_system\");\n                    r0 = open(&decomp_var_48, 0x2);\n                    *dword_a6058 = r0;\n                    if (r0 < 0x0) {\n                            printf(\"[MTAL]: Cannot open device %s!\\n\", &decomp_var_48);\n                            r4 = 0x0;\n                    }\n            }\n    }\n    pthread_mutex_unlock(0xa6bdc);\n    r0 = r4;\n    &decomp_var_48 = &decomp_var_8;\n    return r0;\n",
+    "evidence_id": "ev_a144cc1c176758cdf748536d6980c4a55d01300a6b64311a634c45bd5f9f6407",
+    "evidence": {
+      "evidence_id": "ev_a144cc1c176758cdf748536d6980c4a55d01300a6b64311a634c45bd5f9f6407",
+      "subject": {
+        "name": "libmtal.so",
+        "digest": {
+          "sha256": "b2939a08ac5e342508c3d52359a735fe821db41b8fe17589ab111af651cb514c"
+        },
+        "format": "elf",
+        "architecture": "arm",
+        "local_path": "/Users/palusa/Documents/Codex/2026-10-20/my/work/philips-ambilight/libmtal.so"
+      },
+      "provider": {
+        "id": "hopper",
+        "name": "Hopper Disassembler",
+        "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+      },
+      "predicate_type": "rea.analysis",
+      "operation": "procedure_pseudo_code",
+      "parameters": {
+        "procedure": "OpenMtalDeviceHandle",
+        "document": null
+      },
+      "raw_result": "    decomp_var_8 = r4;\n    pthread_mutex_lock(0xa6bdc);\n    if (*dword_a6058 != -0x1) {\n            r4 = 0x1;\n            r1 = *dword_a6bd8;\n            r1 = r1 + 0x1;\n            if (r1 == 0x0) {\n                    r1 = 0xffffffff;\n            }\n            *dword_a6bd8 = r1;\n    }\n    else {\n            snprintf(&decomp_var_48, 0x40, \"/dev/%s\", 0x91863);\n            r0 = open(&decomp_var_48, 0x2);\n            r4 = 0x1;\n            *dword_a6058 = r0;\n            if (r0 < 0x0) {\n                    r4 = 0x1;\n                    snprintf(&decomp_var_48, 0x40, \"/dev/%s\", \"mtal_system\");\n                    r0 = open(&decomp_var_48, 0x2);\n                    *dword_a6058 = r0;\n                    if (r0 < 0x0) {\n                            printf(\"[MTAL]: Cannot open device %s!\\n\", &decomp_var_48);\n                            r4 = 0x0;\n                    }\n            }\n    }\n    pthread_mutex_unlock(0xa6bdc);\n    r0 = r4;\n    &decomp_var_48 = &decomp_var_8;\n    return r0;\n",
+      "normalized_result": "    decomp_var_8 = r4;\n    pthread_mutex_lock(0xa6bdc);\n    if (*dword_a6058 != -0x1) {\n            r4 = 0x1;\n            r1 = *dword_a6bd8;\n            r1 = r1 + 0x1;\n            if (r1 == 0x0) {\n                    r1 = 0xffffffff;\n            }\n            *dword_a6bd8 = r1;\n    }\n    else {\n            snprintf(&decomp_var_48, 0x40, \"/dev/%s\", 0x91863);\n            r0 = open(&decomp_var_48, 0x2);\n            r4 = 0x1;\n            *dword_a6058 = r0;\n            if (r0 < 0x0) {\n                    r4 = 0x1;\n                    snprintf(&decomp_var_48, 0x40, \"/dev/%s\", \"mtal_system\");\n                    r0 = open(&decomp_var_48, 0x2);\n                    *dword_a6058 = r0;\n                    if (r0 < 0x0) {\n                            printf(\"[MTAL]: Cannot open device %s!\\n\", &decomp_var_48);\n                            r4 = 0x0;\n                    }\n            }\n    }\n    pthread_mutex_unlock(0xa6bdc);\n    r0 = r4;\n    &decomp_var_48 = &decomp_var_8;\n    return r0;\n",
+      "confidence": "observed",
+      "authority": "shipped-artifact",
+      "environment": null,
+      "limitations": [
+        "Results depend on Hopper's completed static analysis."
+      ],
+      "locations": [],
+      "evidence_links": [],
+      "analysis_profile": {
+        "provider": {
+          "id": "hopper",
+          "name": "Hopper Disassembler",
+          "version": "launcher-sha256:dad6f886261fad0d4cdd01aee6fcf57439c60d7b5c54e62fc97f0180116690e0"
+        },
+        "parameters": {
+          "target_kind": "executable",
+          "target_format": "elf",
+          "architecture": "arm",
+          "available_architectures": [
+            "arm"
+          ],
+          "loader": {
+            "source": "derived",
+            "argument_count": 3,
+            "arguments_sha256": "dd0605838b8e722cf454e4184a67866a7aebceeac99f2c1d916c849716443ed0"
+          }
+        },
+        "digest": "dfab957a187d7639e16851db8615666766b60f61990a11fb3df1722cd8ff70dd"
+      }
+    }
+  }
+}

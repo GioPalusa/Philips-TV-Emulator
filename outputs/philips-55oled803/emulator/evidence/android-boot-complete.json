@@ -1,0 +1,30 @@
+{
+  "run": "ui/runs/20261020-173917-5f31e4/console.log",
+  "observations": [
+    {
+      "line": 20048,
+      "text": "TVUI_BOOT:1"
+    },
+    {
+      "line": 17804,
+      "text": "TVUI_KEY_30307e2ffe75:0"
+    },
+    {
+      "line": 48206,
+      "text": "TVUI_KEY_ed3d1d37d389:0"
+    },
+    {
+      "line": 20046,
+      "text": "01-01 00:05:07.597  1191  2112 I SurfaceFlinger: Boot is finished (277450 ms)"
+    },
+    {
+      "line": 19846,
+      "text": "01-01 00:05:07.207  1708  1757 D MTKAPI  : <<<<<mtktvapi jni_onload waiting dtv_svc>>>>> count:18[  322.144293] init: processing action (sys.boot_completed=1)"
+    }
+  ],
+  "limits": [
+    "Virtual Home command exit 0; visible launcher navigation not yet verified",
+    "Stock boot animation rendered with software graphics adaptation",
+    "Vendor TV service readiness and full launcher still incomplete"
+  ]
+}

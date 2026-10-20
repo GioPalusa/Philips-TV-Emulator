@@ -1,0 +1,3335 @@
+--- a/hw/arm/virt.c
++++ b/hw/arm/virt.c
+@@ -96,6 +96,10 @@
+ #include "hw/cxl/cxl_host.h"
+ #include "qemu/guest-random.h"
+ #include "hw/watchdog/sbsa_gwdt.h"
++#include "hw/sd/sd.h"
++#include "system/block-backend.h"
++#include "chardev/char-fe.h"
++#include "qemu/timer.h"
+ 
+ static GlobalProperty arm_virt_compat_defaults[] = {
+     { TYPE_VIRTIO_IOMMU_PCI, "aw-bits", "48" },
+@@ -174,14 +178,15 @@
+  */
+ static const MemMapEntry base_memmap[] = {
+     /* Space up to 0x8000000 is reserved for a boot ROM */
+-    [VIRT_FLASH] =              {          0, 0x08000000 },
+-    [VIRT_CPUPERIPHS] =         { 0x08000000, 0x00020000 },
++    /* 55OLED803/12 prototype: keep QEMU firmware away from TV RAM. */
++    [VIRT_FLASH] =              { 0xc0000000, 0x08000000 },
++    [VIRT_CPUPERIPHS] =         { 0xf2011000, 0x00020000 },
+     /* GIC distributor and CPU interfaces sit inside the CPU peripheral space */
+-    [VIRT_GIC_DIST] =           { 0x08000000, 0x00010000 },
+-    [VIRT_GIC_CPU] =            { 0x08010000, 0x00010000 },
+-    [VIRT_GIC_V2M] =            { 0x08020000, 0x00001000 },
+-    [VIRT_GIC_HYP] =            { 0x08030000, 0x00010000 },
+-    [VIRT_GIC_VCPU] =           { 0x08040000, 0x00010000 },
++    [VIRT_GIC_DIST] =           { 0xf2011000, 0x00001000 },
++    [VIRT_GIC_CPU] =            { 0xf2012000, 0x00001000 },
++    [VIRT_GIC_V2M] =            { 0xf2013000, 0x00001000 },
++    [VIRT_GIC_HYP] =            { 0xf2014000, 0x00002000 },
++    [VIRT_GIC_VCPU] =           { 0xf2016000, 0x00002000 },
+     /* The space in between here is reserved for GICv3 CPU/vCPU/HYP */
+     [VIRT_GIC_ITS] =            { 0x08080000, 0x00020000 },
+     /* This redistributor space allows up to 2*64kB*123 CPUs */
+@@ -199,7 +204,7 @@
+     [VIRT_GICV5_ITS_TR_NS] =    { 0x08090000, 0x00010000 },
+     [VIRT_GICV5_ITS_TR_EL3] =   { 0x080A0000, 0x00010000 },
+     [VIRT_GICV5_ITS_TR_REALM] = { 0x080B0000, 0x00010000 },
+-    [VIRT_UART0] =              { 0x09000000, 0x00001000 },
++    [VIRT_UART0] =              { 0xf000c000, 0x00001000 },
+     [VIRT_RTC] =                { 0x09010000, 0x00001000 },
+     [VIRT_FW_CFG] =             { 0x09020000, 0x00000018 },
+     [VIRT_GPIO] =               { 0x09030000, 0x00001000 },
+@@ -221,7 +226,7 @@
+     [VIRT_PCIE_PIO] =           { 0x3eff0000, 0x00010000 },
+     [VIRT_PCIE_ECAM] =          { 0x3f000000, 0x01000000 },
+     /* Actual RAM size depends on initial RAM and device memory settings */
+-    [VIRT_MEM] =                { GiB, LEGACY_RAMLIMIT_BYTES },
++    [VIRT_MEM] =                { 0, LEGACY_RAMLIMIT_BYTES },
+ };
+ 
+ /* Update the docs for highmem-mmio-size when changing this default */
+@@ -2877,6 +2882,362 @@
+     }
+ }
+ 
++/* MT5891 console: stock UART0 uses a 31-byte FIFO and 115200 8N1.
++ * RX is paced in virtual time; a socket burst must not become an unlimited
++ * stream of immediate receive interrupts into the guest terminal layer.
++ * TX remains an immediate sink for the stock polling boot console.
++ */
++static uint32_t philips_uart_regs[0x1000 / 4];
++static uint32_t philips_pd_uart_regs[0xc0 / 4];
++static CharFrontend philips_console;
++static qemu_irq philips_console_irq;
++static uint8_t philips_uart_rx[31];
++static unsigned philips_uart_rx_count;
++static QEMUTimer *philips_uart_tx_timer;
++static QEMUTimer *philips_uart_rx_timer;
++#define PHILIPS_UART_BYTE_NS 86806 /* ceil(10 bits / 115200 baud), 8N1 */
++static uint8_t philips_uart_ingress[256];
++static unsigned philips_uart_ingress_head, philips_uart_ingress_count;
++
++static void philips_uart_rx_schedule(void)
++{
++    unsigned capacity = (philips_uart_regs[4 / 4] & 0x40) ? 31 : 1;
++    if (philips_uart_ingress_count && philips_uart_rx_count < capacity &&
++        !timer_pending(philips_uart_rx_timer)) {
++        timer_mod(philips_uart_rx_timer,
++                  qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) + PHILIPS_UART_BYTE_NS);
++    }
++}
++
++static void philips_uart_irq_update(void)
++{
++    uint32_t pending = philips_uart_regs[0x10 / 4] & (1U << 19);
++    if (philips_uart_rx_count) {
++        pending |= 1U << 18; /* receive timeout, with data available */
++    }
++    philips_uart_regs[0x10 / 4] = pending;
++    qemu_set_irq(philips_console_irq,
++                 !!(pending & philips_uart_regs[0x0c / 4]));
++}
++
++static int philips_uart_can_receive(void *opaque)
++{
++    if (!(philips_uart_regs[0x0c / 4] & ((1U << 17) | (1U << 18)))) {
++        return 0;
++    }
++    return sizeof(philips_uart_ingress) - philips_uart_ingress_count;
++}
++
++static void philips_uart_receive(void *opaque, const uint8_t *buf, int size)
++{
++    /* The character backend honors can_receive; retain bounded backpressure. */
++    size = MIN(size, sizeof(philips_uart_ingress) - philips_uart_ingress_count);
++    for (int i = 0; i < size; i++) {
++        unsigned tail = (philips_uart_ingress_head +
++                         philips_uart_ingress_count) %
++                        sizeof(philips_uart_ingress);
++        philips_uart_ingress[tail] = buf[i];
++        philips_uart_ingress_count++;
++    }
++    philips_uart_rx_schedule();
++}
++
++static void philips_uart_received(void *opaque)
++{
++    unsigned capacity = (philips_uart_regs[4 / 4] & 0x40) ? 31 : 1;
++    if (philips_uart_ingress_count && philips_uart_rx_count < capacity) {
++        philips_uart_rx[philips_uart_rx_count++] =
++            philips_uart_ingress[philips_uart_ingress_head];
++        philips_uart_ingress_head = (philips_uart_ingress_head + 1) %
++                                    sizeof(philips_uart_ingress);
++        philips_uart_ingress_count--;
++    }
++    philips_uart_irq_update();
++    philips_uart_rx_schedule();
++    if (qemu_chr_fe_backend_connected(&philips_console)) {
++        qemu_chr_fe_accept_input(&philips_console);
++    }
++}
++
++static void philips_uart_transmitted(void *opaque)
++{
++    philips_uart_regs[0x10 / 4] |= 1U << 19;
++    philips_uart_irq_update();
++}
++
++static uint64_t philips_uart_read(void *opaque, hwaddr offset, unsigned size)
++{
++    if (offset == 0x4c || offset == 0xcc || offset == 0x18c) {
++        return 0x1f00 | (offset == 0x4c ? philips_uart_rx_count : 0);
++    }
++    if (offset == 4) {
++        return (philips_uart_regs[offset / 4] & 0x40) | 2 |
++               !!philips_uart_rx_count;
++    }
++    if (offset == 0) {
++        uint8_t value = 0;
++        if (philips_uart_rx_count) {
++            value = philips_uart_rx[0];
++            memmove(philips_uart_rx, philips_uart_rx + 1,
++                    --philips_uart_rx_count);
++        }
++        philips_uart_irq_update();
++        /* Resume the serial line after a full FIFO; never refill inline. */
++        philips_uart_rx_schedule();
++        return value;
++    }
++    return (philips_uart_regs[offset / 4] >> ((offset & 3) * 8)) &
++           (UINT32_MAX >> ((4 - size) * 8));
++}
++
++static void philips_uart_write(void *opaque, hwaddr offset, uint64_t value,
++                               unsigned size)
++{
++    if (offset == 0 || offset == 0xc0 || offset == 0xc4) {
++        fputc((unsigned char)value, stderr);
++        fflush(stderr);
++        if (offset == 0 && qemu_chr_fe_backend_connected(&philips_console)) {
++            uint8_t byte = value;
++            qemu_chr_fe_write(&philips_console, &byte, 1);
++        }
++        if (offset == 0) {
++            /* Functional TX sink with deferred empty interrupt. Modeling
++             * per-byte busy time stalls the stock polling console under TCG.
++             */
++            if (!timer_pending(philips_uart_tx_timer)) {
++                timer_mod(philips_uart_tx_timer,
++                          qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) + 1000000);
++            }
++            philips_uart_regs[0x10 / 4] &= ~(1U << 19);
++            philips_uart_irq_update();
++        }
++        return;
++    }
++    if (offset == 0x10) {
++        /* The driver's interrupt handler writes ~pending: W0C. */
++        philips_uart_regs[0x10 / 4] &= value;
++        philips_uart_irq_update();
++        return;
++    }
++    uint32_t old_enable = philips_uart_regs[0x0c / 4];
++    uint32_t mask = (UINT32_MAX >> ((4 - size) * 8)) << ((offset & 3) * 8);
++    philips_uart_regs[offset / 4] =
++        (philips_uart_regs[offset / 4] & ~mask) |
++        ((value << ((offset & 3) * 8)) & mask);
++    if (offset == 0x0c && (value & ~old_enable & (1U << 19))) {
++        timer_mod(philips_uart_tx_timer,
++                  qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) + PHILIPS_UART_BYTE_NS);
++    }
++    if (offset == 0x50 || offset == 0xd0 || offset == 0x190) {
++        if (offset == 0x50 && (value & 0x40)) {
++            philips_uart_rx_count = 0;
++        }
++        if (offset == 0x50 && (value & 0x80)) {
++            timer_del(philips_uart_tx_timer);
++        }
++        philips_uart_regs[offset / 4] &= ~0xc0; /* FIFO flush self-clears. */
++    }
++    philips_uart_irq_update();
++    philips_uart_rx_schedule();
++    if (offset == 0x0c && qemu_chr_fe_backend_connected(&philips_console)) {
++        qemu_chr_fe_accept_input(&philips_console);
++    }
++}
++
++static const MemoryRegionOps philips_uart_ops = {
++    .read = philips_uart_read,
++    .write = philips_uart_write,
++    .endianness = DEVICE_NATIVE_ENDIAN,
++    .valid.min_access_size = 1,
++    .valid.max_access_size = 4,
++};
++
++/* Trace accesses to MT5891 peripherals that have no model yet. */
++static void philips_note_mmio(hwaddr offset, unsigned size, bool write)
++{
++    static hwaddr seen[8192];
++    static uint64_t counts[8192];
++    static unsigned seen_count;
++    hwaddr address = 0xf0000000 + offset;
++
++    for (unsigned i = 0; i < seen_count; i++) {
++        if (seen[i] == address) {
++            uint64_t count = ++counts[i];
++            if (count >= 1048576 && !(count & (count - 1))) {
++                fprintf(stderr, "[mt5891 polling %s] 0x%08" HWADDR_PRIx
++                        " count=%" PRIu64 " pc=0x%08x\n",
++                        write ? "write" : "read", address, count,
++                        current_cpu ? ARM_CPU(current_cpu)->env.regs[15] : 0);
++            }
++            return;
++        }
++    }
++    if (seen_count < ARRAY_SIZE(seen)) {
++        seen[seen_count++] = address;
++        fprintf(stderr, "[mt5891 missing %s] 0x%08" HWADDR_PRIx
++                " size=%u pc=0x%08x\n", write ? "write" : "read", address, size,
++                current_cpu ? ARM_CPU(current_cpu)->env.regs[15] : 0);
++    }
++}
++
++#include "philips-smp.inc"
++#include "philips-timer.inc"
++#include "philips-pdwnc.inc"
++#include "philips-gfx.inc"
++#include "philips-aproc.inc"
++#include "philips-servoadc.inc"
++#include "philips-osd.inc"
++#include "mt5891_ambilight_measure.inc"
++#include "mt5891_ambilight_spi.inc"
++
++static MT5891AmbSpi philips_ambilight;
++static FILE *philips_ambilight_log;
++
++static void philips_ambilight_capture(void *opaque, uint64_t sequence,
++                                     const uint8_t *bytes, size_t count,
++                                     unsigned m, unsigned n, bool complete)
++{
++    if (!philips_ambilight_log) {
++        return;
++    }
++    fprintf(philips_ambilight_log,
++        "{\"schema\":\"mt5891-ambilight-spi-v1\",\"sequence\":%" PRIu64
++        ",\"complete\":%s,\"m\":%u,\"n\":%u,\"data_hex\":\"",
++        sequence, complete ? "true" : "false", m, n);
++    for (size_t i = 0; i < count; i++) {
++        fprintf(philips_ambilight_log, "%02x", bytes[i]);
++    }
++    fputs("\"}\n", philips_ambilight_log);
++    fflush(philips_ambilight_log);
++}
++
++static uint64_t philips_mmio_read(void *opaque, hwaddr offset, unsigned size)
++{
++    uint64_t value;
++    if (philips_smp_read(offset, size, &value)) {
++        return value;
++    }
++    if (philips_timer_read(offset, size, &value)) {
++        if ((offset & ~3ULL) == 0x8030) {
++            value |= (philips_gfx_bim_status() >> (8 * (offset & 3))) &
++                     (UINT32_MAX >> (8 * (4 - size)));
++        }
++        return value;
++    }
++    if (philips_pdwnc_read(offset, size, &value)) {
++        return value;
++    }
++    if (philips_gfx_read(offset, size, &value)) {
++        return value;
++    }
++    if (philips_aproc_read(offset, size, &value)) {
++        return value;
++    }
++    if (philips_servoadc_read(offset, size, &value)) {
++        return value;
++    }
++    if (philips_osd_read(offset, size, &value)) {
++        return value;
++    }
++    if ((philips_measure_enabled || philips_vsync_fixture_enabled) &&
++        ((offset >= 0x27b00 && offset < 0x27b10) ||
++         (offset >= 0x34224 && offset < 0x34228))) {
++        return philips_amb_measure_filter_read(0xf0000000 + offset, size, 0);
++    }
++    if (offset >= 0x29400 && offset < 0x29450) {
++        return mt5891_amb_spi_read(&philips_ambilight, offset - 0x29400, size);
++    }
++    /* PDWNC UARTs 2/4/5, as defined by mt53xx_uart.h. Transmit is
++     * synchronous; RX is empty. Modem peers and RX IRQs are not modeled.
++     */
++    if (offset >= 0x28800 && offset < 0x288c0) {
++        unsigned r = offset - 0x28800;
++        if (r == 0x34 || r == 0x74 || r == 0xb4) {
++            return 0x1f00;
++        }
++        if (r == 4 || r == 0x48 || r == 0x84) {
++            return (philips_pd_uart_regs[r / 4] & 0x40) | 2;
++        }
++        if (r == 0x10 || r == 0x50 || r == 0x90) {
++            return 0;
++        }
++        return philips_pd_uart_regs[r / 4];
++    }
++    philips_note_mmio(offset, size, false);
++    return 0;
++}
++
++static void philips_mmio_write(void *opaque, hwaddr offset, uint64_t value,
++                              unsigned size)
++{
++    philips_amb_measure_observe_write(0xf0000000 + offset, size, value);
++    bool smp_handled = philips_smp_write(offset, size, value);
++    bool timer_handled = philips_timer_write(offset, size, value);
++    if ((offset & ~3ULL) == 0x8034) {
++        philips_gfx_bim_enable(philips_timer.mask);
++    }
++    if ((offset & ~3ULL) == 0x8038) {
++        philips_gfx_bim_clear(value << (8 * (offset & 3)));
++    }
++    if (smp_handled || timer_handled) {
++        return;
++    }
++    if (philips_pdwnc_write(offset, size, value)) {
++        return;
++    }
++    if (philips_gfx_write(offset, size, value)) {
++        return;
++    }
++    if (philips_aproc_write(offset, size, value)) {
++        return;
++    }
++    if (philips_servoadc_write(offset, size, value)) {
++        return;
++    }
++    if (philips_osd_write(offset, size, value)) {
++        return;
++    }
++    if ((philips_measure_enabled || philips_vsync_fixture_enabled) &&
++        ((offset >= 0x27b00 && offset < 0x27b10) ||
++         (offset >= 0x3422c && offset < 0x34230))) {
++        return;
++    }
++    if (offset >= 0x29400 && offset < 0x29450) {
++        mt5891_amb_spi_write(&philips_ambilight, offset - 0x29400, value, size);
++        return;
++    }
++    if (offset >= 0x28800 && offset < 0x288c0) {
++        unsigned r = offset - 0x28800;
++        if (r == 0 || r == 0x44 || r == 0x80) {
++            return; /* Peripheral UARTs: no attached peer. */
++        }
++        philips_pd_uart_regs[r / 4] = value;
++        if (r == 0x38 || r == 0x78 || r == 0xb8) {
++            philips_pd_uart_regs[r / 4] &= ~0xc0;
++        }
++        return;
++    }
++    philips_note_mmio(offset, size, true);
++}
++
++static const MemoryRegionOps philips_mmio_ops = {
++    .read = philips_mmio_read,
++    .write = philips_mmio_write,
++    .endianness = DEVICE_NATIVE_ENDIAN,
++    .valid.min_access_size = 1,
++    .valid.max_access_size = 4,
++};
++
++static void philips_modify_dtb(const struct arm_boot_info *info, void *fdt)
++{
++    /* arm_load_dtb normally replaces memory nodes with -m's single bank.
++     * Restore the measured discontiguous TV DRAM banks after that step.
++     */
++    qemu_fdt_setprop_cells(fdt, "/memory@0", "reg",
++        0x00000000, 0x371e0000, 0x40000000, 0x2b804000,
++        0x8c748000, 0x138b8000);
++}
++
+ static void machvirt_init(MachineState *machine)
+ {
+     VirtMachineState *vms = VIRT_MACHINE(machine);
+@@ -3148,8 +3509,44 @@
+     fdt_add_timer_nodes(vms);
+     fdt_add_cpu_nodes(vms);
+ 
+-    memory_region_add_subregion(sysmem, vms->memmap[VIRT_MEM].base,
+-                                machine->ram);
++    /* The observed first bank is 0x00000000..0x371e0000.  -m 880M
++     * provides 0x37000000 bytes; map its remaining 0x1e0000 separately.
++     * The two later ranges are copied from the TV's live device tree.
++     * Priority covers the generic virt board's low-address peripherals.
++     */
++    if (machine->ram_size != 880 * MiB) {
++        error_report("55OLED803/12 prototype requires -m 880M");
++        exit(1);
++    }
++    memory_region_add_subregion_overlap(sysmem, 0, machine->ram, 10);
++    const struct {
++        hwaddr base;
++        uint64_t size;
++        const char *name;
++    } tv_ram[] = {
++        { 0x37000000, 0x001e0000, "mt5891.ram0.tail" },
++        { 0x40000000, 0x2b804000, "mt5891.ram1" },
++        { 0x8c748000, 0x138b8000, "mt5891.ram2" },
++        /* The stock FBM driver maps video/DSP pools in the gaps omitted
++         * from Linux's allocatable RAM. Keep those gaps backed by storage
++         * without advertising them as ordinary RAM in the device tree.
++         * This does not model secure-world ownership of protected pools.
++         */
++        { 0x371e0000, 0x08e20000, "mt5891.reserved-fbm0" },
++        { 0x6b804000, 0x20f44000, "mt5891.reserved-fbm1" },
++        /* MT53xx core.c maps these SRAM pages outside normal DRAM.
++         * CONFIG_OPM saves 256 bytes at 0xfb00bf00 during machine init.
++         */
++        { 0xfb004000, 0x00002000, "mt5891.sram-data" },
++        { 0xfb00b000, 0x00001000, "mt5891.sram-core1" },
++    };
++    for (int bank = 0; bank < ARRAY_SIZE(tv_ram); bank++) {
++        MemoryRegion *region = g_new0(MemoryRegion, 1);
++        memory_region_init_ram(region, NULL, tv_ram[bank].name,
++                               tv_ram[bank].size, &error_fatal);
++        memory_region_add_subregion_overlap(sysmem, tv_ram[bank].base,
++                                            region, 10);
++    }
+ 
+     cxl_fmws_update_mmio();
+ 
+@@ -3191,6 +3588,58 @@
+         }
+     }
+     create_uart(vms, VIRT_UART0, sysmem, serial_hd(0), false);
++    philips_console_irq = qdev_get_gpio_in(vms->gic, 89); /* IRQ121 */
++    philips_uart_tx_timer = timer_new_ns(QEMU_CLOCK_VIRTUAL,
++                                        philips_uart_transmitted, NULL);
++    philips_uart_rx_timer = timer_new_ns(QEMU_CLOCK_VIRTUAL,
++                                        philips_uart_received, NULL);
++    Chardev *console_chr = qemu_chr_find("tv-console");
++    if (console_chr) {
++        qemu_chr_fe_init(&philips_console, console_chr, &error_fatal);
++        qemu_chr_fe_set_handlers(&philips_console, philips_uart_can_receive,
++            philips_uart_receive, NULL, NULL, NULL, NULL, true);
++    }
++    philips_smp_init();
++    philips_timer_init(qdev_get_gpio_in(vms->gic, 75), NULL, NULL);
++    /* Stock BIM vector0 is Linux IRQ104, hence GIC SPI72. */
++    philips_pdwnc_init(qdev_get_gpio_in(vms->gic, 72));
++    philips_gfx_init();
++    philips_gfx_set_irq(qdev_get_gpio_in(vms->gic, 97));
++    philips_osd_init(qdev_get_gpio_in(vms->gic, 175));
++    philips_aproc_init(qdev_get_gpio_in(vms->gic, 162));
++    philips_servoadc_init();
++    philips_amb_measure_init(qdev_get_gpio_in(vms->gic, 95));
++    const char *ambilight_log_path = getenv("PHILIPS_AMBILIGHT_LOG");
++    if (ambilight_log_path) {
++        philips_ambilight_log = fopen(ambilight_log_path, "wx");
++        if (!philips_ambilight_log) {
++            error_report("Cannot create Ambilight log: %s", strerror(errno));
++            exit(1);
++        }
++    }
++    mt5891_amb_spi_init(&philips_ambilight, philips_ambilight_capture, NULL);
++    MemoryRegion *philips_mmio = g_new0(MemoryRegion, 1);
++    memory_region_init_io(philips_mmio, NULL, &philips_mmio_ops, NULL,
++                          "mt5891.unmodeled-peripherals", 0x03000000);
++    memory_region_add_subregion_overlap(sysmem, 0xf0000000,
++                                        philips_mmio, -10);
++    MemoryRegion *philips_uart = g_new0(MemoryRegion, 1);
++    memory_region_init_io(philips_uart, NULL, &philips_uart_ops, NULL,
++                          "mt5891.early-uart", 0x1000);
++    memory_region_add_subregion_overlap(sysmem, 0xf000c000,
++                                        philips_uart, 20);
++    BlockBackend *tv_disk = blk_by_name("tv-emmc");
++    if (tv_disk) {
++        DeviceState *msdc = qdev_new("mt5891-msdc");
++        sysbus_realize_and_unref(SYS_BUS_DEVICE(msdc), &error_fatal);
++        sysbus_mmio_map(SYS_BUS_DEVICE(msdc), 0, 0xf006d000);
++        sysbus_connect_irq(SYS_BUS_DEVICE(msdc), 0,
++                           qdev_get_gpio_in(vms->gic, 140));
++        DeviceState *card = qdev_new(TYPE_EMMC);
++        qdev_prop_set_drive_err(card, "drive", tv_disk, &error_fatal);
++        qdev_realize_and_unref(card, qdev_get_child_bus(msdc, "emmc-bus"),
++                              &error_fatal);
++    }
+     if (vms->secure) {
+         create_uart(vms, VIRT_UART1, secure_sysmem, serial_hd(1), true);
+     }
+@@ -3258,6 +3707,7 @@
+     vms->bootinfo.skip_dtb_autoload = true;
+     vms->bootinfo.firmware_loaded = firmware_loaded;
+     vms->bootinfo.psci_conduit = vms->psci_conduit;
++    vms->bootinfo.modify_dtb = philips_modify_dtb;
+     arm_load_kernel(ARM_CPU(first_cpu), machine, &vms->bootinfo);
+ 
+     vms->machine_done.notify = virt_machine_done;
+--- a/hw/sd/meson.build
++++ b/hw/sd/meson.build
+@@ -1,5 +1,6 @@
+ system_ss.add(when: 'CONFIG_PL181', if_true: files('pl181.c'))
+ system_ss.add(when: 'CONFIG_SD', if_true: files('sd.c', 'core.c'))
++system_ss.add(when: 'CONFIG_SD', if_true: files('mt5891-msdc.c'))
+ system_ss.add(when: 'CONFIG_SDHCI', if_true: files('sdhci.c'))
+ system_ss.add(when: 'CONFIG_SDHCI_PCI', if_true: files('sdhci-pci.c'))
+ system_ss.add(when: 'CONFIG_SSI_SD', if_true: files('ssi-sd.c'))
+--- a/hw/sd/sd.c
++++ b/hw/sd/sd.c
+@@ -166,6 +166,7 @@
+     uint64_t rpmb_part_size;
+     BlockBackend *blk;
+     uint8_t boot_config;
++    uint8_t reliable_write_sector_count;
+ 
+     const SDProto *proto;
+ 
+@@ -523,7 +524,7 @@
+     sd->ext_csd[EXT_CSD_ACC_SIZE] = 0x1; /* Access size */
+     sd->ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE] = 0x01; /* HC Erase unit size */
+     sd->ext_csd[EXT_CSD_ERASE_TIMEOUT_MULT] = 0x01; /* HC erase timeout */
+-    sd->ext_csd[EXT_CSD_REL_WR_SEC_C] = 0x1; /* Reliable write sector count */
++    sd->ext_csd[EXT_CSD_REL_WR_SEC_C] = sd->reliable_write_sector_count;
+     sd->ext_csd[EXT_CSD_HC_WP_GRP_SIZE] = 0x01; /* HC write protect group size */
+     sd->ext_csd[EXT_CSD_S_C_VCC] = 0x01; /* Sleep current VCC  */
+     sd->ext_csd[EXT_CSD_S_C_VCCQ] = 0x01; /* Sleep current VCCQ */
+@@ -3215,6 +3216,13 @@
+ static const Property emmc_properties[] = {
+     DEFINE_PROP_UINT64("boot-partition-size", SDState, boot_part_size, 0),
+     DEFINE_PROP_UINT8("boot-config", SDState, boot_config, 0x0),
++    /*
++     * Zero permits boards to avoid advertising legacy reliable writes.
++     * The Philips vendor kernel otherwise splits journal requests into
++     * one-sector transfers and mishandles their partial completion.
++     */
++    DEFINE_PROP_UINT8("reliable-write-sector-count", SDState,
++                      reliable_write_sector_count, 1),
+     DEFINE_PROP_UINT64("rpmb-partition-size", SDState, rpmb_part_size, 0),
+     DEFINE_PROP_STRING("auth-key", SDState, preset_auth_key),
+ };
+--- /dev/null
++++ b/hw/sd/mt5891-msdc.c
+@@ -0,0 +1,465 @@
++/*
++ * MediaTek MT5891 MSDC controller, functional bring-up model with opt-in writes.
++ * Register/descriptor layout: vendor Linux 3.10 mtk_msdc_host_hw.h.
++ * Card protocol is delegated to QEMU's eMMC model, including card state,
++ * CID/CSD/EXT_CSD, addressing and block backend bounds checks.
++ * SPDX-License-Identifier: GPL-2.0-or-later
++ */
++#include "qemu/osdep.h"
++#include "qemu/bswap.h"
++#include "qemu/units.h"
++#include "qemu/log.h"
++#include "qemu/module.h"
++#include "hw/core/sysbus.h"
++#include "hw/core/irq.h"
++#include "hw/core/qdev-properties.h"
++#include "hw/sd/sd.h"
++#include "system/dma.h"
++#include "migration/vmstate.h"
++#include "qom/object.h"
++
++#define TYPE_MT5891_MSDC "mt5891-msdc"
++OBJECT_DECLARE_SIMPLE_TYPE(MT5891MSDCState, MT5891_MSDC)
++#define REG(s, off) ((s)->regs[(off) / 4])
++#define I_ACMD   (1U << 3)
++#define I_QEMPTY (1U << 6)
++#define I_CMD    (1U << 8)
++#define I_CMDTO  (1U << 9)
++#define I_XFER   (1U << 12)
++#define I_DMA    (1U << 13)
++#define I_DATTO  (1U << 14)
++#define MAX_DESCRIPTORS 4096
++
++struct MT5891MSDCState {
++    SysBusDevice parent_obj;
++    MemoryRegion iomem;
++    SDBus sdbus;
++    qemu_irq irq;
++    uint32_t regs[0x1000 / 4];
++    uint32_t remaining;
++    bool trace;
++    bool allow_writes;
++    bool transfer_write;
++};
++
++static void msdc_irq(MT5891MSDCState *s)
++{
++    qemu_set_irq(s->irq, !!(REG(s, 0x0c) & REG(s, 0x10)));
++}
++
++static void msdc_data_end(MT5891MSDCState *s)
++{
++    uint32_t auto_cmd = (REG(s, 0x34) >> 28) & 3;
++    REG(s, 0x0c) |= I_XFER;
++    if (auto_cmd == 1) {
++        SDRequest req = { .cmd = 12, .arg = 0 };
++        uint8_t resp[16];
++        size_t n = sdbus_do_command(&s->sdbus, &req, resp, sizeof(resp));
++        if (n == 4) {
++            REG(s, 0x80) = ldl_be_p(resp);
++            REG(s, 0x0c) |= I_ACMD;
++        } else {
++            REG(s, 0x0c) |= 1U << 4; /* Auto-command timeout */
++        }
++    }
++    msdc_irq(s);
++}
++
++static unsigned msdc_card_chunk(MT5891MSDCState *s, unsigned n)
++{
++    unsigned opcode = REG(s, 0x34) & 63;
++    unsigned block_size = (REG(s, 0x34) >> 16) & 0xfff;
++
++    /*
++     * These eMMC commands transfer 512-byte blocks. Keep each bulk request
++     * inside a card block, including when a BD ends in the middle of one.
++     * Other command/block-size combinations retain byte-granular readiness
++     * checks until their card data phase has been modelled explicitly.
++     */
++    if (block_size == 512 &&
++        (opcode == 8 || opcode == 17 || opcode == 18 ||
++         opcode == 24 || opcode == 25)) {
++        unsigned left = s->remaining % 512;
++        return MIN(n, left ? left : 512);
++    }
++    return MIN(n, 1);
++}
++
++static bool msdc_pull(MT5891MSDCState *s, uint8_t *buf, unsigned n)
++{
++    if (s->transfer_write || n > s->remaining) {
++        return false;
++    }
++    while (n) {
++        unsigned chunk = msdc_card_chunk(s, n);
++        if (!sdbus_data_ready(&s->sdbus)) {
++            REG(s, 0x0c) |= I_DATTO;
++            s->remaining = 0;
++            msdc_irq(s);
++            return false;
++        }
++        sdbus_read_data(&s->sdbus, buf, chunk);
++        buf += chunk;
++        n -= chunk;
++        s->remaining -= chunk;
++    }
++    return true;
++}
++
++static bool msdc_push(MT5891MSDCState *s, const uint8_t *buf, unsigned n)
++{
++    if (!s->allow_writes || !s->transfer_write || n > s->remaining) {
++        return false;
++    }
++    while (n) {
++        unsigned chunk = msdc_card_chunk(s, n);
++        if (!sdbus_receive_ready(&s->sdbus)) {
++            REG(s, 0x0c) |= I_DATTO;
++            s->remaining = 0;
++            msdc_irq(s);
++            return false;
++        }
++        sdbus_write_data(&s->sdbus, buf, chunk);
++        buf += chunk;
++        n -= chunk;
++        s->remaining -= chunk;
++    }
++    return true;
++}
++
++static bool msdc_dma_buffer(MT5891MSDCState *s, uint32_t addr, uint32_t length)
++{
++    uint8_t buf[512];
++    if (!length || length > s->remaining) {
++        return false;
++    }
++    while (length) {
++        unsigned n = MIN(length, sizeof(buf));
++        if (s->transfer_write) {
++            if (dma_memory_read(&address_space_memory, addr, buf, n,
++                                MEMTXATTRS_UNSPECIFIED) != MEMTX_OK ||
++                !msdc_push(s, buf, n)) {
++                return false;
++            }
++        } else if (!msdc_pull(s, buf, n) ||
++                   dma_memory_write(&address_space_memory, addr, buf, n,
++                                    MEMTXATTRS_UNSPECIFIED) != MEMTX_OK) {
++            return false;
++        }
++        addr += n;
++        length -= n;
++    }
++    REG(s, 0x94) = addr;
++    return true;
++}
++
++static bool msdc_descriptor(MT5891MSDCState *s, uint32_t addr,
++                            uint8_t *desc, bool gpd)
++{
++    unsigned sum = 0, i;
++    if (dma_memory_read(&address_space_memory, addr, desc, 16,
++                        MEMTXATTRS_UNSPECIFIED) != MEMTX_OK) {
++        return false;
++    }
++    if (REG(s, 0x9c) & 2) {
++        for (i = 0; i < 16; i++) {
++            sum += desc[i];
++        }
++        if ((sum & 0xff) != 0xff) {
++            REG(s, 0x9c) |= gpd ? 0x20 : 0x10;
++            return false;
++        }
++    }
++    return true;
++}
++
++static bool msdc_dma_descriptors(MT5891MSDCState *s)
++{
++    uint32_t gp = REG(s, 0x90);
++    unsigned budget = MAX_DESCRIPTORS;
++    while (s->remaining && budget--) {
++        uint8_t gpd[16], bd[16];
++        uint32_t flags, ptr;
++        if (!msdc_descriptor(s, gp, gpd, true)) {
++            return false;
++        }
++        flags = ldl_le_p(gpd);
++        if (!(flags & 1)) { /* No descriptor owned by hardware. */
++            return false;
++        }
++        ptr = ldl_le_p(gpd + 8);
++        if (flags & 2) {
++            bool end = false;
++            while (!end && budget && s->remaining) {
++                budget--;
++                if (!msdc_descriptor(s, ptr, bd, false) ||
++                    !msdc_dma_buffer(s, ldl_le_p(bd + 8),
++                                     ldl_le_p(bd + 12) & 0xffff)) {
++                    return false;
++                }
++                end = ldl_le_p(bd) & 1;
++                ptr = ldl_le_p(bd + 4);
++            }
++            if (!end) {
++                return false;
++            }
++        } else if (!msdc_dma_buffer(s, ptr, ldl_le_p(gpd + 12) & 0xffff)) {
++            return false;
++        }
++        /* Return descriptor ownership to the driver. */
++        stl_le_p(gpd, flags & ~1U);
++        if (dma_memory_write(&address_space_memory, gp, gpd, 4,
++                             MEMTXATTRS_UNSPECIFIED) != MEMTX_OK) {
++            return false;
++        }
++        gp = ldl_le_p(gpd + 4);
++    }
++    return s->remaining == 0;
++}
++
++static void msdc_dma(MT5891MSDCState *s)
++{
++    bool descriptor = REG(s, 0x98) & 0x100;
++    bool ok;
++    REG(s, 0x9c) |= 1;
++    if (!s->remaining) {
++        ok = false;
++    } else if (descriptor) {
++        ok = msdc_dma_descriptors(s);
++    } else {
++        uint32_t len = REG(s, 0xa8);
++        if (!len) {
++            len = REG(s, 0x98) >> 16;
++        }
++        ok = !((REG(s, 0x98) & 0x400) && len != s->remaining) &&
++             msdc_dma_buffer(s, REG(s, 0x90), len);
++    }
++    REG(s, 0x9c) &= ~1U;
++    REG(s, 0x98) &= ~5U;
++    if (ok) {
++        REG(s, 0x0c) |= I_DMA;
++        if (descriptor) {
++            REG(s, 0x0c) |= I_QEMPTY;
++        }
++        if (!s->remaining) {
++            msdc_data_end(s);
++        }
++    } else {
++        REG(s, 0x0c) |= I_DATTO;
++        qemu_log_mask(LOG_GUEST_ERROR, "mt5891-msdc: DMA failed at %08x remaining=%u\n",
++                      REG(s, 0x90), s->remaining);
++    }
++    msdc_irq(s);
++}
++
++static void msdc_command(MT5891MSDCState *s)
++{
++    uint32_t cmd = REG(s, 0x34);
++    unsigned opcode = cmd & 63, response_type = (cmd >> 7) & 7;
++    uint8_t response[16] = {0};
++    SDRequest req = { .cmd = opcode, .arg = REG(s, 0x38) };
++    size_t n;
++    s->remaining = 0;
++    if (s->trace) {
++        fprintf(stderr, "[mt5891-msdc] CMD%u arg=%08x ctrl=%08x blocks=%u\n",
++                opcode, req.arg, cmd, REG(s, 0x50));
++    }
++    s->transfer_write = !!(cmd & (1U << 13));
++    /* Reject a direction mismatch before the card can enter a transfer. */
++    if (((opcode == 24 || opcode == 25) && !s->transfer_write) ||
++        ((opcode == 8 || opcode == 17 || opcode == 18) && s->transfer_write)) {
++        REG(s, 0x40) = (1U << 22) | (4U << 9) | (1U << 8);
++        REG(s, 0x0c) |= I_CMD | I_DATTO;
++        msdc_irq(s);
++        return;
++    }
++    /* Only CMD24/25 data writes are opt-in. Erase/program/lock stay rejected. */
++    if ((s->transfer_write && (!s->allow_writes ||
++                              (opcode != 24 && opcode != 25))) ||
++        opcode == 26 || opcode == 27 || opcode == 28 || opcode == 29 ||
++        opcode == 35 || opcode == 36 || opcode == 38 || opcode == 42) {
++        REG(s, 0x40) = (1U << 26) | (4U << 9) | (1U << 8); /* WP_VIOLATION */
++        REG(s, 0x0c) |= I_CMD | I_DATTO;
++        msdc_irq(s);
++        return;
++    }
++    if (((cmd >> 28) & 3) == 2 && ((cmd >> 11) & 3)) {
++        SDRequest pre = { .cmd = 23, .arg = REG(s, 0x50) };
++        n = sdbus_do_command(&s->sdbus, &pre, response, sizeof(response));
++        if (n != 4) {
++            REG(s, 0x0c) |= 1U << 4;
++            msdc_irq(s);
++            return;
++        }
++        REG(s, 0x80) = ldl_be_p(response);
++        REG(s, 0x0c) |= I_ACMD;
++    }
++    n = sdbus_do_command(&s->sdbus, &req, response, sizeof(response));
++    if (response_type && n != (response_type == 2 ? 16 : 4)) {
++        REG(s, 0x0c) |= I_CMDTO;
++    } else {
++        unsigned i;
++        for (i = 0; i < 4; i++) {
++            REG(s, 0x40 + 4 * i) = 0;
++        }
++        if (n == 16) {
++            for (i = 0; i < 4; i++) {
++                REG(s, 0x40 + 4 * (3 - i)) = ldl_be_p(response + 4 * i);
++            }
++        } else if (n == 4) {
++            REG(s, 0x40) = ldl_be_p(response);
++        }
++        REG(s, 0x0c) |= I_CMD;
++        if ((cmd >> 11) & 3) {
++            uint32_t size = (cmd >> 16) & 0xfff;
++            uint32_t blocks = MAX(REG(s, 0x50), 1U);
++            uint64_t total = (uint64_t)size * blocks;
++            if (!size || total > 64 * MiB ||
++                (s->transfer_write ? !sdbus_receive_ready(&s->sdbus) :
++                                     !sdbus_data_ready(&s->sdbus))) {
++                REG(s, 0x0c) |= I_DATTO;
++            } else {
++                s->remaining = total;
++            }
++        }
++    }
++    msdc_irq(s);
++}
++
++static uint64_t msdc_read(void *opaque, hwaddr off, unsigned size)
++{
++    MT5891MSDCState *s = opaque;
++    switch (off) {
++    case 0x08: /* Command/data pins high; card detect asserted. */
++        return 0x1ff0000;
++    case 0x14:
++        return s->transfer_write ? 0 : MIN(s->remaining, 128U);
++    case 0x1c: {
++        uint8_t data[4] = {0};
++        unsigned n = MIN(s->remaining, size);
++        if (n) {
++            if (!msdc_pull(s, data, n)) {
++                REG(s, 0x0c) |= I_DATTO;
++                msdc_irq(s);
++            } else if (!s->remaining) {
++                msdc_data_end(s);
++            }
++        }
++        return ldl_le_p(data);
++    }
++    case 0x3c:
++        return 0; /* Synchronous command engine has no outstanding command. */
++    default:
++        return REG(s, off);
++    }
++}
++
++static void msdc_write(void *opaque, hwaddr off, uint64_t value, unsigned size)
++{
++    MT5891MSDCState *s = opaque;
++    switch (off) {
++    case 0x00:
++        REG(s, off) = (value & ~4U) | 0x80; /* Self-clearing reset, clock stable */
++        if (value & 4) {
++            s->remaining = 0;
++            REG(s, 0x0c) = 0;
++            REG(s, 0x9c) &= ~1U;
++        }
++        break;
++    case 0x0c: /* W1C */
++        REG(s, off) &= ~value;
++        break;
++    case 0x14:
++        /* FIFO clear does not abort the card's command. No staged FIFO here. */
++        break;
++    case 0x18: {
++        uint8_t bytes[4];
++        stl_le_p(bytes, value);
++        if (!s->remaining || !msdc_push(s, bytes, size)) {
++            REG(s, 0x0c) |= I_DATTO;
++        } else if (!s->remaining) {
++            msdc_data_end(s);
++        }
++        break;
++    }
++    case 0x34:
++        REG(s, off) = value;
++        msdc_command(s);
++        break;
++    case 0x98:
++        REG(s, off) = value;
++        if (value & 2) {
++            REG(s, off) &= ~7U;
++            REG(s, 0x9c) &= ~1U;
++        } else if (value & 5) {
++            msdc_dma(s);
++        }
++        break;
++    default:
++        REG(s, off) = value;
++        break;
++    }
++    msdc_irq(s);
++}
++
++static const MemoryRegionOps msdc_ops = {
++    .read = msdc_read,
++    .write = msdc_write,
++    .endianness = DEVICE_LITTLE_ENDIAN,
++    .valid = { .min_access_size = 1, .max_access_size = 4 },
++};
++
++static void msdc_reset(DeviceState *dev)
++{
++    MT5891MSDCState *s = MT5891_MSDC(dev);
++    memset(s->regs, 0, sizeof(s->regs));
++    REG(s, 0x00) = 0x81;
++    REG(s, 0xfc) = 0x00010000;
++    REG(s, 0x104) = 4;
++    s->remaining = 0;
++    msdc_irq(s);
++}
++
++static void msdc_init(Object *obj)
++{
++    MT5891MSDCState *s = MT5891_MSDC(obj);
++    memory_region_init_io(&s->iomem, obj, &msdc_ops, s, TYPE_MT5891_MSDC, 0x1000);
++    sysbus_init_mmio(SYS_BUS_DEVICE(obj), &s->iomem);
++    sysbus_init_irq(SYS_BUS_DEVICE(obj), &s->irq);
++    qbus_init(&s->sdbus, sizeof(s->sdbus), TYPE_SD_BUS, DEVICE(obj), "emmc-bus");
++}
++
++static const Property msdc_properties[] = {
++    DEFINE_PROP_BOOL("trace", MT5891MSDCState, trace, false),
++    DEFINE_PROP_BOOL("allow-writes", MT5891MSDCState, allow_writes, false),
++};
++
++static const VMStateDescription msdc_vmstate = {
++    .name = TYPE_MT5891_MSDC,
++    .unmigratable = true,
++};
++
++static void msdc_class_init(ObjectClass *klass, const void *data)
++{
++    DeviceClass *dc = DEVICE_CLASS(klass);
++    device_class_set_legacy_reset(dc, msdc_reset);
++    device_class_set_props(dc, msdc_properties);
++    dc->desc = "MediaTek MT5891 MSDC functional controller";
++    dc->user_creatable = false;
++    /* Migrating in-flight controller/card transfers is not implemented. */
++    dc->vmsd = &msdc_vmstate;
++}
++
++static const TypeInfo msdc_info = {
++    .name = TYPE_MT5891_MSDC,
++    .parent = TYPE_SYS_BUS_DEVICE,
++    .instance_size = sizeof(MT5891MSDCState),
++    .instance_init = msdc_init,
++    .class_init = msdc_class_init,
++};
++
++static void msdc_register_types(void)
++{
++    type_register_static(&msdc_info);
++}
++type_init(msdc_register_types)
+--- /dev/null
++++ b/hw/arm/philips-smp.inc
+@@ -0,0 +1,151 @@
++/*
++ * Functional model of the secondary CPU power and boot-monitor mailbox
++ * contract used by Philips TPM171E 107.1.143.0, Linux 3.10.79.
++ *
++ * Include from hw/arm/virt.c. Offsets passed below are relative to 0xf0000000.
++ * This replaces the boot monitor's mailbox branch with a QEMU CPU power-on
++ * operation. It does not emulate the original boot ROM instruction by instruction.
++ * Register masks and addresses come from the exact stock kernel disassembly,
++ * not the older GPL tree's differently configured MT5891 definitions.
++ */
++#include "target/arm/arm-powerctl.h"
++#include "target/arm/multiprocessing.h"
++#include "system/reset.h"
++
++typedef struct PhilipsSMPState {
++    uint32_t entry;
++    uint32_t magic;
++    uint32_t power[4];
++    uint32_t progress[4];
++    bool released[4];
++} PhilipsSMPState;
++
++static PhilipsSMPState philips_smp;
++
++enum {
++    PTV_MEM_PD = 1 << 0,
++    PTV_MEM_CKISO = 1 << 2,
++    PTV_MEM_ACK = 1 << 3,
++    PTV_CLK_DIS = 1 << 4,
++    PTV_RESET = 1 << 5,
++    PTV_PWR_ON = 1 << 6,
++    PTV_PWR_ON_2 = 1 << 7,
++    PTV_PWR_ACK = 1 << 8,
++    PTV_PWR_ACK_2 = 1 << 9,
++    PTV_CLAMPS = 3 << 10,
++};
++
++static uint32_t philips_smp_ack(uint32_t value)
++{
++    value &= ~(PTV_MEM_ACK | PTV_PWR_ACK | PTV_PWR_ACK_2);
++    if (value & PTV_MEM_PD) {
++        value |= PTV_MEM_ACK;
++    }
++    if (value & PTV_PWR_ON) {
++        value |= PTV_PWR_ACK;
++    }
++    if (value & PTV_PWR_ON_2) {
++        value |= PTV_PWR_ACK_2;
++    }
++    return value;
++}
++
++static void philips_smp_release(unsigned cpu)
++{
++    uint32_t v = philips_smp.power[cpu];
++    CPUState *cs = qemu_get_cpu(cpu);
++    int result;
++
++    if (!cs || philips_smp.released[cpu] ||
++        philips_smp.magic != 0xffffb007 || !philips_smp.entry ||
++        (philips_smp.entry & 3) ||
++        (v & (PTV_PWR_ON | PTV_PWR_ON_2)) !=
++            (PTV_PWR_ON | PTV_PWR_ON_2) ||
++        (v & (PTV_RESET | PTV_CLK_DIS | PTV_MEM_PD |
++              PTV_MEM_CKISO | PTV_CLAMPS))) {
++        return;
++    }
++    /*
++     * Same exception level as QEMU's primary Linux firmware handoff.
++     * The stock secondary_startup handles both HYP and SVC entry.
++     */
++    result = arm_set_cpu_on(arm_cpu_mp_affinity(ARM_CPU(cs)),
++                           philips_smp.entry, 0,
++                           arm_feature(&ARM_CPU(cs)->env, ARM_FEATURE_EL2) ? 2 : 1,
++                           false);
++    if (result == QEMU_ARM_POWERCTL_RET_SUCCESS) {
++        philips_smp.released[cpu] = true;
++        fprintf(stderr, "[mt5891 smp] released CPU%u at 0x%08x\n",
++                cpu, philips_smp.entry);
++    } else {
++        fprintf(stderr, "[mt5891 smp] CPU%u release failed: %d\n", cpu, result);
++    }
++}
++
++static bool philips_smp_read(hwaddr offset, unsigned size, uint64_t *value)
++{
++    if (size != 4) {
++        return false;
++    }
++    if (offset == 0x8188) {
++        *value = philips_smp.entry;
++    } else if (offset == 0x8068) {
++        *value = philips_smp.magic;
++    } else if (offset >= 0x8408 && offset <= 0x8410 && !(offset & 3)) {
++        *value = philips_smp.power[(offset - 0x8404) / 4];
++    } else if (offset >= 0x88f4 && offset <= 0x88fc && !(offset & 3)) {
++        *value = philips_smp.progress[(offset - 0x88f0) / 4];
++    } else {
++        return false;
++    }
++    return true;
++}
++
++static bool philips_smp_write(hwaddr offset, unsigned size, uint32_t value)
++{
++    unsigned cpu;
++    if (size != 4) {
++        return false;
++    }
++    if (offset == 0x8188) {
++        philips_smp.entry = value;
++    } else if (offset == 0x8068) {
++        philips_smp.magic = value;
++    } else if (offset >= 0x8408 && offset <= 0x8410 && !(offset & 3)) {
++        cpu = (offset - 0x8404) / 4;
++        philips_smp.power[cpu] = philips_smp_ack(value);
++        if ((value & PTV_RESET) && philips_smp.released[cpu]) {
++            CPUState *cs = qemu_get_cpu(cpu);
++            if (cs) {
++                arm_set_cpu_off(arm_cpu_mp_affinity(ARM_CPU(cs)));
++            }
++            philips_smp.released[cpu] = false;
++        }
++    } else if (offset >= 0x88f4 && offset <= 0x88fc && !(offset & 3)) {
++        philips_smp.progress[(offset - 0x88f0) / 4] = value;
++        return true;
++    } else {
++        return false;
++    }
++    for (cpu = 1; cpu < 4; cpu++) {
++        philips_smp_release(cpu);
++    }
++    return true;
++}
++
++static void philips_smp_reset(void *opaque)
++{
++    unsigned cpu;
++    memset(&philips_smp, 0, sizeof(philips_smp));
++    for (cpu = 1; cpu < 4; cpu++) {
++        philips_smp.power[cpu] = philips_smp_ack(
++            PTV_RESET | PTV_CLK_DIS | PTV_MEM_PD |
++            PTV_MEM_CKISO | PTV_CLAMPS);
++    }
++}
++
++static void philips_smp_init(void)
++{
++    philips_smp_reset(NULL);
++    qemu_register_reset(philips_smp_reset, NULL);
++}
+--- /dev/null
++++ b/hw/arm/philips-timer.inc
+@@ -0,0 +1,249 @@
++/*
++ * Philips TPM171E stock DT timer contract, with legacy timer1/2 counters.
++ * Timer0 is an UP counter plus absolute comparator in the exact stock DT
++ * driver (clocksource_mmio_readl_up, mt53xx_time_set_next_event).
++ * Older vendor timer.c is only authoritative for the timer1/2 register layout.
++ */
++#include "qemu/timer.h"
++#include "hw/core/irq.h"
++#include "system/reset.h"
++
++#define PTV_TIMER_HZ 24000000U
++typedef struct PhilipsTimerChannel {
++    uint64_t count, limit, stamp;
++    uint32_t period;
++    QEMUTimer *event;
++    qemu_irq irq;
++    unsigned index;
++    bool expired;
++} PhilipsTimerChannel;
++
++static struct {
++    PhilipsTimerChannel channel[3];
++    uint32_t control, status, mask;
++} philips_timer;
++
++static uint64_t philips_timer_ticks(void)
++{
++    return muldiv64(qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL),
++                    PTV_TIMER_HZ, NANOSECONDS_PER_SECOND);
++}
++
++static void philips_timer_irq(void)
++{
++    for (unsigned i = 0; i < 3; i++) {
++        qemu_set_irq(philips_timer.channel[i].irq,
++                     !!(philips_timer.status & philips_timer.mask &
++                        (1U << (3 + i))));
++    }
++}
++
++static uint64_t philips_timer_count(PhilipsTimerChannel *c, uint64_t now)
++{
++    if (c->index == 0) {
++        /* Clocksource must keep advancing even with its comparator disabled. */
++        return c->count + now - c->stamp;
++    }
++    if (!(philips_timer.control & (1U << (8 * c->index))) || c->expired) {
++        return c->count;
++    }
++    uint64_t elapsed = now - c->stamp;
++    if (elapsed <= c->count) {
++        return c->count - elapsed;
++    }
++    if (!(philips_timer.control & (2U << (8 * c->index)))) {
++        return 0;
++    }
++    /* A zero programmed limit has a one-tick period. */
++    uint64_t period = c->limit ? c->limit : 1;
++    return period - 1 - ((elapsed - c->count - 1) % period);
++}
++
++static void philips_timer_schedule(PhilipsTimerChannel *c)
++{
++    uint64_t now = philips_timer_ticks(), ticks;
++    int64_t ns = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
++    timer_del(c->event);
++    if (!(philips_timer.control & (1U << (8 * c->index))) || c->expired) {
++        return;
++    }
++    if (c->index == 0) {
++        ticks = (uint32_t)((uint32_t)c->limit -
++                           (uint32_t)philips_timer_count(c, now));
++        if (!ticks) {
++            ticks = 1;
++        }
++    } else {
++        ticks = philips_timer_count(c, now);
++        if (!ticks) {
++            ticks = 1;
++        }
++    }
++    /* A 64-bit vendor timestamp may expire many thousands of years away. */
++    uint64_t max_ticks = muldiv64(INT64_MAX - ns,
++                                  PTV_TIMER_HZ, NANOSECONDS_PER_SECOND);
++    if (ticks >= max_ticks) {
++        return;
++    }
++    uint64_t delta = muldiv64(ticks, NANOSECONDS_PER_SECOND, PTV_TIMER_HZ);
++    if (muldiv64(delta, PTV_TIMER_HZ, NANOSECONDS_PER_SECOND) < ticks) {
++        delta++;
++    }
++    timer_mod(c->event, ns + delta);
++}
++
++static void philips_timer_expire(void *opaque)
++{
++    PhilipsTimerChannel *c = opaque;
++    uint64_t now = philips_timer_ticks();
++    philips_timer.status |= 1U << (3 + c->index);
++    if (philips_timer.control & (2U << (8 * c->index))) {
++        if (c->index == 0) {
++            /*
++             * The DT driver uses one-shot mode. Periodic stepping is a
++             * compatibility approximation pending a physical timer trace.
++             */
++            c->limit = (uint32_t)c->limit + (c->period ? c->period : 1);
++        } else {
++            c->count = c->limit;
++            c->stamp = now;
++        }
++    } else {
++        c->expired = true;
++        if (c->index != 0) {
++            c->count = 0;
++            c->stamp = now;
++        }
++    }
++    philips_timer_irq();
++    philips_timer_schedule(c);
++}
++
++static int philips_timer_register(hwaddr offset, bool *high, bool *limit)
++{
++    if (offset >= 0x8060 && offset <= 0x8074 && !(offset & 3)) {
++        *high = false;
++        *limit = !(offset & 4);
++        return (offset - 0x8060) / 8;
++    }
++    if (offset >= 0x8180 && offset <= 0x8194 && !(offset & 3)) {
++        *high = true;
++        *limit = !(offset & 4);
++        return (offset - 0x8180) / 8;
++    }
++    return -1;
++}
++
++static bool philips_timer_read(hwaddr offset, unsigned size, uint64_t *value)
++{
++    bool high, limit;
++    int i;
++    if (size != 4) {
++        return false;
++    }
++    if (offset == 0x8078) {
++        *value = philips_timer.control;
++    } else if (offset == 0x8030) {
++        *value = philips_timer.status;
++    } else if (offset == 0x8034) {
++        *value = philips_timer.mask;
++    } else if (offset == 0x8038) {
++        *value = 0;
++    } else if ((i = philips_timer_register(offset, &high, &limit)) >= 0) {
++        PhilipsTimerChannel *c = &philips_timer.channel[i];
++        uint64_t v = limit ? c->limit : philips_timer_count(c, philips_timer_ticks());
++        *value = (uint32_t)(high ? v >> 32 : v);
++    } else {
++        return false;
++    }
++    return true;
++}
++
++static bool philips_timer_write(hwaddr offset, unsigned size, uint32_t value)
++{
++    bool high, limit;
++    int i;
++    uint64_t now = philips_timer_ticks();
++    if (size != 4) {
++        return false;
++    }
++    if (offset == 0x8034) {
++        philips_timer.mask = value;
++        philips_timer_irq();
++        return true;
++    }
++    if (offset == 0x8038) {
++        philips_timer.status &= ~value;
++        philips_timer_irq();
++        return true;
++    }
++    if (offset == 0x8078) {
++        for (i = 0; i < 3; i++) {
++            PhilipsTimerChannel *c = &philips_timer.channel[i];
++            c->count = philips_timer_count(c, now);
++            c->stamp = now;
++            if (!(philips_timer.control & (1U << (8 * i))) &&
++                (value & (1U << (8 * i)))) {
++                c->expired = false;
++            }
++        }
++        philips_timer.control = value;
++    } else if ((i = philips_timer_register(offset, &high, &limit)) >= 0) {
++        PhilipsTimerChannel *c = &philips_timer.channel[i];
++        uint64_t old = limit ? c->limit : philips_timer_count(c, now);
++        uint64_t v = high ? ((uint64_t)value << 32) | (uint32_t)old :
++                           (old & UINT64_C(0xffffffff00000000)) | value;
++        if (limit) {
++            c->limit = v;
++            if (!high && i == 0) {
++                c->period = value - (uint32_t)philips_timer_count(c, now);
++            }
++        } else {
++            c->count = v;
++            c->stamp = now;
++        }
++        c->expired = false;
++    } else {
++        return false;
++    }
++    for (i = 0; i < 3; i++) {
++        philips_timer_schedule(&philips_timer.channel[i]);
++    }
++    return true;
++}
++
++static void philips_timer_reset(void *opaque)
++{
++    uint64_t now = philips_timer_ticks();
++    /*
++     * Preloader handoff assumption from vendor timer.c: timestamp timer2
++     * already counts down from all ones. IRQ mask is left enabled because
++     * the DT kernel masks individual interrupts at the GIC.
++     */
++    philips_timer.control = 3U << 16;
++    philips_timer.status = 0;
++    philips_timer.mask = UINT32_MAX;
++    for (unsigned i = 0; i < 3; i++) {
++        PhilipsTimerChannel *c = &philips_timer.channel[i];
++        c->count = c->limit = i == 2 ? UINT64_MAX : 0;
++        c->stamp = now;
++        c->expired = false;
++        c->period = 0;
++        timer_del(c->event);
++    }
++    philips_timer_irq();
++}
++
++/* Timer0 SPI75 is confirmed by live DT and stock kernel IRQ107. */
++static void philips_timer_init(qemu_irq irq0, qemu_irq irq1, qemu_irq irq2)
++{
++    qemu_irq irqs[] = {irq0, irq1, irq2};
++    for (unsigned i = 0; i < 3; i++) {
++        PhilipsTimerChannel *c = &philips_timer.channel[i];
++        c->index = i;
++        c->irq = irqs[i];
++        c->event = timer_new_ns(QEMU_CLOCK_VIRTUAL, philips_timer_expire, c);
++    }
++    philips_timer_reset(NULL);
++    qemu_register_reset(philips_timer_reset, NULL);
++}
+--- /dev/null
++++ b/hw/arm/philips-pdwnc.inc
+@@ -0,0 +1,139 @@
++/*
++ * MT5891 PDWNC/T8032 mailbox, derived from the exact 2021 dtv_driver.ko.
++ * This is a high-level mailbox peer, not an 8051 CPU emulator. Only decoded
++ * commands are acknowledged; unknown commands stay pending and are logged.
++ * SPDX-License-Identifier: GPL-2.0-or-later
++ */
++#include "hw/core/irq.h"
++#include "system/reset.h"
++
++static struct {
++    qemu_irq irq;
++    uint32_t status, enable, response, command, data, trigger;
++    uint8_t mode;
++    bool notifications;
++    uint64_t requests, unsupported;
++} philips_pdwnc;
++
++static void philips_pdwnc_update_irq(void)
++{
++    qemu_set_irq(philips_pdwnc.irq,
++                 !!(philips_pdwnc.status & philips_pdwnc.enable));
++}
++
++static void philips_pdwnc_request(void)
++{
++    unsigned command = philips_pdwnc.command & 0xff;
++    unsigned subcommand = (philips_pdwnc.command >> 8) & 0xff;
++    bool supported = false;
++    philips_pdwnc.requests++;
++    /*
++     * PDWNC_Init sends 0x0186 and checks an exact response 0x86.
++     * _PDWNC_SetT8032(4/5) sends 0x0186 / 0x0286. Both call sites
++     * inspect only the command echo/status, and change shared-control bit16.
++     */
++    if (command == 0x86 && (subcommand == 1 || subcommand == 2)) {
++        philips_pdwnc.notifications = subcommand == 1;
++        supported = true;
++    }
++    /*
++     * _PDWNC_InitT8032 sends command2/sub1; _PDWNC_SetT8032(0) sends
++     * command2/sub2. These select the normal controller/ARM handshake mode,
++     * with no returned payload consumed by the host. Retain that mode so
++     * the command changes state, rather than blindly echoing all requests.
++     */
++    if (command == 2 && (subcommand == 1 || subcommand == 2) &&
++        philips_pdwnc.data == 0) {
++        philips_pdwnc.mode = subcommand;
++        supported = true;
++    }
++    /* Doorbell is consumed by the modeled coprocessor. */
++    philips_pdwnc.trigger &= ~1U;
++    if (supported) {
++        philips_pdwnc.response = command;
++        philips_pdwnc.status |= 1U << 15;
++        fprintf(stderr, "[mt5891-pdwnc] mailbox cmd=%02x sub=%02x data=%08x ack=%08x\n",
++                command, subcommand, philips_pdwnc.data, philips_pdwnc.response);
++    } else {
++        philips_pdwnc.unsupported++;
++        fprintf(stderr, "[mt5891-pdwnc] unsupported mailbox cmd=%02x sub=%02x data=%08x; no ACK\n",
++                command, subcommand, philips_pdwnc.data);
++    }
++    philips_pdwnc_update_irq();
++}
++
++static uint32_t *philips_pdwnc_reg(hwaddr off)
++{
++    switch (off & ~3ULL) {
++    case 0x28040: return &philips_pdwnc.status;
++    case 0x28044: return &philips_pdwnc.enable;
++    case 0x28180: return &philips_pdwnc.response;
++    case 0x28184: return &philips_pdwnc.command;
++    case 0x28188: return &philips_pdwnc.data;
++    case 0x281e8: return &philips_pdwnc.trigger;
++    default: return NULL;
++    }
++}
++
++static bool philips_pdwnc_read(hwaddr off, unsigned size, uint64_t *value)
++{
++    uint32_t *reg;
++    if ((size != 1 && size != 2 && size != 4) || (off & 3) + size > 4) {
++        return false;
++    }
++    if ((off & ~3ULL) == 0x28048) {
++        *value = 0; /* W1C interrupt clear is not a latched configuration. */
++        return true;
++    }
++    reg = philips_pdwnc_reg(off);
++    if (!reg) {
++        return false;
++    }
++    *value = (*reg >> (8 * (off & 3))) & ((1ULL << (8 * size)) - 1);
++    return true;
++}
++
++static bool philips_pdwnc_write(hwaddr off, unsigned size, uint64_t value)
++{
++    uint32_t *reg, mask;
++    unsigned shift = 8 * (off & 3);
++    hwaddr word = off & ~3ULL;
++    if ((size != 1 && size != 2 && size != 4) || (off & 3) + size > 4) {
++        return false;
++    }
++    mask = ((1ULL << (8 * size)) - 1) << shift;
++    value = (value << shift) & mask;
++    if (word == 0x28048) {
++        philips_pdwnc.status &= ~value;
++        philips_pdwnc_update_irq();
++        return true;
++    }
++    reg = philips_pdwnc_reg(off);
++    if (!reg) {
++        return false;
++    }
++    if (word == 0x28040 || word == 0x28180) {
++        return true; /* Peer owns status and response. */
++    }
++    *reg = (*reg & ~mask) | value;
++    if (word == 0x281e8 && (value & 1)) {
++        philips_pdwnc_request();
++    }
++    philips_pdwnc_update_irq();
++    return true;
++}
++
++static void philips_pdwnc_reset(void *opaque)
++{
++    qemu_irq irq = philips_pdwnc.irq;
++    memset(&philips_pdwnc, 0, sizeof(philips_pdwnc));
++    philips_pdwnc.irq = irq;
++    philips_pdwnc_update_irq();
++}
++
++static void philips_pdwnc_init(qemu_irq irq)
++{
++    philips_pdwnc.irq = irq;
++    philips_pdwnc_reset(NULL);
++    qemu_register_reset(philips_pdwnc_reset, NULL);
++}
+--- /dev/null
++++ b/hw/arm/philips-gfx.inc
+@@ -0,0 +1,486 @@
++/*
++ * MT5891 GFX reset, command queue, and bounded linear fill/copy subset.
++ * Unsupported operations stay pending and never generate completion.
++ * Offsets are relative to 0xf0000000.
++ * SPDX-License-Identifier: GPL-2.0-or-later
++ */
++#include "system/reset.h"
++#include "system/address-spaces.h"
++#include "system/memory.h"
++#include "hw/core/irq.h"
++#include "qemu/rcu.h"
++
++typedef struct PhilipsGfxBank {
++    uint32_t regs[0x1000 / 4];
++    unsigned reset_ready; /* Bit0 engine, bit1 command queue. */
++    bool pending;
++    uint32_t queue_pos;
++    uint64_t unsupported, completed, pixels;
++    uint64_t submission_bytes;
++} PhilipsGfxBank;
++
++static PhilipsGfxBank philips_gfx[2];
++static qemu_irq philips_gfx_irq;
++static uint32_t philips_gfx_irq_status, philips_gfx_irq_mask;
++
++static void philips_gfx_update_irq(void)
++{
++    if (philips_gfx_irq) {
++        qemu_set_irq(philips_gfx_irq,
++                     !!(philips_gfx_irq_status & philips_gfx_irq_mask));
++    }
++}
++
++static void philips_gfx_set_irq(qemu_irq irq)
++{
++    philips_gfx_irq = irq;
++    philips_gfx_update_irq();
++}
++
++static uint32_t philips_gfx_bim_status(void)
++{
++    return philips_gfx_irq_status;
++}
++
++static void philips_gfx_bim_enable(uint32_t value)
++{
++    philips_gfx_irq_mask = value & (1U << 25);
++    philips_gfx_update_irq();
++}
++
++static void philips_gfx_bim_clear(uint32_t value)
++{
++    philips_gfx_irq_status &= ~value;
++    philips_gfx_update_irq();
++}
++
++/* Never allow command DMA or rendering to touch MMIO, ROM, or RAM devices. */
++static bool philips_gfx_ram(hwaddr addr, size_t bytes, bool write)
++{
++    bool valid = true;
++    if (!bytes || addr > UINT32_MAX || bytes > 0x100000000ULL - addr) {
++        return false;
++    }
++    rcu_read_lock();
++    while (bytes) {
++        hwaddr translated, chunk = bytes;
++        MemoryRegion *mr = address_space_translate(&address_space_memory,
++                           addr, &translated, &chunk, write,
++                           MEMTXATTRS_UNSPECIFIED);
++        if (!chunk || !memory_region_is_ram(mr) ||
++            memory_region_is_ram_device(mr) ||
++            (write && memory_region_is_rom(mr))) {
++            valid = false;
++            break;
++        }
++        addr += chunk;
++        bytes -= chunk;
++    }
++    rcu_read_unlock();
++    return valid;
++}
++
++static bool philips_gfx_read_ram(hwaddr addr, void *data, size_t bytes)
++{
++    return philips_gfx_ram(addr, bytes, false) &&
++           address_space_read(&address_space_memory, addr,
++                              MEMTXATTRS_UNSPECIFIED, data, bytes) == MEMTX_OK;
++}
++
++static bool philips_gfx_write_ram(hwaddr addr, const void *data, size_t bytes)
++{
++    return philips_gfx_ram(addr, bytes, true) &&
++           address_space_write(&address_space_memory, addr,
++                               MEMTXATTRS_UNSPECIFIED, data, bytes) == MEMTX_OK;
++}
++
++static uint32_t philips_gfx_le32(const uint8_t *p)
++{
++    return (uint32_t)p[0] | (uint32_t)p[1] << 8 |
++           (uint32_t)p[2] << 16 | (uint32_t)p[3] << 24;
++}
++
++/*
++ * The shipped .rodata+0x244f4 table gives log2(bytes/pixel). Restrict to
++ * packed formats10..14. Format10 is also used by GFX_Memset as raw bytes.
++ * Same-format copies do not interpret color channels.
++ */
++static unsigned philips_gfx_pixel_size(unsigned format)
++{
++    static const uint8_t size[] = { 1, 2, 2, 2, 4 };
++    return format >= 10 && format <= 14 ? size[format - 10] : 0;
++}
++
++static bool philips_gfx_render(PhilipsGfxBank *bank, const char **reason)
++{
++    uint32_t *r = bank->regs;
++    unsigned op = (r[0x10 / 4] >> 4) & 31;
++    unsigned format = r[0x10 / 4] & 15;
++    unsigned bpp = philips_gfx_pixel_size(format);
++    unsigned width = r[0x28 / 4] & 0x7fff;
++    unsigned height = ((r[0x28 / 4] >> 16) & 0x7ff) |
++                      ((r[0x284 / 4] & 0x100) << 3);
++    unsigned dst_pitch = (r[0x2c / 4] & 0xffff) * 16;
++    unsigned src_pitch = (r[0x2c / 4] >> 16) * 16;
++    uint64_t dst = (r[0x1c / 4] & 0x3fffffffU) |
++                   (uint64_t)((r[0x118 / 4] >> 16) & 3) << 30;
++    uint64_t src = (r[0x18 / 4] & 0x3fffffffU) |
++                   (uint64_t)((r[0x118 / 4] >> 12) & 3) << 30;
++    size_t row, dst_span, src_span = 0;
++    uint8_t *buffer;
++    unsigned y, x, reg;
++    height++;
++    *reason = "unsupported opcode/format or transform";
++    if ((op != 2 && op != 6) || !bpp ||
++        (r[0x10 / 4] & ~0x000019ffU) ||
++        (r[0x44 / 4] & ~0xc0000000U)) {
++        return false;
++    }
++    if (op == 6 && ((r[0x28 / 4] >> 27) & 15) != format) {
++        *reason = "format conversion";
++        return false;
++    }
++    /* Only direct physical addresses; MMU enable is alias0x180 bit0. */
++    if (r[0x180 / 4] & 1) {
++        *reason = "GFX MMU translation";
++        return false;
++    }
++    if (r[0x118 / 4] & ~0x00033000U) {
++        *reason = "extended surface flags";
++        return false;
++    }
++    /*
++     * Refuse state that could enable unimplemented blending, color maps,
++     * clipping, compression, or channel-order conversion. These are the
++     * decoded registers and exact reset defaults needed by this subset.
++     */
++    for (reg = 0x10; reg <= 0x12c; reg += 4) {
++        uint32_t value = r[reg / 4];
++        if (!value) {
++            continue;
++        }
++        switch (reg) {
++        case 0x10: case 0x14: case 0x18: case 0x1c:
++        case 0x28: case 0x2c: case 0x44: case 0x118:
++            continue;
++        case 0x4c:
++            if (value == UINT32_MAX) { continue; }
++            break;
++        case 0x104:
++            if (value == 0x00400000) { continue; }
++            break;
++        case 0x11c:
++            if (!(value & ~0x303U)) { continue; }
++            break;
++        case 0x12c:
++            if (value == 0x98000000) { continue; }
++            break;
++        }
++        *reason = "unimplemented nonzero drawing configuration";
++        return false;
++    }
++    if ((r[0x284 / 4] & ~0x100U) ||
++        r[0x280 / 4] || r[0x288 / 4]) {
++        *reason = "extended drawing mode";
++        return false;
++    }
++    row = (size_t)width * bpp;
++    *reason = "invalid dimensions or stride";
++    if (!width || height > 4096 ||
++        dst_pitch < row || (op == 6 && src_pitch < row)) {
++        return false;
++    }
++    dst_span = (size_t)(height - 1) * dst_pitch + row;
++    if (op == 6) {
++        src_span = (size_t)(height - 1) * src_pitch + row;
++    }
++    if (dst_span > 64 * 1024 * 1024 || src_span > 64 * 1024 * 1024) {
++        *reason = "surface exceeds 64MiB operation bound";
++        return false;
++    }
++    if (bank->submission_bytes + row * height > 256 * 1024 * 1024) {
++        *reason = "submission exceeds 256MiB rendering budget";
++        return false;
++    }
++    *reason = "unmapped/readonly surface or MMIO";
++    if (!philips_gfx_ram(dst, dst_span, true) ||
++        (op == 6 && !philips_gfx_ram(src, src_span, false))) {
++        return false;
++    }
++    /* Direction/overlap semantics need a separate decoded implementation. */
++    if (op == 6 && src < dst + dst_span && dst < src + src_span) {
++        *reason = "overlapping copy";
++        return false;
++    }
++    buffer = g_malloc(row);
++    if (op == 2) {
++        uint32_t color = r[0x14 / 4];
++        for (x = 0; x < row; x++) {
++            buffer[x] = color >> (8 * (x % bpp));
++        }
++    }
++    for (y = 0; y < height; y++) {
++        if ((op == 6 && !philips_gfx_read_ram(src + (uint64_t)y * src_pitch,
++                                             buffer, row)) ||
++            !philips_gfx_write_ram(dst + (uint64_t)y * dst_pitch,
++                                   buffer, row)) {
++            g_free(buffer);
++            *reason = "surface transfer failed";
++            return false;
++        }
++    }
++    g_free(buffer);
++    bank->pixels += (uint64_t)width * height;
++    bank->submission_bytes += row * height;
++    r[0x10 / 4] &= ~(1U << 11);
++    return true;
++}
++
++static bool philips_gfx_queue(PhilipsGfxBank *bank, uint32_t bytes,
++                              const char **reason)
++{
++    uint32_t *r = bank->regs;
++    unsigned shift = (r[0x08 / 4] >> 30) +
++                     ((r[0] & (1U << 16)) ? 0 : 4);
++    uint32_t capacity = 2048U << shift;
++    hwaddr base = (r[0x08 / 4] & 0x3fffffffU) |
++                  (uint64_t)((r[0x11c / 4] >> 8) & 3) << 30;
++    uint32_t remaining;
++    *reason = "invalid command queue bounds/mode";
++    if (!(r[0] & 1) || (bytes & 7) || !bytes ||
++        bytes > capacity || (base & 7) || bank->queue_pos >= capacity ||
++        !philips_gfx_ram(base, capacity, false)) {
++        return false;
++    }
++    for (remaining = bytes; remaining; remaining -= 8) {
++        uint8_t command[8];
++        uint32_t value, address, reg;
++        if (!philips_gfx_read_ram(base + bank->queue_pos, command, 8)) {
++            *reason = "command queue transfer failed";
++            return false;
++        }
++        value = philips_gfx_le32(command);
++        address = philips_gfx_le32(command + 4);
++        /* Accept only decoded GFX configuration/launch targets. */
++        if ((address & 0xfffff000U) != 0xf0004000U || (address & 3)) {
++            *reason = "unsupported command target";
++            return false;
++        }
++        reg = address & 0xfff;
++        if (reg == 0 &&
++            (value == 0xaec0031f || value == 0xaac0031f)) {
++            /* Exact GFX_ClearRegister pipeline-control pulse. */
++            r[0] = value;
++            bank->queue_pos = (bank->queue_pos + 8) % capacity;
++            continue;
++        }
++        if (reg == 0x180 || reg == 0x188 ||
++            reg == 0x18c || reg == 0x190) {
++            /*
++             * Exact disabled-MMU sequence emitted by _GFX_MMU_Set_Cfg:
++             * agents disabled (bit0), global enable0, self-fire bit31.
++             * An empty/disabled translation cache has no entries to flush.
++             */
++            bool valid = (reg == 0x180 && value == 0xfe) ||
++                         (reg == 0x188 &&
++                          (value == 0x30 || value == 0x300030)) ||
++                         (reg == 0x18c && value == 0x30) ||
++                         (reg == 0x190 && value == 0x80000000 &&
++                          !(r[0x180 / 4] & 1));
++            if (!valid) {
++                *reason = "unsupported MMU operation";
++                return false;
++            }
++            r[reg / 4] = reg == 0x190 ? 0 : value;
++            bank->queue_pos = (bank->queue_pos + 8) % capacity;
++            continue;
++        }
++        if (!((reg >= 0x10 && reg <= 0x12c) ||
++              (reg >= 0x280 && reg <= 0x288))) {
++            *reason = "unsupported configuration/MMU register";
++            return false;
++        }
++        r[reg / 4] = value;
++        if (reg == 0x10 && (value & (1U << 11)) &&
++            !philips_gfx_render(bank, reason)) {
++            return false;
++        }
++        bank->queue_pos = (bank->queue_pos + 8) % capacity;
++    }
++    /* The driver exposes the read pointer masked3fff0000 then shifted12. */
++    r[0x168 / 4] = (bank->queue_pos << 12) & 0x3fff0000U;
++    return true;
++}
++
++static PhilipsGfxBank *philips_gfx_bank(hwaddr off, unsigned *reg)
++{
++    if (off >= 0x4000 && off < 0x5000) {
++        *reg = off - 0x4000;
++        return &philips_gfx[0];
++    }
++    if (off >= 0x5c000 && off < 0x5d000) {
++        *reg = off - 0x5c000;
++        return &philips_gfx[1];
++    }
++    return NULL;
++}
++
++static bool philips_gfx_access_valid(hwaddr off, unsigned size)
++{
++    return (size == 1 || size == 2 || size == 4) &&
++           (off & 3) + size <= 4;
++}
++
++static void philips_gfx_submit(PhilipsGfxBank *bank, unsigned reg,
++                               uint32_t value)
++{
++    const char *reason = "prior unsupported work still pending";
++    bool success = false;
++    if (!bank->pending && bank->reset_ready == 3) {
++        bank->submission_bytes = 0;
++        success = reg == 0x0c ? philips_gfx_queue(bank, value, &reason) :
++                               philips_gfx_render(bank, &reason);
++    }
++    if (success) {
++        bank->completed++;
++        bank->regs[0x0c / 4] = 0;
++        philips_gfx_irq_status |= 1U << 25;
++        philips_gfx_update_irq();
++        if (bank->completed <= 16) {
++            fprintf(stderr, "[mt5891-gfx] completed bank=%u %s "
++                    "bytes=%u pixels=%" PRIu64 "\n",
++                    (unsigned)(bank - philips_gfx),
++                    reg == 0x0c ? "queue" : "draw", value, bank->pixels);
++        }
++        return;
++    }
++    bank->pending = true;
++    bank->unsupported++;
++    if (bank->unsupported <= 32 ||
++        !(bank->unsupported & (bank->unsupported - 1))) {
++        fprintf(stderr,
++                "[mt5891-gfx] unsupported %s bank=%u value=%08x "
++                "opcode=%u queue=%08x reason=%s; pending, no completion "
++                "(count=%" PRIu64 ")\n",
++                reg == 0x0c ? "command queue" : "render command",
++                (unsigned)(bank - philips_gfx), value,
++                (bank->regs[0x10 / 4] >> 4) & 31,
++                bank->regs[0x08 / 4], reason, bank->unsupported);
++    }
++}
++
++static uint32_t philips_gfx_control(PhilipsGfxBank *bank, uint32_t next,
++                                   uint32_t write_mask)
++{
++    uint32_t previous = bank->regs[0];
++    unsigned pair;
++
++    /*
++     * GFX_HwResetEngine and GFX_HwResetCmdQue assert their field to 3,
++     * release it to 0, then poll for 2. GFX_HwReset does both together.
++     * Its secondary bank uses 3 -> 2 directly. Untouched byte lanes must
++     * not reassert reset just because an earlier field reads as 3.
++     */
++    for (pair = 0; pair < 2; pair++) {
++        unsigned shift = pair ? 28 : 30;
++        unsigned old_field = (previous >> shift) & 3;
++        unsigned new_field = (next >> shift) & 3;
++        uint32_t field_mask = 3U << shift;
++        if (!(write_mask & field_mask)) {
++            continue;
++        }
++        if (new_field == 3) {
++            bank->reset_ready &= ~(1U << pair);
++            bank->pending = false;
++            if (pair) {
++                bank->queue_pos = 0;
++            }
++        } else if (old_field == 3 &&
++                   (new_field == 0 || new_field == 2)) {
++            next = (next & ~field_mask) | (2U << shift);
++            bank->reset_ready |= 1U << pair;
++            fprintf(stderr,
++                    "[mt5891-gfx] bank=%u %s reset complete\n",
++                    (unsigned)(bank - philips_gfx),
++                    pair ? "queue" : "engine");
++        } else if (new_field != 2) {
++            bank->reset_ready &= ~(1U << pair);
++        }
++    }
++    return next;
++}
++
++static bool philips_gfx_read(hwaddr off, unsigned size, uint64_t *value)
++{
++    PhilipsGfxBank *bank;
++    unsigned reg;
++    uint32_t word;
++    if (!philips_gfx_access_valid(off, size)) {
++        return false;
++    }
++    bank = philips_gfx_bank(off, &reg);
++    if (!bank) {
++        return false;
++    }
++    if ((reg & ~3U) == 4) {
++        /*
++         * The driver's idle tests require bit0 and low-six-bit value0x21.
++         * Hardware revision bits15:8 are unknown and deliberately remain0.
++         */
++        word = bank->reset_ready == 3 && !bank->pending ? 0x21 : 0;
++    } else {
++        word = bank->regs[reg / 4];
++    }
++    *value = (word >> (8 * (reg & 3))) &
++             ((1ULL << (8 * size)) - 1);
++    return true;
++}
++
++static bool philips_gfx_write(hwaddr off, unsigned size, uint64_t value)
++{
++    PhilipsGfxBank *bank;
++    unsigned reg, shift;
++    uint32_t mask, next, written;
++    if (!philips_gfx_access_valid(off, size)) {
++        return false;
++    }
++    bank = philips_gfx_bank(off, &reg);
++    if (!bank) {
++        return false;
++    }
++    shift = 8 * (reg & 3);
++    reg &= ~3U;
++    if (reg == 4) {
++        return true; /* Device owns idle and hardware revision status. */
++    }
++    mask = ((1ULL << (8 * size)) - 1) << shift;
++    written = (value << shift) & mask;
++    next = (bank->regs[reg / 4] & ~mask) | written;
++    if (reg == 0) {
++        next = philips_gfx_control(bank, next, mask);
++    }
++    bank->regs[reg / 4] = next;
++    if (reg == 0x08) {
++        bank->queue_pos = 0;
++    }
++    if ((reg == 0x0c && written != 0) ||
++        (reg == 0x10 && (written & (1U << 11)))) {
++        philips_gfx_submit(bank, reg, next);
++    }
++    return true;
++}
++
++static void philips_gfx_reset(void *opaque)
++{
++    (void)opaque;
++    memset(philips_gfx, 0, sizeof(philips_gfx));
++    philips_gfx_irq_status = 0;
++    philips_gfx_irq_mask = 1U << 25;
++    philips_gfx_update_irq();
++}
++
++static void philips_gfx_init(void)
++{
++    philips_gfx_reset(NULL);
++    qemu_register_reset(philips_gfx_reset, NULL);
++}
+--- /dev/null
++++ b/hw/arm/philips-aproc.inc
+@@ -0,0 +1,215 @@
++/*
++ * TPM171E APROC mailbox protocol model, derived from stock dtv_driver.ko.
++ *
++ * This models the host-visible bootstrap/lifecycle handshake only. It does
++ * NOT execute the audio processor firmware, decode sound, update PCM rings,
++ * or implement the processor's shared-memory configuration commands.
++ * See README.md for evidence and the deliberately synthetic timing/token.
++ */
++#include "qemu/timer.h"
++#include "hw/core/irq.h"
++#include "system/reset.h"
++
++#define PTV_APROC_IRQ (1U << 26) /* vendor90 -> Linux IRQ194 -> GIC SPI162 */
++#define PTV_APROC_DELAY_NS 1000000
++
++typedef struct PhilipsAprocRequest {
++    uint32_t word, arg1, arg2;
++} PhilipsAprocRequest;
++
++static struct {
++    uint32_t mailbox[0xa0 / 4];
++    uint32_t control, reset, busy, irq_status, irq_mask;
++    PhilipsAprocRequest request[2];
++    bool ready_pending;
++    unsigned unsupported_count;
++    QEMUTimer *event;
++    qemu_irq irq;
++} philips_aproc;
++
++static void philips_aproc_irq(void)
++{
++    qemu_set_irq(philips_aproc.irq,
++                 !!(philips_aproc.irq_status & philips_aproc.irq_mask &
++                    PTV_APROC_IRQ));
++}
++
++static void philips_aproc_schedule(void)
++{
++    if ((philips_aproc.reset & 1) &&
++        (philips_aproc.ready_pending || philips_aproc.busy)) {
++        timer_mod(philips_aproc.event,
++                  qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) + PTV_APROC_DELAY_NS);
++    }
++}
++
++static void philips_aproc_notify(uint32_t word, uint32_t arg1, uint32_t arg2)
++{
++    /* Channel0 is also where NotifyKernelDone reads its ready token. */
++    philips_aproc.mailbox[0] = word;
++    philips_aproc.mailbox[1] = arg1;
++    philips_aproc.mailbox[2] = arg2;
++    philips_aproc.irq_status |= PTV_APROC_IRQ;
++    philips_aproc_irq();
++}
++
++static bool philips_aproc_lifecycle(uint32_t word)
++{
++    unsigned code = (word >> 8) & 0xffff;
++    unsigned type = word & 0xff;
++    bool decoder = (code >= 6 && code <= 9) || code == 0x16;
++
++    /*
++     * Exact callback table at .data+0x5ef88. These completions model virtual
++     * object lifecycle only; a decoder handle does not produce audio.
++     * All these table entries require arg1=1 and wildcard arg2.
++     */
++    return (type == 3 && (code == 1 || code == 5 || decoder)) ||
++           (type == 4 && decoder) || (code == 4 && type == 5);
++}
++
++static void philips_aproc_tick(void *opaque)
++{
++    unsigned channel;
++    PhilipsAprocRequest *r;
++    (void)opaque;
++    if (!(philips_aproc.reset & 1)) {
++        return;
++    }
++    /* Do not overwrite a mailbox before the guest ISR has acknowledged it. */
++    if (philips_aproc.irq_status & PTV_APROC_IRQ) {
++        philips_aproc_schedule();
++        return;
++    }
++    if (philips_aproc.ready_pending) {
++        philips_aproc.ready_pending = false;
++        philips_aproc_notify(0x108, 1, 1);
++        fprintf(stderr, "[mt5891 aproc] synthetic kernel-ready mailbox\n");
++        philips_aproc_schedule();
++        return;
++    }
++    if (!philips_aproc.busy) {
++        return;
++    }
++    channel = (philips_aproc.busy & 1) ? 0 : 1;
++    r = &philips_aproc.request[channel];
++    philips_aproc.busy &= ~(1U << channel);
++    if (philips_aproc_lifecycle(r->word)) {
++        philips_aproc_notify(r->word, 1, 0);
++        fprintf(stderr, "[mt5891 aproc] lifecycle completion cmd=%06x\n",
++                r->word);
++    } else if (philips_aproc.unsupported_count++ < 32) {
++        /*
++         * Hardware consumed the command; do not claim a successful operation
++         * or manufacture a callback for an unknown protocol message.
++         */
++        fprintf(stderr, "[mt5891 aproc unsupported] cmd=%06x p1=%08x p2=%08x\n",
++                r->word, r->arg1, r->arg2);
++    }
++    philips_aproc_schedule();
++}
++
++static bool philips_aproc_read(hwaddr offset, unsigned size, uint64_t *value)
++{
++    if (size != 4 || (offset & 3)) {
++        return false;
++    }
++    if (offset >= 0x8800 && offset < 0x88a0) {
++        *value = philips_aproc.mailbox[(offset - 0x8800) / 4];
++        return true;
++    }
++    switch (offset) {
++    case 0x8080: *value = philips_aproc.irq_status; return true;
++    case 0x8084: *value = philips_aproc.irq_mask; return true;
++    case 0x8088: *value = 0; return true;
++    case 0x8904: *value = philips_aproc.control; return true;
++    case 0x8908: *value = philips_aproc.reset; return true;
++    case 0x8920: *value = philips_aproc.busy; return true;
++    default: return false;
++    }
++}
++
++static bool philips_aproc_write(hwaddr offset, unsigned size, uint64_t value)
++{
++    uint32_t v = value;
++    if (size != 4 || (offset & 3)) {
++        return false;
++    }
++    if (offset >= 0x8800 && offset < 0x88a0) {
++        philips_aproc.mailbox[(offset - 0x8800) / 4] = v;
++        return true;
++    }
++    switch (offset) {
++    case 0x8080:
++        return true; /* IRQ status is device-generated. */
++    case 0x8084:
++        philips_aproc.irq_mask = v;
++        philips_aproc_irq();
++        return true;
++    case 0x8088:
++        philips_aproc.irq_status &= ~(v & PTV_APROC_IRQ);
++        philips_aproc_irq();
++        philips_aproc_schedule();
++        return true;
++    case 0x8904:
++        philips_aproc.control = v;
++        return true;
++    case 0x8908: {
++        uint32_t old = philips_aproc.reset;
++        philips_aproc.reset = v;
++        if (!(v & 1)) {
++            timer_del(philips_aproc.event);
++            philips_aproc.ready_pending = false;
++            philips_aproc.busy = 0;
++            philips_aproc.irq_status = 0;
++            memset(philips_aproc.mailbox, 0, sizeof(philips_aproc.mailbox));
++            philips_aproc_irq();
++        } else if (!(old & 1)) {
++            philips_aproc.ready_pending = true;
++            philips_aproc_schedule();
++        }
++        return true;
++    }
++    case 0x8920:
++        for (unsigned i = 0; i < 2; i++) {
++            unsigned base = (0x80 + i * 0x10) / 4;
++            unsigned bit = 1U << i;
++            if ((v & bit) && !(philips_aproc.busy & bit)) {
++                philips_aproc.request[i] = (PhilipsAprocRequest) {
++                    philips_aproc.mailbox[base],
++                    philips_aproc.mailbox[base + 1],
++                    philips_aproc.mailbox[base + 2],
++                };
++                philips_aproc.busy |= bit;
++            }
++        }
++        philips_aproc_schedule();
++        return true;
++    default:
++        return false;
++    }
++}
++
++static void philips_aproc_reset(void *opaque)
++{
++    (void)opaque;
++    timer_del(philips_aproc.event);
++    memset(philips_aproc.mailbox, 0, sizeof(philips_aproc.mailbox));
++    memset(philips_aproc.request, 0, sizeof(philips_aproc.request));
++    philips_aproc.control = philips_aproc.reset = philips_aproc.busy = 0;
++    philips_aproc.irq_status = 0;
++    /* Match preloader/GIC handoff assumption also used for the BIM timers. */
++    philips_aproc.irq_mask = UINT32_MAX;
++    philips_aproc.ready_pending = false;
++    philips_aproc.unsupported_count = 0;
++    philips_aproc_irq();
++}
++
++static void philips_aproc_init(qemu_irq irq)
++{
++    philips_aproc.irq = irq;
++    philips_aproc.event = timer_new_ns(QEMU_CLOCK_VIRTUAL,
++                                       philips_aproc_tick, NULL);
++    philips_aproc_reset(NULL);
++    qemu_register_reset(philips_aproc_reset, NULL);
++}
+--- /dev/null
++++ b/hw/arm/philips-servoadc.inc
+@@ -0,0 +1,102 @@
++/*
++ * MT5891 polled servo ADC, derived from stock dtv_driver.ko.
++ * Board inputs are held at full scale: channel1=1023 is outside every
++ * physical-key range in the supplied TV's DRVCUST table (largest max=955).
++ * No key events or interrupts are synthesized. Conversion latency is idealized
++ * as immediate; the host waits 50us before checking the completed channel.
++ */
++#include "system/reset.h"
++
++#define PTV_ADC_BASE 0x28300
++#define PTV_ADC_END  0x283c0
++#define PTV_ADC_CHANNELS 11
++
++static struct {
++    uint32_t config[0x90 / 4];
++    uint32_t status;
++    uint16_t sample[PTV_ADC_CHANNELS];
++} philips_servoadc;
++
++static bool philips_servoadc_access(hwaddr offset, unsigned size)
++{
++    return offset >= PTV_ADC_BASE && offset < PTV_ADC_END &&
++           (size == 1 || size == 2 || size == 4) &&
++           (offset & 3) + size <= 4;
++}
++
++static bool philips_servoadc_read(hwaddr offset, unsigned size, uint64_t *value)
++{
++    uint32_t reg;
++    unsigned index, shift = 8 * (offset & 3);
++    if (!philips_servoadc_access(offset, size)) {
++        return false;
++    }
++    index = (offset - PTV_ADC_BASE) / 4;
++    if (index < 0x90 / 4) {
++        reg = philips_servoadc.config[index];
++    } else if (index == 0x90 / 4) {
++        reg = philips_servoadc.status;
++    } else {
++        unsigned channel = index - 0x94 / 4;
++        reg = (uint32_t)philips_servoadc.sample[channel] << 2;
++    }
++    *value = (reg >> shift) & ((UINT64_C(1) << (8 * size)) - 1);
++    return true;
++}
++
++static bool philips_servoadc_write(hwaddr offset, unsigned size, uint64_t value)
++{
++    uint32_t mask, old, selected;
++    unsigned index, shift = 8 * (offset & 3);
++    if (!philips_servoadc_access(offset, size)) {
++        return false;
++    }
++    index = (offset - PTV_ADC_BASE) / 4;
++    if (index >= 0x90 / 4) {
++        return true; /* Converter owns completion status and sample values. */
++    }
++    mask = ((UINT64_C(1) << (8 * size)) - 1) << shift;
++    old = philips_servoadc.config[index];
++    philips_servoadc.config[index] =
++        (old & ~mask) | (((uint32_t)value << shift) & mask);
++
++    /*
++     * PDWNC_ReadServoADCChannelValue ORs a requested bit into ADC_CONFIG1
++     * and polls last-channel only for a newly enabled channel. Already enabled
++     * channels are treated as continuous conversion by the stock driver.
++     */
++    if (index == 1) {
++        selected = philips_servoadc.config[1] & ~old & 0x7ff;
++    } else if (index == 0 && !(old & 1) &&
++               (philips_servoadc.config[0] & 1)) {
++        selected = philips_servoadc.config[1] & 0x7ff;
++    } else {
++        selected = 0;
++    }
++    if (philips_servoadc.config[0] & 1) {
++        for (unsigned channel = 0; channel < PTV_ADC_CHANNELS; channel++) {
++            if (selected & (1U << channel)) {
++                /* Input is a stable board pull-up, never a pressed button. */
++                philips_servoadc.sample[channel] = 1023;
++                philips_servoadc.status = channel;
++            }
++        }
++    }
++    return true;
++}
++
++static void philips_servoadc_reset(void *opaque)
++{
++    (void)opaque;
++    memset(&philips_servoadc, 0, sizeof(philips_servoadc));
++    /* Initialize latches to the same neutral voltage used by conversions. */
++    for (unsigned i = 0; i < PTV_ADC_CHANNELS; i++) {
++        philips_servoadc.sample[i] = 1023;
++    }
++}
++
++static void philips_servoadc_init(void)
++{
++    philips_servoadc_reset(NULL);
++    qemu_register_reset(philips_servoadc_reset, NULL);
++}
+--- /dev/null
++++ b/hw/arm/philips-osd.inc
+@@ -0,0 +1,218 @@
++/*
++ * MT5891 OSD plane-2 input view, reverse engineered from this TV's dtv_driver.
++ * This is an uncomposited first-region viewer, not a panel/video compositor.
++ * See README.md for evidence, integration, assumptions and missing hardware.
++ */
++#include "ui/console.h"
++#include "system/address-spaces.h"
++#include "qemu/bswap.h"
++
++static struct {
++    uint8_t regs[0xa00];
++    QemuConsole *con;
++    QEMUTimer *timer;
++    qemu_irq irq;
++    uint32_t mask, pending, current_bitmap;
++    uint32_t previous_header, previous_bitmap;
++    uint8_t previous_region[48];
++    bool enabled, warned, visible;
++} philips_osd;
++
++/* MMIO is deliberately excluded: malformed descriptors must not execute
++ * device reads (including GIC banked reads outside vCPU context).
++ */
++static bool philips_osd_dma_read(uint32_t addr, void *dst, size_t count)
++{
++    MemoryRegionSection section = memory_region_find(get_system_memory(),
++                                                     addr, count);
++    bool valid = section.mr && memory_region_is_ram(section.mr) &&
++                 int128_get64(section.size) >= count;
++    if (valid) {
++        memcpy(dst, (uint8_t *)memory_region_get_ram_ptr(section.mr) +
++               section.offset_within_region, count);
++    }
++    if (section.mr) {
++        memory_region_unref(section.mr);
++    }
++    return valid;
++}
++
++static void philips_osd_irq_update(void)
++{
++    qemu_set_irq(philips_osd.irq,
++                 !!(philips_osd.mask & philips_osd.pending & (1U << 7)));
++}
++
++static bool philips_osd_update(void *opaque)
++{
++    uint8_t header[48];
++    uint32_t control = ldl_le_p(philips_osd.regs + 0x300);
++    uint32_t ptr = (ldl_le_p(philips_osd.regs + 0x304) & 0x0fffffff) << 4;
++    uint32_t bitmap;
++    unsigned width, height, pitch, format, rsel, gsel, bsel;
++    DisplaySurface *surface;
++    uint8_t *row;
++
++    if (!philips_osd.enabled || !(control & 1) || !ptr ||
++        !philips_osd_dma_read(ptr, header, sizeof(header))) {
++        return true;
++    }
++    bitmap = (ldl_le_p(header + 4) & 0x0fffffff) << 4;
++    format = header[3] >> 4;
++    pitch = (lduw_le_p(header + 8) & 0x7ff) << 4;
++    width = lduw_le_p(header + 36) & 0x1fff;
++    height = lduw_le_p(header + 38) & 0xfff;
++    /* 32-bit byte selection is established by _setup_buffer. Other formats
++     * require separate packed-pixel semantics, so don't guess their colors.
++     */
++    if (format != 14 || (header[15] & 0x10) || !width || !height ||
++        width > 4096 || height > 2160 || pitch < width * 4 ||
++        (uint64_t)bitmap + (uint64_t)pitch * height > UINT32_MAX) {
++        if (!philips_osd.warned) {
++            fprintf(stderr, "[mt5891 osd] unsupported/invalid region:"
++                    " header=%08x bitmap=%08x format=%u %ux%u pitch=%u"
++                    " compressed=%u; no pixels substituted\n",
++                    ptr, bitmap, format, width, height, pitch,
++                    !!(header[15] & 0x10));
++            philips_osd.warned = true;
++        }
++        return true;
++    }
++    if (ptr != philips_osd.previous_header ||
++        bitmap != philips_osd.previous_bitmap ||
++        memcmp(header, philips_osd.previous_region, sizeof(header))) {
++        fprintf(stderr, "[mt5891 osd] raw plane2 first region:"
++                " header=%08x bitmap=%08x %ux%u pitch=%u selectors=%02x"
++                " output=%ux%u pos=%u,%u next=%u\n", ptr, bitmap,
++                width, height, pitch, header[11],
++                lduw_le_p(header + 44) & 0x1fff,
++                lduw_le_p(header + 40) & 0xfff,
++                lduw_le_p(header + 46) & 0x1fff,
++                lduw_le_p(header + 42) & 0xfff, !!(header[14] & 0x80));
++        philips_osd.previous_header = ptr;
++        philips_osd.previous_bitmap = bitmap;
++        memcpy(philips_osd.previous_region, header, sizeof(header));
++    }
++    philips_osd.current_bitmap = bitmap;
++    rsel = (header[11] >> 4) & 3;
++    gsel = (header[11] >> 2) & 3;
++    bsel = header[11] & 3;
++    surface = qemu_console_surface(philips_osd.con);
++    if (surface_width(surface) != width || surface_height(surface) != height) {
++        qemu_console_resize(philips_osd.con, width, height);
++        surface = qemu_console_surface(philips_osd.con);
++    }
++    row = g_malloc(width * 4);
++    for (unsigned y = 0; y < height; ++y) {
++        uint32_t *dst = (uint32_t *)(surface_data(surface) +
++                                    y * surface_stride(surface));
++        /* View raw bitmap coordinates; mirror, flip and output positioning
++         * are panel-composition operations, not applied in this input view.
++         */
++        if (!philips_osd_dma_read(bitmap + y * pitch, row, width * 4)) {
++            g_free(row);
++            return true;
++        }
++        for (unsigned x = 0; x < width; ++x) {
++            const uint8_t *p = row + x * 4;
++            dst[x] = (p[rsel] << 16) | (p[gsel] << 8) | p[bsel];
++        }
++    }
++    g_free(row);
++    philips_osd.visible = true;
++    qemu_console_update(philips_osd.con, 0, 0, width, height);
++    return true;
++}
++
++static const GraphicHwOps philips_osd_ops = {
++    .gfx_update = philips_osd_update,
++};
++
++static void philips_osd_tick(void *opaque)
++{
++    uint8_t header[48];
++    uint32_t control = ldl_le_p(philips_osd.regs + 0x300);
++    uint32_t ptr = (ldl_le_p(philips_osd.regs + 0x304) & 0x0fffffff) << 4;
++
++    /* Keep the guest's current-bitmap query independent of a host viewer. */
++    if ((control & 1) && ptr &&
++        philips_osd_dma_read(ptr, header, sizeof(header))) {
++        philips_osd.current_bitmap =
++            (ldl_le_p(header + 4) & 0x0fffffff) << 4;
++    } else {
++        philips_osd.current_bitmap = 0;
++    }
++    /* Synthetic 60 Hz virtual-time cadence; no panel PLL/timing claim. */
++    philips_osd.pending |= 1U << 7;
++    philips_osd_irq_update();
++    timer_mod(philips_osd.timer, qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) +
++              16666667);
++}
++
++static bool philips_osd_read(hwaddr offset, unsigned size, uint64_t *value)
++{
++    uint32_t word;
++    unsigned shift = 8 * (offset & 3);
++    if (!philips_osd.enabled || !size || size > 4 ||
++        (offset & 3) + size > 4) {
++        return false;
++    }
++    if (offset >= 0x21000 && offset + size <= 0x21a00) {
++        if ((offset & ~3ULL) == 0x21324) {
++            word = philips_osd.current_bitmap >> 4;
++        } else {
++            word = ldl_le_p(philips_osd.regs + ((offset - 0x21000) & ~3ULL));
++        }
++    } else if ((offset & ~3ULL) == 0x808c) {
++        word = philips_osd.pending;
++    } else if ((offset & ~3ULL) == 0x8090) {
++        word = philips_osd.mask;
++    } else if ((offset & ~3ULL) == 0x807c) {
++        word = 0;
++    } else {
++        return false;
++    }
++    *value = (word >> shift) & (UINT32_MAX >> (8 * (4 - size)));
++    return true;
++}
++
++static bool philips_osd_write(hwaddr offset, unsigned size, uint64_t value)
++{
++    unsigned shift = 8 * (offset & 3);
++    uint32_t mask, word;
++    if (!philips_osd.enabled || !size || size > 4 ||
++        (offset & 3) + size > 4) {
++        return false;
++    }
++    mask = (UINT32_MAX >> (8 * (4 - size))) << shift;
++    word = value << shift;
++    if (offset >= 0x21000 && offset + size <= 0x21a00) {
++        uint8_t *p = philips_osd.regs + ((offset - 0x21000) & ~3ULL);
++        stl_le_p(p, (ldl_le_p(p) & ~mask) | (word & mask));
++    } else if ((offset & ~3ULL) == 0x8090) {
++        philips_osd.mask = (philips_osd.mask & ~mask) | (word & mask);
++        philips_osd_irq_update();
++    } else if ((offset & ~3ULL) == 0x807c) {
++        philips_osd.pending &= ~(word & mask);
++        philips_osd_irq_update();
++    } else if ((offset & ~3ULL) != 0x808c) {
++        return false;
++    }
++    return true;
++}
++
++static void philips_osd_init(qemu_irq irq)
++{
++    const char *enabled = getenv("PHILIPS_OSD_SCANOUT");
++    philips_osd.enabled = enabled && !strcmp(enabled, "1");
++    if (!philips_osd.enabled) {
++        return;
++    }
++    philips_osd.irq = irq;
++    philips_osd.con = qemu_graphic_console_create(NULL, 0, &philips_osd_ops,
++                                                NULL);
++    philips_osd.timer = timer_new_ns(QEMU_CLOCK_VIRTUAL, philips_osd_tick, NULL);
++    timer_mod(philips_osd.timer, qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) + 16666667);
++    fprintf(stderr, "[mt5891 osd] enabled raw plane2 first-region view;"
++            " virtual 60Hz SPI175, no panel/video composition\n");
++}
+--- /dev/null
++++ b/hw/arm/mt5891_ambilight_spi.h
+@@ -0,0 +1,32 @@
++/* Observed MT5891 local-dimming SPI software-send path.
++ * dtv_driver.ko SHA256: 7c9beee7c57ce276357eb4ee8a031ea3c8e5eebd42230df5b073ae557633bea9
++ * Standalone core: the QEMU wrapper supplies MMIO mapping and a transfer sink.
++ */
++#ifndef MT5891_AMBILIGHT_SPI_H
++#define MT5891_AMBILIGHT_SPI_H
++#include <stdbool.h>
++#include <stddef.h>
++#include <stdint.h>
++
++#define MT5891_AMB_SPI_BASE UINT64_C(0xf0029400)
++#define MT5891_AMB_SPI_SIZE 0x50u
++#define MT5891_AMB_SPI_CAPACITY 65536u
++
++typedef void (*MT5891AmbSpiSink)(void *opaque, uint64_t sequence,
++                               const uint8_t *bytes, size_t count,
++                               unsigned m, unsigned n, bool complete);
++typedef struct MT5891AmbSpi {
++    uint8_t registers[MT5891_AMB_SPI_SIZE];
++    uint8_t fifo[MT5891_AMB_SPI_CAPACITY];
++    size_t count;
++    bool overflow;
++    uint64_t sequence;
++    MT5891AmbSpiSink sink;
++    void *opaque;
++} MT5891AmbSpi;
++
++void mt5891_amb_spi_init(MT5891AmbSpi *, MT5891AmbSpiSink, void *);
++uint32_t mt5891_amb_spi_read(MT5891AmbSpi *, uint32_t offset, unsigned size);
++void mt5891_amb_spi_write(MT5891AmbSpi *, uint32_t offset, uint32_t value,
++                         unsigned size);
++#endif
+--- /dev/null
++++ b/hw/arm/mt5891_ambilight_spi.inc
+@@ -0,0 +1,75 @@
++#include "mt5891_ambilight_spi.h"
++#include <string.h>
++
++static uint32_t load_bytes(const uint8_t *bytes, unsigned size)
++{
++    uint32_t result = 0;
++    for (unsigned i = 0; i < size; ++i) {
++        result |= (uint32_t)bytes[i] << (8 * i);
++    }
++    return result;
++}
++
++static bool access_valid(uint32_t offset, unsigned size)
++{
++    return (size == 1 || size == 2 || size == 4) &&
++           offset <= MT5891_AMB_SPI_SIZE - size;
++}
++
++void mt5891_amb_spi_init(MT5891AmbSpi *s, MT5891AmbSpiSink sink, void *opaque)
++{
++    memset(s, 0, sizeof(*s));
++    s->registers[0x4c] = 0x20; /* driver polls bit 5 for send completion */
++    s->sink = sink;
++    s->opaque = opaque;
++}
++
++uint32_t mt5891_amb_spi_read(MT5891AmbSpi *s, uint32_t offset, unsigned size)
++{
++    if (!access_valid(offset, size)) {
++        return 0;
++    }
++    return load_bytes(s->registers + offset, size);
++}
++
++void mt5891_amb_spi_write(MT5891AmbSpi *s, uint32_t offset,
++                         uint32_t value, unsigned size)
++{
++    if (!access_valid(offset, size)) {
++        return;
++    }
++    /* Exact observed path: write zero at 0x00 before streaming FIFO bytes. */
++    if (offset == 0 && value == 0) {
++        s->count = 0;
++        s->overflow = false;
++    }
++    if (offset == 8) {
++        /* STR writes the byte loaded by LDRB; upper three bytes are not data. */
++        if (s->count < sizeof(s->fifo)) {
++            s->fifo[s->count++] = (uint8_t)value;
++        } else {
++            s->overflow = true;
++        }
++    }
++    for (unsigned i = 0; i < size; ++i) {
++        s->registers[offset + i] = (uint8_t)(value >> (i * 8));
++    }
++    if (offset <= 0x4c && offset + size > 0x4c &&
++        (s->registers[0x4c] & 1)) {
++        unsigned m = (load_bytes(s->registers + 0x40, 2) >> 4) & 255;
++        unsigned n = (load_bytes(s->registers + 0x42, 2) >> 4) & 255;
++        bool complete = !s->overflow && m != 0 && n != 0 &&
++                        s->count == (size_t)m * n;
++        ++s->sequence;
++        if (s->sink) {
++            s->sink(s->opaque, s->sequence, s->fifo, s->count, m, n, complete);
++        }
++        /* Synchronous transfer is our implementation choice, not measured
++         * hardware timing. Preserve configuration, self-clear start, signal
++         * completion and release the driver-visible FIFO busy/occupancy field.
++         */
++        s->registers[0x4c] = (s->registers[0x4c] & ~1u) | 0x20;
++        s->registers[4] = 0;
++        s->registers[5] &= ~3u;
++    }
++}
+--- /dev/null
++++ b/hw/arm/mt5891_ambilight_measure.h
+@@ -0,0 +1,35 @@
++#ifndef MT5891_AMBILIGHT_MEASURE_H
++#define MT5891_AMBILIGHT_MEASURE_H
++#include <stdbool.h>
++#include <stdint.h>
++
++#define MT5891_AMB_MEASURE_BASE UINT64_C(0xf0027b00)
++#define MT5891_AMB_MEASURE_SIZE 16u
++#define MT5891_AMB_COLUMNS 32u
++#define MT5891_AMB_ROWS 20u
++typedef void (*MT5891AmbMeasureIRQ)(void *opaque, bool asserted);
++
++typedef struct MT5891AmbMeasure {
++    uint16_t samples[3][MT5891_AMB_ROWS][MT5891_AMB_COLUMNS];
++    uint8_t configuration[8];
++    uint8_t status;
++    unsigned row, next_row, column;
++    bool irq_enabled, irq_asserted;
++    MT5891AmbMeasureIRQ irq;
++    void *opaque;
++} MT5891AmbMeasure;
++
++void mt5891_amb_measure_init(MT5891AmbMeasure *, MT5891AmbMeasureIRQ, void *);
++void mt5891_amb_measure_enable_irq(MT5891AmbMeasure *, bool enabled);
++bool mt5891_amb_measure_step_row(MT5891AmbMeasure *);
++void mt5891_amb_measure_ack(MT5891AmbMeasure *, uint8_t pulse);
++uint32_t mt5891_amb_measure_read(MT5891AmbMeasure *, uint32_t offset, unsigned size);
++void mt5891_amb_measure_write(MT5891AmbMeasure *, uint32_t offset, uint32_t value,
++                             unsigned size);
++/* Explicit test input, in raw measurement units; does not sample video. */
++void mt5891_amb_measure_fixture(MT5891AmbMeasure *);
++/* Explicit constant raw R,G,B input. Decimal or 0x-prefixed hexadecimal,
++ * comma separated, each 0..65535. Invalid input leaves all samples unchanged.
++ */
++bool mt5891_amb_measure_fixture_rgb16(MT5891AmbMeasure *, const char *spec);
++#endif
+--- /dev/null
++++ b/hw/arm/mt5891_ambilight_measure.c
+@@ -0,0 +1,148 @@
++#include "mt5891_ambilight_measure.h"
++#include <string.h>
++
++static void update_irq(MT5891AmbMeasure *s)
++{
++    bool asserted = s->irq_enabled && (s->status & 0x80);
++    if (asserted != s->irq_asserted) {
++        s->irq_asserted = asserted;
++        if (s->irq) {
++            s->irq(s->opaque, asserted);
++        }
++    }
++}
++
++void mt5891_amb_measure_init(MT5891AmbMeasure *s, MT5891AmbMeasureIRQ irq, void *opaque)
++{
++    memset(s, 0, sizeof(*s));
++    s->irq = irq;
++    s->opaque = opaque;
++}
++
++void mt5891_amb_measure_enable_irq(MT5891AmbMeasure *s, bool enabled)
++{
++    s->irq_enabled = enabled;
++    update_irq(s);
++}
++
++bool mt5891_amb_measure_step_row(MT5891AmbMeasure *s)
++{
++    if (s->status & 0x80) {
++        return false; /* Do not silently overwrite an unconsumed row. */
++    }
++    s->row = s->next_row;
++    s->next_row = (s->next_row + 1) % MT5891_AMB_ROWS;
++    s->column = 0;
++    s->status |= 0x80;
++    update_irq(s);
++    return true;
++}
++
++void mt5891_amb_measure_ack(MT5891AmbMeasure *s, uint8_t pulse)
++{
++    s->status &= ~(pulse & 0x80);
++    update_irq(s);
++}
++
++uint32_t mt5891_amb_measure_read(MT5891AmbMeasure *s, uint32_t offset, unsigned size)
++{
++    uint8_t bytes[16] = {0};
++    uint32_t result = 0;
++    if ((size != 1 && size != 2 && size != 4) || offset > 16 - size) {
++        return 0;
++    }
++    memcpy(bytes, s->configuration, sizeof(s->configuration));
++    unsigned col = s->column < MT5891_AMB_COLUMNS ? s->column : MT5891_AMB_COLUMNS - 1;
++    unsigned meta = s->row | (col << 5);
++    bytes[8] = meta;
++    bytes[9] = meta >> 8;
++    if (s->column < MT5891_AMB_COLUMNS && (s->status & 0x80)) {
++        for (unsigned channel = 0; channel < 3; ++channel) {
++            uint16_t value = s->samples[channel][s->row][s->column];
++            bytes[10 + channel * 2] = value;
++            bytes[11 + channel * 2] = value >> 8;
++        }
++    }
++    for (unsigned i = 0; i < size; ++i) {
++        result |= (uint32_t)bytes[offset + i] << (i * 8);
++    }
++    /* Observed guest consumes channel0, metadata, then packed channels1/2.
++     * Advancing only after the final packed read is an explicit model
++     * hypothesis to validate against real hardware.
++     */
++    if (offset == 12 && size == 4 && s->column < MT5891_AMB_COLUMNS &&
++        (s->status & 0x80)) {
++        ++s->column;
++    }
++    return result;
++}
++
++void mt5891_amb_measure_write(MT5891AmbMeasure *s, uint32_t offset,
++                             uint32_t value, unsigned size)
++{
++    if ((size != 1 && size != 2 && size != 4) || offset > 8 - size) {
++        return;
++    }
++    for (unsigned i = 0; i < size; ++i) {
++        s->configuration[offset + i] = value >> (i * 8);
++    }
++}
++
++void mt5891_amb_measure_fixture(MT5891AmbMeasure *s)
++{
++    for (unsigned row = 0; row < MT5891_AMB_ROWS; ++row) {
++        for (unsigned col = 0; col < MT5891_AMB_COLUMNS; ++col) {
++            s->samples[0][row][col] = 0x1000 + row * 32 + col;
++            s->samples[1][row][col] = 0x2000 + row * 32 + col;
++            s->samples[2][row][col] = 0x3000 + row * 32 + col;
++        }
++    }
++}
++
++bool mt5891_amb_measure_fixture_rgb16(MT5891AmbMeasure *s, const char *spec)
++{
++    uint16_t rgb[3];
++    if (!spec) {
++        return false;
++    }
++    for (unsigned channel = 0; channel < 3; ++channel) {
++        unsigned base = 10, value = 0, digits = 0;
++        if (spec[0] == '0' && (spec[1] == 'x' || spec[1] == 'X')) {
++            base = 16;
++            spec += 2;
++        }
++        while (*spec) {
++            unsigned digit;
++            if (*spec >= '0' && *spec <= '9') {
++                digit = *spec - '0';
++            } else if (*spec >= 'a' && *spec <= 'f') {
++                digit = *spec - 'a' + 10;
++            } else if (*spec >= 'A' && *spec <= 'F') {
++                digit = *spec - 'A' + 10;
++            } else {
++                break;
++            }
++            if (digit >= base || value > (65535u - digit) / base) {
++                return false;
++            }
++            value = value * base + digit;
++            ++digits;
++            ++spec;
++        }
++        if (!digits || (channel < 2 ? *spec != ',' : *spec != '\0')) {
++            return false;
++        }
++        rgb[channel] = value;
++        if (channel < 2) {
++            ++spec;
++        }
++    }
++    for (unsigned channel = 0; channel < 3; ++channel) {
++        for (unsigned row = 0; row < MT5891_AMB_ROWS; ++row) {
++            for (unsigned col = 0; col < MT5891_AMB_COLUMNS; ++col) {
++                s->samples[channel][row][col] = rgb[channel];
++            }
++        }
++    }
++    return true;
++}
+--- /dev/null
++++ b/hw/arm/mt5891_ambilight_measure.inc
+@@ -0,0 +1,179 @@
++/*
++ * Optional synthetic raw-measurement fixture for the Philips development board.
++ * Include after QEMU headers. Copy the matching .h/.c alongside this file.
++ * Default: inert. Measurements: PHILIPS_AMBILIGHT_FIXTURE=1.
++ * Or approximate raw OSD input: PHILIPS_AMBILIGHT_FRAMEBUFFER=1.
++ * Framebuffer mode requires philips-osd.inc included before this file.
++ * Independent 50 Hz output VSync: PHILIPS_VIDEO_VSYNC_FIXTURE=1.
++ *
++ * Call philips_amb_measure_init(qdev_get_gpio_in(gic, 95)) once.
++ * After normal backing MMIO read:
++ *   value = philips_amb_measure_filter_read(physical_address, size, value);
++ * On MMIO write, in addition to normal backing behavior:
++ *   philips_amb_measure_observe_write(physical_address, size, value);
++ *
++ * Hook full measurement block f0027b00..0f and accesses overlapping status
++ * f0034224 / acknowledgement f003422e. Filter preserves all unrelated bits.
++ * No ownership of BIM8034. Bit6 is owned only with the VSync fixture enabled.
++ * This wrapper is sole IRQ95 source only
++ * until other output-VSync peripherals exist; then use an OR aggregator.
++ */
++#include "qemu/timer.h"
++#include "hw/core/irq.h"
++#include "mt5891_ambilight_measure.c"
++#include "philips-ambilight-framebuffer.inc"
++
++static MT5891AmbMeasure philips_measure_core;
++static QEMUTimer *philips_measure_timer;
++static qemu_irq philips_measure_irq;
++static bool philips_measure_enabled;
++static bool philips_framebuffer_enabled;
++static bool philips_framebuffer_valid;
++static bool philips_vsync_fixture_enabled;
++static bool philips_measure_irq_level;
++static bool philips_vsync_pending;
++static unsigned philips_vsync_tick_count;
++#define PHILIPS_MEASURE_ROW_NS INT64_C(1000000) /* 20 rows x 50 frames/s */
++
++static void philips_measure_update_combined_irq(void)
++{
++    qemu_set_irq(philips_measure_irq,
++                 philips_measure_irq_level || philips_vsync_pending);
++}
++
++static void philips_measure_irq_changed(void *opaque, bool asserted)
++{
++    (void)opaque;
++    philips_measure_irq_level = asserted;
++    philips_measure_update_combined_irq();
++}
++
++static void philips_measure_tick(void *opaque)
++{
++    (void)opaque;
++    /* A pending row stalls production rather than dropping unread samples. */
++    if (philips_measure_enabled) {
++        if (philips_framebuffer_enabled &&
++            !(philips_measure_core.status & 0x80) &&
++            philips_measure_core.next_row == 0) {
++            bool valid = philips_amb_sample_framebuffer(
++                philips_measure_core.samples);
++            if (!valid) {
++                memset(philips_measure_core.samples, 0,
++                       sizeof(philips_measure_core.samples));
++            }
++            if (valid != philips_framebuffer_valid) {
++                fprintf(stderr, "[Philips Ambilight framebuffer input] %s\n",
++                        valid ? "Sampling supported raw OSD plane2 region."
++                              : "No supported OSD input; measurements are zero.");
++                philips_framebuffer_valid = valid;
++            }
++        }
++        mt5891_amb_measure_step_row(&philips_measure_core);
++    }
++    /* VSync is independent of measurement backpressure. A pending VSync is
++     * level-triggered and coalesces subsequent frames until acknowledged. */
++    if (philips_vsync_fixture_enabled && ++philips_vsync_tick_count == 20) {
++        philips_vsync_tick_count = 0;
++        philips_vsync_pending = true;
++        philips_measure_update_combined_irq();
++    }
++    timer_mod(philips_measure_timer,
++              qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) + PHILIPS_MEASURE_ROW_NS);
++}
++
++static void philips_amb_measure_init(qemu_irq irq)
++{
++    const char *opt = getenv("PHILIPS_AMBILIGHT_FIXTURE");
++    philips_measure_enabled = opt && !strcmp(opt, "1");
++    opt = getenv("PHILIPS_AMBILIGHT_FRAMEBUFFER");
++    philips_framebuffer_enabled = opt && !strcmp(opt, "1");
++    philips_measure_enabled |= philips_framebuffer_enabled;
++    opt = getenv("PHILIPS_VIDEO_VSYNC_FIXTURE");
++    philips_vsync_fixture_enabled = opt && !strcmp(opt, "1");
++    if (!philips_measure_enabled && !philips_vsync_fixture_enabled) {
++        return;
++    }
++    philips_measure_irq = irq;
++    mt5891_amb_measure_init(&philips_measure_core,
++                           philips_measure_irq_changed, NULL);
++    if (!philips_framebuffer_enabled) {
++        mt5891_amb_measure_fixture(&philips_measure_core);
++    } else {
++        fprintf(stderr, "[Philips Ambilight framebuffer input] Enabled "
++                "approximate 4x4 sampling per 32x20 cell of raw OSD plane 2; "
++                "no panel composition or calibration. Invalid input is zero.\n");
++    }
++    opt = getenv("PHILIPS_AMBILIGHT_FIXTURE_RGB16");
++    if (philips_framebuffer_enabled && opt) {
++        fprintf(stderr, "Select framebuffer measurements OR constant RGB16 "
++                "fixture, not both.\n");
++        exit(EXIT_FAILURE);
++    }
++    if (philips_measure_enabled && opt) {
++        if (!mt5891_amb_measure_fixture_rgb16(&philips_measure_core, opt)) {
++            fprintf(stderr, "Invalid PHILIPS_AMBILIGHT_FIXTURE_RGB16: "
++                    "expected R,G,B integers in 0..65535 (decimal or 0x hex).\n");
++            exit(EXIT_FAILURE);
++        }
++        fprintf(stderr, "[Philips synthetic Ambilight input] "
++                "Constant RGB16=%s; this is a measurement fixture, "
++                "not captured television video.\n", opt);
++    }
++    mt5891_amb_measure_enable_irq(&philips_measure_core,
++                                  philips_measure_enabled);
++    philips_measure_timer = timer_new_ns(QEMU_CLOCK_VIRTUAL,
++                                        philips_measure_tick, NULL);
++    timer_mod(philips_measure_timer,
++              qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) + PHILIPS_MEASURE_ROW_NS);
++}
++
++static uint64_t philips_amb_measure_filter_read(hwaddr address, unsigned size,
++                                               uint64_t value)
++{
++    if (!philips_measure_enabled && !philips_vsync_fixture_enabled) {
++        return value;
++    }
++    if (philips_measure_enabled &&
++        address >= MT5891_AMB_MEASURE_BASE &&
++        address < MT5891_AMB_MEASURE_BASE + MT5891_AMB_MEASURE_SIZE &&
++        size <= MT5891_AMB_MEASURE_BASE + MT5891_AMB_MEASURE_SIZE - address) {
++        return mt5891_amb_measure_read(&philips_measure_core,
++                                       address - MT5891_AMB_MEASURE_BASE, size);
++    }
++    if (size <= 8 && address <= UINT64_C(0xf0034224) &&
++        UINT64_C(0xf0034224) - address < size) {
++        unsigned shift = (UINT64_C(0xf0034224) - address) * 8;
++        uint8_t mask = (philips_measure_enabled ? 0x80 : 0) |
++                       (philips_vsync_fixture_enabled ? 0x40 : 0);
++        uint8_t status = (philips_measure_core.status & 0x80) |
++                         (philips_vsync_pending ? 0x40 : 0);
++        value &= ~((uint64_t)mask << shift);
++        value |= (uint64_t)(status & mask) << shift;
++    }
++    return value;
++}
++
++static void philips_amb_measure_observe_write(hwaddr address, unsigned size,
++                                             uint64_t value)
++{
++    if (!philips_measure_enabled && !philips_vsync_fixture_enabled) {
++        return;
++    }
++    if (philips_measure_enabled &&
++        address >= MT5891_AMB_MEASURE_BASE &&
++        address < MT5891_AMB_MEASURE_BASE + MT5891_AMB_MEASURE_SIZE &&
++        size <= MT5891_AMB_MEASURE_BASE + MT5891_AMB_MEASURE_SIZE - address) {
++        mt5891_amb_measure_write(&philips_measure_core,
++                                address - MT5891_AMB_MEASURE_BASE, value, size);
++    }
++    if (size <= 8 && address <= UINT64_C(0xf003422e) &&
++        UINT64_C(0xf003422e) - address < size) {
++        unsigned shift = (UINT64_C(0xf003422e) - address) * 8;
++        mt5891_amb_measure_ack(&philips_measure_core, (value >> shift) & 0x80);
++        if (philips_vsync_fixture_enabled && ((value >> shift) & 0x40)) {
++            philips_vsync_pending = false;
++            philips_measure_update_combined_irq();
++        }
++    }
++}
+--- /dev/null
++++ b/hw/arm/philips-ambilight-framebuffer.inc
+@@ -0,0 +1,25 @@
++/*
++ * Include after philips-osd.inc and mt5891_ambilight_measure.c.
++ * Uses the existing OSD register state and RAM-only DMA reader.
++ */
++#include "mt5891_ambilight_framebuffer.c"
++
++static bool philips_amb_framebuffer_read(void *opaque, uint32_t address,
++                                        void *destination, size_t count)
++{
++    (void)opaque;
++    return philips_osd_dma_read(address, destination, count);
++}
++
++static bool philips_amb_sample_framebuffer(
++    uint16_t output[3][MT5891_AMB_ROWS][MT5891_AMB_COLUMNS])
++{
++    if (!philips_osd.enabled) {
++        return false;
++    }
++    uint32_t control = ldl_le_p(philips_osd.regs + 0x300);
++    uint32_t header = (ldl_le_p(philips_osd.regs + 0x304) & 0x0fffffff) << 4;
++    return mt5891_amb_framebuffer_sample(control, header,
++                                          philips_amb_framebuffer_read,
++                                          NULL, output);
++}
+--- /dev/null
++++ b/hw/arm/mt5891_ambilight_framebuffer.h
+@@ -0,0 +1,19 @@
++#ifndef MT5891_AMBILIGHT_FRAMEBUFFER_H
++#define MT5891_AMBILIGHT_FRAMEBUFFER_H
++#include <stdbool.h>
++#include <stddef.h>
++#include <stdint.h>
++#include "mt5891_ambilight_measure.h"
++
++typedef bool (*MT5891AmbFramebufferRead)(void *opaque, uint32_t address,
++                                        void *destination, size_t count);
++/*
++ * Approximate measurements of the raw OSD plane-2 first region, not final
++ * panel composition. Supports only the observed uncompressed format14 and
++ * byte selectors. 4x4 samples per cell; averaged RGB8 is shifted left8.
++ * Destination is unchanged on failure. Reader must reject non-RAM ranges.
++ */
++bool mt5891_amb_framebuffer_sample(uint32_t control, uint32_t header_address,
++    MT5891AmbFramebufferRead read_ram, void *opaque,
++    uint16_t output[3][MT5891_AMB_ROWS][MT5891_AMB_COLUMNS]);
++#endif
+--- /dev/null
++++ b/hw/arm/mt5891_ambilight_framebuffer.c
+@@ -0,0 +1,64 @@
++#include "mt5891_ambilight_framebuffer.h"
++#include <string.h>
++
++static uint16_t amb_fb_le16(const uint8_t *p)
++{
++    return (uint16_t)p[0] | ((uint16_t)p[1] << 8);
++}
++
++static uint32_t amb_fb_le32(const uint8_t *p)
++{
++    return (uint32_t)p[0] | ((uint32_t)p[1] << 8) |
++           ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24);
++}
++
++bool mt5891_amb_framebuffer_sample(uint32_t control, uint32_t header_address,
++    MT5891AmbFramebufferRead read_ram, void *opaque,
++    uint16_t output[3][MT5891_AMB_ROWS][MT5891_AMB_COLUMNS])
++{
++    uint8_t header[48], scanline[4096 * 4];
++    uint16_t grid[3][MT5891_AMB_ROWS][MT5891_AMB_COLUMNS];
++    if (!(control & 1) || !header_address || !read_ram || !output ||
++        !read_ram(opaque, header_address, header, sizeof(header))) {
++        return false;
++    }
++    uint32_t bitmap = (amb_fb_le32(header + 4) & 0x0fffffff) << 4;
++    unsigned format = header[3] >> 4;
++    unsigned pitch = (amb_fb_le16(header + 8) & 0x7ff) << 4;
++    unsigned width = amb_fb_le16(header + 36) & 0x1fff;
++    unsigned height = amb_fb_le16(header + 38) & 0xfff;
++    unsigned selectors[3] = {
++        (header[11] >> 4) & 3, (header[11] >> 2) & 3, header[11] & 3
++    };
++    if (format != 14 || (header[15] & 0x10) || !width || !height ||
++        width > 4096 || height > 2160 || pitch < width * 4 ||
++        (uint64_t)bitmap + (uint64_t)pitch * height > UINT32_MAX) {
++        return false;
++    }
++    for (unsigned cell_y = 0; cell_y < MT5891_AMB_ROWS; ++cell_y) {
++        unsigned sums[3][MT5891_AMB_COLUMNS] = {{0}};
++        for (unsigned sample_y = 0; sample_y < 4; ++sample_y) {
++            unsigned y = ((uint64_t)(cell_y * 8 + sample_y * 2 + 1) *
++                          height) / (MT5891_AMB_ROWS * 8);
++            if (!read_ram(opaque, bitmap + y * pitch, scanline, width * 4)) {
++                return false;
++            }
++            for (unsigned cell_x = 0; cell_x < MT5891_AMB_COLUMNS; ++cell_x) {
++                for (unsigned sample_x = 0; sample_x < 4; ++sample_x) {
++                    unsigned x = ((uint64_t)(cell_x * 8 + sample_x * 2 + 1) *
++                                  width) / (MT5891_AMB_COLUMNS * 8);
++                    for (unsigned c = 0; c < 3; ++c) {
++                        sums[c][cell_x] += scanline[x * 4 + selectors[c]];
++                    }
++                }
++            }
++        }
++        for (unsigned c = 0; c < 3; ++c) {
++            for (unsigned cell_x = 0; cell_x < MT5891_AMB_COLUMNS; ++cell_x) {
++                grid[c][cell_y][cell_x] = (sums[c][cell_x] / 16) << 8;
++            }
++        }
++    }
++    memcpy(output, grid, sizeof(grid));
++    return true;
++}
+--- a/target/arm/cpu.h
++++ b/target/arm/cpu.h
+@@ -1216,6 +1216,7 @@
+ void arm_gt_sel2vtimer_cb(void *opaque);
+ 
+ unsigned int gt_cntfrq_period_ns(ARMCPU *cpu);
++#include "gt24.h"
+ void gt_rme_post_el_change(ARMCPU *cpu, void *opaque);
+ 
+ #define ARM_AFF0_SHIFT 0
+--- a/target/arm/helper.c
++++ b/target/arm/helper.c
+@@ -1355,6 +1355,9 @@
+ {
+     ARMCPU *cpu = env_archcpu(env);
+ 
++    if (cpu->gt_cntfrq_hz == 24000000) {
++        return gt24_ns_to_ticks(qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL));
++    }
+     return qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) / gt_cntfrq_period_ns(cpu);
+ }
+ 
+@@ -1545,7 +1548,9 @@
+          * set the timer for as far in the future as possible. When the
+          * timer expires we will reset the timer for any remaining period.
+          */
+-        if (nexttick > INT64_MAX / gt_cntfrq_period_ns(cpu)) {
++        if (cpu->gt_cntfrq_hz == 24000000) {
++            timer_mod_ns(cpu->gt_timer[timeridx], gt24_ticks_to_ns(nexttick));
++        } else if (nexttick > INT64_MAX / gt_cntfrq_period_ns(cpu)) {
+             timer_mod_ns(cpu->gt_timer[timeridx], INT64_MAX);
+         } else {
+             timer_mod(cpu->gt_timer[timeridx], nexttick);
+--- a/target/arm/tcg/op_helper.c
++++ b/target/arm/tcg/op_helper.c
+@@ -456,7 +456,9 @@
+     if (uadd64_overflow(timeout, offset, &nexttick)) {
+         nexttick = UINT64_MAX;
+     }
+-    if (nexttick > INT64_MAX / gt_cntfrq_period_ns(cpu)) {
++    if (cpu->gt_cntfrq_hz == 24000000) {
++        timer_mod_ns(cpu->wfxt_timer, gt24_ticks_to_ns(nexttick));
++    } else if (nexttick > INT64_MAX / gt_cntfrq_period_ns(cpu)) {
+         /*
+          * If the timeout is too long for the signed 64-bit range
+          * of a QEMUTimer, let it expire early.
+@@ -510,7 +512,9 @@
+         int bit = evntis ? evnti + 8 : evnti;
+         uint64_t count = gt_get_countervalue(env) - offset;
+         uint64_t target_bit = BIT_ULL(bit);
+-        uint64_t lower_bits = MAKE_64BIT_MASK(0, bit - 1);
++        uint64_t lower_bits = cpu->gt_cntfrq_hz == 24000000 ?
++                              target_bit - 1 :
++                              MAKE_64BIT_MASK(0, bit - 1);
+         uint64_t next_tick = target_bit - (count & lower_bits);
+         uint64_t abstick;
+ 
+@@ -525,6 +529,15 @@
+          * set the timer for as far in the future as possible. When the
+          * timer expires we will reset the timer for any remaining period.
+          */
++        if (cpu->gt_cntfrq_hz == 24000000) {
++            /* next_tick is a delta. WFE's timer uses nanoseconds, not
++             * counter ticks; add the current counter before conversion.
++             */
++            if (uadd64_overflow(gt_get_countervalue(env), next_tick, &abstick)) {
++                return INT64_MAX;
++            }
++            return gt24_ticks_to_ns(abstick);
++        }
+         if (uadd64_overflow(next_tick, offset, &abstick)) {
+             abstick = UINT64_MAX;
+         }
+@@ -713,7 +726,9 @@
+     if (uadd64_overflow(timeout, offset, &nexttick)) {
+         nexttick = UINT64_MAX;
+     }
+-    if (nexttick > INT64_MAX / gt_cntfrq_period_ns(cpu)) {
++    if (cpu->gt_cntfrq_hz == 24000000) {
++        nexttick = gt24_ticks_to_ns(nexttick);
++    } else if (nexttick > INT64_MAX / gt_cntfrq_period_ns(cpu)) {
+         nexttick = INT64_MAX;
+     }
+ 
+--- /dev/null
++++ b/target/arm/gt24.h
+@@ -0,0 +1,25 @@
++/*
++ * Exact 24 MHz generic-counter conversion for the MT5891 prototype.
++ * A tick is 125/3 ns. Floor reads and ceil deadlines are inverse, so a
++ * fractional-nanosecond tick never causes a timer to expire prematurely.
++ * Decomposition bounds intermediate products without requiring int128.
++ */
++#ifndef ARM_GT24_H
++#define ARM_GT24_H
++
++static inline uint64_t gt24_ns_to_ticks(uint64_t ns)
++{
++    return (ns / 125) * 3 + ((ns % 125) * 3) / 125;
++}
++
++static inline int64_t gt24_ticks_to_ns(uint64_t ticks)
++{
++    uint64_t whole = ticks / 3;
++    uint64_t fraction = ((ticks % 3) * 125 + 2) / 3;
++
++    if (whole > (INT64_MAX - fraction) / 125) {
++        return INT64_MAX;
++    }
++    return whole * 125 + fraction;
++}
++#endif

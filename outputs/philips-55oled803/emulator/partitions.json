@@ -1,0 +1,267 @@
+{
+  "model": "Philips 55OLED803/12",
+  "board": "PH7M_EU_5596",
+  "soc": "MediaTek MT5891",
+  "sector_bytes": 512,
+  "emmc_size_bytes": 15634268160,
+  "emmc_sectors": 30535680,
+  "source": "Read-only /proc/partinfo and /sys/block/mmcblk0/size on the live TV; geometry only, not partition contents.",
+  "partitions": [
+    {
+      "number": 1,
+      "name": "uboot",
+      "start_sector": 0,
+      "sector_count": 4096,
+      "start_byte": 0,
+      "size_bytes": 2097152
+    },
+    {
+      "number": 2,
+      "name": "ubootB",
+      "start_sector": 4096,
+      "sector_count": 4096,
+      "start_byte": 2097152,
+      "size_bytes": 2097152
+    },
+    {
+      "number": 3,
+      "name": "misc",
+      "start_sector": 8192,
+      "sector_count": 2048,
+      "start_byte": 4194304,
+      "size_bytes": 1048576
+    },
+    {
+      "number": 4,
+      "name": "recovery",
+      "start_sector": 10240,
+      "sector_count": 65536,
+      "start_byte": 5242880,
+      "size_bytes": 33554432
+    },
+    {
+      "number": 5,
+      "name": "boot",
+      "start_sector": 75776,
+      "sector_count": 40960,
+      "start_byte": 38797312,
+      "size_bytes": 20971520
+    },
+    {
+      "number": 6,
+      "name": "uboot_env",
+      "start_sector": 116736,
+      "sector_count": 4096,
+      "start_byte": 59768832,
+      "size_bytes": 2097152
+    },
+    {
+      "number": 7,
+      "name": "ubootB_env",
+      "start_sector": 120832,
+      "sector_count": 4096,
+      "start_byte": 61865984,
+      "size_bytes": 2097152
+    },
+    {
+      "number": 8,
+      "name": "recoveryB",
+      "start_sector": 124928,
+      "sector_count": 65536,
+      "start_byte": 63963136,
+      "size_bytes": 33554432
+    },
+    {
+      "number": 9,
+      "name": "bootB",
+      "start_sector": 190464,
+      "sector_count": 40960,
+      "start_byte": 97517568,
+      "size_bytes": 20971520
+    },
+    {
+      "number": 10,
+      "name": "system",
+      "start_sector": 231424,
+      "sector_count": 4194304,
+      "start_byte": 118489088,
+      "size_bytes": 2147483648
+    },
+    {
+      "number": 11,
+      "name": "userdata",
+      "start_sector": 4425728,
+      "sector_count": 21069824,
+      "start_byte": 2265972736,
+      "size_bytes": 10787749888
+    },
+    {
+      "number": 12,
+      "name": "cache",
+      "start_sector": 25495552,
+      "sector_count": 2457600,
+      "start_byte": 13053722624,
+      "size_bytes": 1258291200
+    },
+    {
+      "number": 13,
+      "name": "dmverity",
+      "start_sector": 27953152,
+      "sector_count": 2048,
+      "start_byte": 14312013824,
+      "size_bytes": 1048576
+    },
+    {
+      "number": 14,
+      "name": "linux_rootfs",
+      "start_sector": 27955200,
+      "sector_count": 124928,
+      "start_byte": 14313062400,
+      "size_bytes": 63963136
+    },
+    {
+      "number": 15,
+      "name": "factory",
+      "start_sector": 28080128,
+      "sector_count": 40960,
+      "start_byte": 14377025536,
+      "size_bytes": 20971520
+    },
+    {
+      "number": 16,
+      "name": "factory_setting",
+      "start_sector": 28121088,
+      "sector_count": 20480,
+      "start_byte": 14397997056,
+      "size_bytes": 10485760
+    },
+    {
+      "number": 17,
+      "name": "3rd_ro",
+      "start_sector": 28141568,
+      "sector_count": 262144,
+      "start_byte": 14408482816,
+      "size_bytes": 134217728
+    },
+    {
+      "number": 18,
+      "name": "3rd_rw",
+      "start_sector": 28403712,
+      "sector_count": 131072,
+      "start_byte": 14542700544,
+      "size_bytes": 67108864
+    },
+    {
+      "number": 19,
+      "name": "reserved",
+      "start_sector": 28534784,
+      "sector_count": 2048,
+      "start_byte": 14609809408,
+      "size_bytes": 1048576
+    },
+    {
+      "number": 20,
+      "name": "channelA",
+      "start_sector": 28536832,
+      "sector_count": 2048,
+      "start_byte": 14610857984,
+      "size_bytes": 1048576
+    },
+    {
+      "number": 21,
+      "name": "channelB",
+      "start_sector": 28538880,
+      "sector_count": 2048,
+      "start_byte": 14611906560,
+      "size_bytes": 1048576
+    },
+    {
+      "number": 22,
+      "name": "tzbp",
+      "start_sector": 28540928,
+      "sector_count": 2048,
+      "start_byte": 14612955136,
+      "size_bytes": 1048576
+    },
+    {
+      "number": 23,
+      "name": "adsp",
+      "start_sector": 28542976,
+      "sector_count": 8192,
+      "start_byte": 14614003712,
+      "size_bytes": 4194304
+    },
+    {
+      "number": 24,
+      "name": "ciplus",
+      "start_sector": 28551168,
+      "sector_count": 2048,
+      "start_byte": 14618198016,
+      "size_bytes": 1048576
+    },
+    {
+      "number": 25,
+      "name": "dvbsDB",
+      "start_sector": 28553216,
+      "sector_count": 2048,
+      "start_byte": 14619246592,
+      "size_bytes": 1048576
+    },
+    {
+      "number": 26,
+      "name": "nvm",
+      "start_sector": 28555264,
+      "sector_count": 4096,
+      "start_byte": 14620295168,
+      "size_bytes": 2097152
+    },
+    {
+      "number": 27,
+      "name": "ambl",
+      "start_sector": 28559360,
+      "sector_count": 2048,
+      "start_byte": 14622392320,
+      "size_bytes": 1048576
+    },
+    {
+      "number": 28,
+      "name": "pq",
+      "start_sector": 28561408,
+      "sector_count": 40960,
+      "start_byte": 14623440896,
+      "size_bytes": 20971520
+    },
+    {
+      "number": 29,
+      "name": "aq",
+      "start_sector": 28602368,
+      "sector_count": 10240,
+      "start_byte": 14644412416,
+      "size_bytes": 5242880
+    },
+    {
+      "number": 30,
+      "name": "SCHEDPVR",
+      "start_sector": 28612608,
+      "sector_count": 2048,
+      "start_byte": 14649655296,
+      "size_bytes": 1048576
+    },
+    {
+      "number": 31,
+      "name": "usersetting",
+      "start_sector": 28614656,
+      "sector_count": 1474560,
+      "start_byte": 14650703872,
+      "size_bytes": 754974720
+    },
+    {
+      "number": 32,
+      "name": "basic",
+      "start_sector": 30089216,
+      "sector_count": 2048,
+      "start_byte": 15405678592,
+      "size_bytes": 1048576
+    }
+  ]
+}

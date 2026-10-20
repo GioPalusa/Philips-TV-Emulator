@@ -1,0 +1,63 @@
+{
+  "schema": "verified-stock-ambilight-recording-v1",
+  "title": "Stock firmware response to synthetic red input",
+  "conditions": "Synthetic geometry 4+9+4; RGB16 input 65280,0,0; emulated measurement and VSync; mode 0\u21928\u21920. Wire order, uncalibrated display.",
+  "source": "stock-red-response.spi.jsonl",
+  "source_sha256": "c4b6ed3719016a6c204d2e5f8cf1b2029818c26e57659614838b02b306e4f14c",
+  "guest_module_sha256": "7c9beee7c57ce276357eb4ee8a031ea3c8e5eebd42230df5b073ae557633bea9",
+  "capture_window": [
+    620,
+    700
+  ],
+  "captured_frames_in_excerpt": 81,
+  "nonblack_sequence_range": [
+    629,
+    690
+  ],
+  "nonblack_frames": 62,
+  "peak_sequence": 643,
+  "peak_rgb16": [
+    33286,
+    13784,
+    8934
+  ],
+  "peak_display_rgb8": [
+    130,
+    53,
+    34
+  ],
+  "active_wire_indices": [
+    3,
+    4,
+    7,
+    8,
+    10,
+    11,
+    12,
+    14,
+    15,
+    16,
+    18,
+    19,
+    20,
+    23,
+    24,
+    27,
+    28
+  ],
+  "mode_before": 0,
+  "mode_during": 8,
+  "mode_restored": 0,
+  "setmode_guest_time_seconds": 137.794768,
+  "restore_guest_time_seconds": 139.840367,
+  "helper_exit_status": 0,
+  "helper_domain": "u:r:mt_dtv-svc:s0",
+  "policy_mode": "enforcing",
+  "physical_tv_changed": false,
+  "limitations": [
+    "Synthetic geometry is not measured physical-panel wiring.",
+    "No framebuffer-to-measurement coupling yet.",
+    "Raw SPI channels are uncalibrated; 8-bit visualization takes high byte.",
+    "Red-only test establishes active response; green/blue causality comparison remains pending."
+  ]
+}

@@ -1,0 +1,44 @@
+--- a/src/Main/FrameBuffer.cpp
++++ b/src/Main/FrameBuffer.cpp
+@@ -25,6 +25,7 @@
+ 
+ #ifdef __ANDROID__
+ #include <cutils/properties.h>
++#include <cutils/log.h>
+ #endif
+ 
+ #define ASYNCHRONOUS_BLIT false   // FIXME: Currently leads to rare race conditions
+@@ -129,6 +130,17 @@
+ 
+ 		renderbuffer = source->lockInternal(0, 0, 0, sw::LOCK_READONLY, sw::PUBLIC);
+ 
++#ifdef __ANDROID__
++		static unsigned diagnosticFrames = 0;
++		if(diagnosticFrames++ < 4)
++		{
++			ALOGI("TVEMU_COPY dst=%p %dx%d pitch=%d fmt=%d src=%p %dx%d pitch=%d fmt=%d top=%d",
++			      framebuffer, width, height, stride, int(format), renderbuffer,
++			      source->getWidth(), source->getHeight(), sourceStride,
++			      int(source->getInternalFormat()), int(topLeftOrigin));
++		}
++#endif
++
+ 		if(!topLeftOrigin)
+ 		{
+ 			renderbuffer = (byte*)renderbuffer + (height - 1) * sourceStride;
+@@ -162,6 +174,15 @@
+ 
+ 			blitRoutine = copyRoutine(blitState);
+ 			blitFunction = (void(*)(void*, void*, Cursor*))blitRoutine->getEntry();
++#ifdef __ANDROID__
++			const unsigned *code = reinterpret_cast<const unsigned*>(blitFunction);
++			for(int i = 0; i < 64; i += 8)
++			{
++				ALOGI("TVEMU_BLIT %03x %08x %08x %08x %08x %08x %08x %08x %08x",
++				      i * 4, code[i], code[i+1], code[i+2], code[i+3],
++				      code[i+4], code[i+5], code[i+6], code[i+7]);
++			}
++#endif
+ 		}
+ 
+ 		blitFunction(framebuffer, renderbuffer, &cursor);

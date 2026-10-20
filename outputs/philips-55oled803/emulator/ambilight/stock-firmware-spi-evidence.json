@@ -1,0 +1,52 @@
+{
+  "schema": "philips-stock-ambilight-evidence-v1",
+  "date": "2026-10-20",
+  "origin": "Stock dtv_driver.ko guest writes through QEMU emulated SPI MMIO. No host-injected SPI commands in these runs.",
+  "conditions": [
+    "Synthetic geometry option bytes 4c08 select compiled architecture 10; not measured physical-panel configuration.",
+    "Synthetic 32x20 measurement input and nominal 50 Hz output-VSync peripheral enabled.",
+    "Development initramfs contains diagnostic helper; no helper actually executes due SELinux deployment denials.",
+    "Original stock firmware algorithms execute; Android UI boot remains incomplete."
+  ],
+  "interpretation": "Actual firmware produces valid hardware-0 SPI transfers, all black. This establishes execution and transport, not a working color response or physical panel match.",
+  "runs": [
+    {
+      "run": "ambilight-probe",
+      "source_capture": "work/philips-emulator/ambilight-probe.jsonl",
+      "sha256": "8f74c959fd6d2fe5c9817fe1e5e48f8672ab9f5d60d2bf76867583bcab51c770",
+      "complete_frames": 479,
+      "frame_count": 479,
+      "distinct_payloads": 1,
+      "packet_sizes": [
+        196
+      ],
+      "nonzero_rgb_pixels": 0,
+      "pixels_per_frame": 28,
+      "current_control_fields": [
+        112,
+        127,
+        64
+      ],
+      "helper_executed": false
+    },
+    {
+      "run": "ambilight-probe2",
+      "source_capture": "work/philips-emulator/ambilight-probe2.jsonl",
+      "sha256": "7000142394afe237fa7ab2ecf81eab83a7fc19d1af867fa127bcc4d6b596cc7d",
+      "complete_frames": 596,
+      "frame_count": 596,
+      "distinct_payloads": 1,
+      "packet_sizes": [
+        196
+      ],
+      "nonzero_rgb_pixels": 0,
+      "pixels_per_frame": 28,
+      "current_control_fields": [
+        112,
+        127,
+        64
+      ],
+      "helper_executed": false
+    }
+  ]
+}

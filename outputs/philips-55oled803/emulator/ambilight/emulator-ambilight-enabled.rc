@@ -1,0 +1,23 @@
+# EXPLICIT DEVELOPMENT EMULATOR PROFILE ONLY.
+# Use this instead of emulator-probe-service.rc, never both.
+# Requires the helper build supporting --enable-mode8 in the development /system.
+# Runs under the existing shipped dtv-svc domain; no SELinux policy changes.
+# Enables stock mode8 for the remainder of this boot, including framebuffer
+# measurements when PHILIPS_AMBILIGHT_FRAMEBUFFER=1 is selected on the host.
+on post-fs
+    # The update's usersetting image omits persistent state from a configured TV.
+    # Stock post-fs-data only chmods this parent before creating child directories.
+    mkdir /user_setting/rw 0777 system system
+    restorecon /user_setting/rw
+
+on boot
+    start emu-amb-enable
+
+service emu-amb-enable /sbin/sh -c "sleep 60; echo EMULATOR_AMBILIGHT_ENABLE_BEGIN; /system/etc/emulator-assets/amb-probe --enable-mode8; echo EMULATOR_AMBILIGHT_ENABLE_END"
+    class late_start
+    user root
+    group root
+    console
+    disabled
+    oneshot
+    seclabel u:r:mt_dtv-svc:s0
