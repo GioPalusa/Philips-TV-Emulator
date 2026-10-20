@@ -6,7 +6,7 @@ root=Path(__file__).resolve().parents[2]
 work=root/'work/philips-emulator'
 src=work/'qemu-11.1.2'
 files=['hw/arm/virt.c','hw/arm/philips-mmio-trace.h','hw/arm/philips-hostgpu.inc','hw/arm/philips-hostgpu-frame.inc','hw/sd/meson.build','hw/sd/sd.c','hw/sd/mt5891-msdc.c',
-       'hw/arm/philips-smp.inc','hw/arm/philips-timer.inc','hw/arm/philips-pdwnc.inc','hw/arm/philips-rtc.inc',
+       'hw/arm/philips-smp.inc','hw/arm/philips-timer.inc','hw/arm/philips-pdwnc.inc','hw/arm/philips-rtc.inc','hw/arm/philips-ts130.inc','hw/arm/philips-ts130-smc.inc',
        'hw/arm/philips-gfx.inc','hw/arm/philips-aproc.inc',
        'hw/arm/philips-servoadc.inc','hw/arm/philips-demux.inc',
        'hw/arm/philips-osd.inc',

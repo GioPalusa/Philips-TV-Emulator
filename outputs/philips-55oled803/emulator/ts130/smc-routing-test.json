@@ -1,0 +1,52 @@
+{
+  "schema": "philips-ts130-arm-smc-route-v1",
+  "origin": "Actual ARM SMC instructions in an independent bare-metal QEMU guest",
+  "records": [
+    {
+      "enabled": false,
+      "results": [
+        4294967295,
+        4294967295,
+        4294967295,
+        4294967295,
+        4294967295,
+        4294967295,
+        65537
+      ],
+      "expected": [
+        4294967295,
+        4294967295,
+        4294967295,
+        4294967295,
+        4294967295,
+        4294967295,
+        65537
+      ],
+      "passed": true,
+      "log": ""
+    },
+    {
+      "enabled": true,
+      "results": [
+        10,
+        0,
+        0,
+        0,
+        10,
+        4294967295,
+        65537
+      ],
+      "expected": [
+        10,
+        0,
+        0,
+        0,
+        10,
+        4294967295,
+        65537
+      ],
+      "passed": true,
+      "log": "[mt5891-ts130] control=4010 result=10 initialized=0 pids=0\n[mt5891-ts130] control=400d result=0 initialized=1 pids=0\n[mt5891-ts130] control=400f result=0 initialized=1 pids=1\n[mt5891-ts130] control=4010 result=0 initialized=1 pids=1\n[mt5891-ts130] control=400f result=10 initialized=1 pids=1\n"
+    }
+  ]
+}

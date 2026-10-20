@@ -52,7 +52,7 @@
  };
  
  /* Update the docs for highmem-mmio-size when changing this default */
-@@ -2877,6 +2882,393 @@
+@@ -2877,6 +2882,394 @@
      }
  }
  
@@ -273,6 +273,7 @@
 +#include "philips-timer.inc"
 +#include "philips-pdwnc.inc"
 +#include "philips-rtc.inc"
++#include "philips-ts130-smc.inc"
 +#include "philips-gfx.inc"
 +#include "philips-aproc.inc"
 +#include "philips-servoadc.inc"
@@ -446,7 +447,7 @@
  static void machvirt_init(MachineState *machine)
  {
      VirtMachineState *vms = VIRT_MACHINE(machine);
-@@ -3148,8 +3540,46 @@
+@@ -3148,8 +3541,47 @@
      fdt_add_timer_nodes(vms);
      fdt_add_cpu_nodes(vms);
  
@@ -492,10 +493,11 @@
 +    }
 +
 +    philips_hostgpu_init(sysmem);
++    philips_ts130_board_init();
  
      cxl_fmws_update_mmio();
  
-@@ -3191,6 +3621,63 @@
+@@ -3191,6 +3623,63 @@
          }
      }
      create_uart(vms, VIRT_UART0, sysmem, serial_hd(0), false);
@@ -559,7 +561,7 @@
      if (vms->secure) {
          create_uart(vms, VIRT_UART1, secure_sysmem, serial_hd(1), true);
      }
-@@ -3258,6 +3745,7 @@
+@@ -3258,6 +3747,7 @@
      vms->bootinfo.skip_dtb_autoload = true;
      vms->bootinfo.firmware_loaded = firmware_loaded;
      vms->bootinfo.psci_conduit = vms->psci_conduit;
@@ -2331,6 +2333,179 @@
 +    qemu_register_reset(philips_rtc_reset, NULL);
 +}
 --- /dev/null
++++ b/hw/arm/philips-ts130.inc
+@@ -0,0 +1,104 @@
++/* Philips TPM171E TS130 control subset, recovered from stock tzbp firmware.
++ * Intentionally no packet parser, descrambler, cryptography or general TEE.
++ * Include after qemu/osdep.h (g_try_malloc0/g_free); standalone tests supply
++ * the same allocator interface. Routing must be opt-in and limited to the
++ * MediaTek SMC service 0x545a3330. See demux/README.md for evidence and limits.
++ */
++#define PHILIPS_TS130_RING_SIZE (128u * 1024u)
++#define PHILIPS_TS130_PID_CAPACITY 96u
++#define PHILIPS_TS130_SCRATCH_SIZE 402u
++#define PHILIPS_TS130_STAGING_SIZE 256u
++
++typedef struct PhilipsTs130State {
++    uint8_t *ring;
++    bool initialized;
++    uint16_t pids[PHILIPS_TS130_PID_CAPACITY];
++    uint8_t pid_count;
++    uint32_t partial_length;
++    uint8_t parser_flag;
++    /* Original pointers are represented by offsets into owned storage;
++     * secure-world addresses are never exposed to the normal-world guest. */
++    uint32_t ring_read_offset, ring_write_offset;
++    uint32_t scratch_read_offset, scratch_write_offset;
++    uint8_t scratch[PHILIPS_TS130_SCRATCH_SIZE];
++    uint8_t staging[PHILIPS_TS130_STAGING_SIZE];
++} PhilipsTs130State;
++
++typedef bool (*PhilipsTs130ReadGuest)(void *opaque, uint32_t physical_address,
++                                    void *buffer, size_t length);
++
++static void philips_ts130_clear_pids(PhilipsTs130State *s)
++{
++    for (unsigned i = 0; i < PHILIPS_TS130_PID_CAPACITY; ++i) {
++        s->pids[i] = UINT16_MAX;
++    }
++    s->pid_count = 0;
++}
++
++static void philips_ts130_reset(PhilipsTs130State *s)
++{
++    g_free(s->ring);
++    memset(s, 0, sizeof(*s));
++}
++
++/* Returns false for commands this subset does not implement. In that case,
++ * state, output and guest memory remain untouched and the caller retains its
++ * existing unsupported-service result. Handled firmware failures return 10.
++ * Payload bounds below deliberately restrict the emulator entry boundary;
++ * the original firmware relies on a trusted in-kernel caller instead.
++ */
++static bool philips_ts130_handle(PhilipsTs130State *s, uint32_t command,
++                                uint32_t payload_pa, uint32_t payload_size,
++                                PhilipsTs130ReadGuest read_guest, void *opaque,
++                                int32_t *smc_result)
++{
++    uint8_t data[2];
++    if (command != 0x400d && command != 0x400f && command != 0x4010) {
++        return false;
++    }
++    *smc_result = 10;
++    if (command == 0x400d) {
++        if (payload_pa || payload_size) {
++            return true;
++        }
++        if (!s->initialized) {
++            uint8_t *ring = g_try_malloc0(PHILIPS_TS130_RING_SIZE);
++            if (!ring) {
++                return true;
++            }
++            s->ring = ring;
++            s->ring_read_offset = s->ring_write_offset = 0;
++            s->scratch_read_offset = s->scratch_write_offset = 0;
++            s->initialized = true;
++        }
++        /* Repeat init preserves all buffer bytes/cursors, as stock does. */
++        philips_ts130_clear_pids(s);
++        s->partial_length = 0;
++        s->parser_flag = 0;
++    } else {
++        size_t need = command == 0x400f ? 2 : 1;
++        if (!s->initialized || !payload_pa || payload_size < need ||
++            payload_size > 64 || payload_pa > UINT32_MAX - (need - 1) ||
++            !read_guest || !read_guest(opaque, payload_pa, data, need)) {
++            return true;
++        }
++        if (command == 0x400f) {
++            uint16_t pid = data[0] | ((uint16_t)data[1] << 8);
++            if (pid == 0x0fff) {
++                philips_ts130_clear_pids(s);
++            } else {
++                if (s->pid_count == PHILIPS_TS130_PID_CAPACITY) {
++                    return true;
++                }
++                s->pids[s->pid_count++] = pid;
++            }
++        } else {
++            /* The recovered reset routine ignores the payload byte. */
++            s->scratch_read_offset = s->scratch_write_offset = 0;
++            s->partial_length = 0;
++            s->parser_flag = 0;
++        }
++    }
++    *smc_result = 0;
++    return true;
++}
+--- /dev/null
++++ b/hw/arm/philips-ts130-smc.inc
+@@ -0,0 +1,63 @@
++/* Board adapter for the independently checked stock TS130 control subset. */
++#include "philips-ts130.inc"
++#include "system/address-spaces.h"
++
++static PhilipsTs130State philips_ts130;
++
++static bool philips_ts130_read_guest(void *opaque, uint32_t pa,
++                                    void *buffer, size_t length)
++{
++    MemoryRegionSection section;
++    bool valid;
++    if (!length || length > 64 || length > 0x100000000ULL - pa) {
++        return false;
++    }
++    /* The vendor wrapper supplies a DMA physical address. Do not permit its
++     * malformed payload to issue MMIO or access host/secure memory. */
++    section = memory_region_find(get_system_memory(), pa, length);
++    valid = section.mr && memory_region_is_ram(section.mr) &&
++            !memory_region_is_ram_device(section.mr) &&
++            int128_get64(section.size) >= length;
++    if (valid) {
++        memcpy(buffer, (uint8_t *)memory_region_get_ram_ptr(section.mr) +
++               section.offset_within_region, length);
++    }
++    if (section.mr) {
++        memory_region_unref(section.mr);
++    }
++    return valid;
++}
++
++static bool philips_ts130_smc(ARMCPU *cpu)
++{
++    CPUARMState *env = &cpu->env;
++    int32_t result;
++    if (is_a64(env) || env->regs[0] != 0x545a3330 ||
++        !philips_ts130_handle(&philips_ts130, env->regs[1], env->regs[2],
++                             env->regs[3], philips_ts130_read_guest, NULL,
++                             &result)) {
++        return false;
++    }
++    fprintf(stderr, "[mt5891-ts130] control=%04x result=%d initialized=%d pids=%u\n",
++            env->regs[1], result, philips_ts130.initialized,
++            philips_ts130.pid_count);
++    env->regs[0] = result;
++    return true;
++}
++
++static void philips_ts130_board_reset(void *opaque)
++{
++    philips_ts130_reset(&philips_ts130);
++}
++
++static void philips_ts130_board_init(void)
++{
++    CPUState *cs;
++    if (g_strcmp0(getenv("PHILIPS_TS130_CONTROL"), "1")) {
++        return;
++    }
++    CPU_FOREACH(cs) {
++        ARM_CPU(cs)->vendor_smc_handler = philips_ts130_smc;
++    }
++    qemu_register_reset(philips_ts130_board_reset, NULL);
++}
+--- /dev/null
 +++ b/hw/arm/philips-gfx.inc
 @@ -0,0 +1,486 @@
 +/*
@@ -4095,7 +4270,17 @@
 +}
 --- a/target/arm/cpu.h
 +++ b/target/arm/cpu.h
-@@ -1216,6 +1216,7 @@
+@@ -1031,6 +1031,9 @@
+      */
+     uint32_t psci_conduit;
+ 
++    /* Optional board-owned vendor SMC subset. NULL preserves normal routing. */
++    bool (*vendor_smc_handler)(ARMCPU *cpu);
++
+     /* For v8M, initial value of the Secure VTOR */
+     uint32_t init_svtor;
+     /* For v8M, initial value of the Non-secure VTOR */
+@@ -1216,6 +1219,7 @@
  void arm_gt_sel2vtimer_cb(void *opaque);
  
  unsigned int gt_cntfrq_period_ns(ARMCPU *cpu);
@@ -4126,6 +4311,30 @@
              timer_mod_ns(cpu->gt_timer[timeridx], INT64_MAX);
          } else {
              timer_mod(cpu->gt_timer[timeridx], nexttick);
+@@ -9637,6 +9642,23 @@
+                       env->exception.syndrome);
+     }
+ 
++    if (tcg_enabled() && cs->exception_index == EXCP_SMC &&
++        cpu->vendor_smc_handler) {
++        bool acquired = !bql_locked();
++        bool handled;
++        if (acquired) {
++            bql_lock();
++        }
++        handled = cpu->vendor_smc_handler(cpu);
++        if (acquired) {
++            bql_unlock();
++        }
++        if (handled) {
++            qemu_plugin_vcpu_hostcall_cb(cs, last_pc);
++            return;
++        }
++    }
++
+     if (tcg_enabled() && arm_is_psci_call(cpu, cs->exception_index)) {
+         arm_handle_psci_call(cpu);
+         qemu_log_mask(CPU_LOG_INT, "...handled as PSCI call\n");
 --- a/target/arm/tcg/op_helper.c
 +++ b/target/arm/tcg/op_helper.c
 @@ -456,7 +456,9 @@

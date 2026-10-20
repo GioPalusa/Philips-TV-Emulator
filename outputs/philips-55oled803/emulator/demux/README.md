@@ -95,7 +95,7 @@ Run `ui/runs/20261020-192007-df77ee` integrated the four-register model. The for
 
 This is an unsupported secure service, not another demux MMIO completion flag. No success constant or security-service bypass was added. The parent task will keep this demux model opt-in while the dependency remains unresolved.
 
-Separately, at guest time46.766s the kernel panicked in `msdc_irq+0x230`, PC `0xc0395784`, with pending status `r6=0x7008` and a null request pointer. The stack identifies the storage interrupt handler; it is not a demux stack. Storage interrupt ordering/error handling requires its own investigation. The run does not establish that this panic is caused by the demux model.
+Separately, at guest time 46.766 s the kernel panicked in `msdc_irq+0x230`, PC `0xc0395784`, with pending status `r6=0x7008` and a null request pointer. The stack identifies the storage interrupt handler; it is not a demux stack. Storage interrupt ordering/error handling requires its own investigation. The run does not establish that this panic is caused by the demux model.
 
 Current status: the original demux busy loop and instruction-port data transfer are implemented and tested. Full demux initialization and TV-equivalent performance are not achieved.
 
@@ -105,3 +105,31 @@ The integrated QEMU build keeps this model **disabled by default**. Set
 `PHILIPS_DEMUX_CONTROL=1` before launching QEMU or the viewer to exercise it.
 The stock path subsequently requires the unimplemented MediaTek secure service
 described above, so the option does not establish a working tuner/TV pipeline.
+
+## Follow-up performance trial proposal
+
+The demux-disabled run `20261020-192519-013418` still shows MtkRmServer consuming 65–97% of one guest CPU six to eight minutes after startup, with the same FTI control address reaching 536,870,912 reads. The previous enabled run is too short to establish steady CPU usage, but it reaches `VENC_GetMAXInstanceCNT` after the VDEC/B2R/VENC initialization calls. These calls therefore did not immediately replace the demux spin in that run.
+
+Static MtkRmServer code also shows that DMX initialization failure is logged and initialization continues; `main` publishes its RPC server after initialization then sleeps 1,000 seconds per iteration. Its resource monitor sleeps 1 second per pass. The separate native `dtv_svc` treats DMX failure as fatal to driver initialization. Its launching shell waits for the readiness marker with `sleep 1`; the internal abort thread's subsequent CPU behavior is not established.
+
+Recommended controlled experiment:
+
+1. Clone the same warmed checkpoint for each run; keep GPU, RTC, storage, CPU and display settings identical.
+2. Run once with demux disabled, once with `PHILIPS_DEMUX_CONTROL=1`, using a disposable overlay for each.
+3. At 60, 120 and 180 guest seconds collect per-process and per-thread `/proc/<pid>/stat` for MtkRmServer, dtv_svc, system_server, SurfaceFlinger and hostgpu_broker. Collect thread `wchan` alongside uptime and `/proc/stat`; derive CPU from tick deltas rather than cumulative percentages.
+4. Compare new missing-MMIO polling counters, vendor service readiness, input-to-visible-frame latency, frame cadence, ANR count and storage errors. An idle static screen is not a valid frame-rate benchmark.
+5. Accept a default change only after the enabled run remains stable and demonstrably reduces CPU/input latency. Continue to describe native TV service initialization as incomplete while the secure-service call fails.
+
+Current Android logs also contain continuing ANRs in Philips settings, playtv, ambihue, TV input and native service clients long after Android boot completion. One representative application main-thread ANR stack should be captured to distinguish unavailable native IPC from rendering latency. Removing the demux spin alone does not prove these application paths are functional.
+
+Additional REA call-boundary evidence from `libmtal.so`:
+
+- `MTVDEC_Init` issues ioctl `0x40040f00`: `ev_f87ae7ffad605b6e0efa5958688cd87d01b1410001c2614137ab331ba6ce4874`.
+- `MTB2R_Init` opens and maps `/dev/b2r`: `ev_0e8af31a24775e58ad6e7796b6f34fcd15bb3e97b587d2d79d48b8b5e5f7a646`.
+- `MTVENC_Init` issues ioctl `0x40042900`: `ev_fc47ed58074ccfbb20e528fea5841c73a871a87a6e1d9e0b8e2724126234a964`.
+
+## Second trial and recovered TS130 control implementation
+
+Run `20261020-194007-2d726d` established that enabling the demux model removed MtkRmServer's active loop: its measured CPU fell from 81.38% to 0%. However, the native `dtv_svc` abort path then used 76.06% CPU. The combined result still does not justify enabling demux alone by default.
+
+The next dependency has now been traced into the actual supplied `tzbp` firmware. LZHS decompression passed the embedded checksum. Command `0x400d` initializes persistent TS130 parser buffers/state; it does not perform device MMIO or cryptography. Commands `0x400f` and `0x4010` maintain PID and reset state. Their exact behavior, reconstructed model, original ARM-code execution tests and limitations are recorded in `../ts130/README.md`. Packet processing and other TrustZone services remain unsupported. Root integration and a new full Android runtime trial are the next gates.

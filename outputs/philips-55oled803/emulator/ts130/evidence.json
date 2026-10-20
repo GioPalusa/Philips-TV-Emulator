@@ -1,0 +1,43 @@
+{
+  "stock_tzbp_sha256": "13d0f539f1331bbfc2c2c939f6d63a9a06c6e8d77f6aadc1496107d4fccc0e74",
+  "decompressed_firmware_sha256": "e76ce9baa09fb93ec3e4fd37142667d0dfa300e78c40ea0fd0246d909c307e63",
+  "decompressed_size": 1003520,
+  "lzhs_checksum": "0x14",
+  "firmware_base": "0x7d005000",
+  "decoder_repository": "https://github.com/openlgtv/epk2extract",
+  "decoder_commit": "2b6af078b56dbedb89efc0f4943036150f1ecae9",
+  "functions": {
+    "ts130_init": {
+      "file_start": "0x5b310",
+      "file_end_exclusive": "0x5b450",
+      "virtual_start": "0x7d060310",
+      "sha256": "c1f1bd9f9da3742ecbd1483479025714312b0de305e626a0ec4e52e2a612048f"
+    },
+    "ts130_set_pid": {
+      "file_start": "0x5b8a8",
+      "file_end_exclusive": "0x5b92c",
+      "virtual_start": "0x7d0608a8",
+      "sha256": "9070e82e973e5bbbeba8fa902a13e6708d8397a26317e7e6705ca10cf1250ad8"
+    },
+    "ts130_reset": {
+      "file_start": "0x5b92c",
+      "file_end_exclusive": "0x5b978",
+      "virtual_start": "0x7d06092c",
+      "sha256": "026456546570c9a7eb6325692d2295edceb4f8ac32873d25f4877bcf54c8ea08"
+    }
+  },
+  "verification": {
+    "original_handler_execution": "PASS in bare-metal ARM QEMU; only heap allocator entry redirected to test allocator",
+    "model": "PASS native ASAN/UBSAN",
+    "scope": "Three control routines only; not the secure monitor, full TEE, TS packet parsing, DRM or physical TV"
+  },
+  "REA_limitations": [
+    "Hopper synthetic ELF analysis invalid_request, subsequent provider_unavailable",
+    "close_binary cleanup_incomplete: authenticated shutdown acknowledgement not observed"
+  ],
+  "files": {
+    "ts130_firmware_oracle.c": "a233ec47ad1b5321415379d5c5bbaa70989096ed1ea824806f03ad95de727dae",
+    "test_ts130.c": "d261857b1266325ecd51fed2bb57176c33a13ddb1e548cd9953dc2155f30af93",
+    "philips-ts130.inc": "04039b73509d06b2252d9761f81cc38414aa78edd30095771be37d263edfcb8f"
+  }
+}
