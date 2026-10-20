@@ -19,11 +19,35 @@
 #include <chrono>
 #include <string>
 #include <algorithm>
+#include <map>
 struct FrameHeader {uint32_t magic,version,width,height,stride,format;uint64_t sequence,frameCount;uint8_t reserved[24];};
 static_assert(sizeof(FrameHeader)==64);
 struct Output {uint8_t* data;size_t size;std::mutex mutex;gfxstream::Renderer::ReadPixelsCallback readPixels;bool async;};
 static std::atomic<uint64_t> nextUid{1};
 static std::atomic<unsigned> clients{0};
+// Optional passive command counting; never changes bytes or enables checksums.
+struct StreamStats {
+ std::mutex mutex;std::map<uint32_t,uint64_t> counts;uint64_t bytes=0;
+ std::chrono::steady_clock::time_point start=std::chrono::steady_clock::now();
+ void add(const std::map<uint32_t,uint64_t>& ops,size_t n){
+  std::lock_guard<std::mutex>lock(mutex);bytes+=n;for(auto [op,count]:ops)counts[op]+=count;
+  auto now=std::chrono::steady_clock::now();double elapsed=std::chrono::duration<double>(now-start).count();if(elapsed<5)return;
+  fprintf(stderr,"HOSTGPU_STREAM seconds=%.3f bytes=%llu ops=",elapsed,bytes);
+  for(auto [op,count]:counts)fprintf(stderr,"%u:%llu,",op,count);fprintf(stderr,"\n");fflush(stderr);
+  counts.clear();bytes=0;start=now;
+ }
+} streamStats;
+struct StreamObserver {
+ bool enabled=getenv("PHILIPS_HOSTGPU_TRACE")!=nullptr;size_t remaining=4,used=0;uint8_t header[8];
+ void feed(const char*p,size_t n){
+  if(!enabled)return;size_t original=n;std::map<uint32_t,uint64_t>ops;
+  while(n){if(remaining){size_t take=std::min(n,remaining);n-=take;p+=take;remaining-=take;continue;}
+   size_t take=std::min(n,8-used);memcpy(header+used,p,take);used+=take;p+=take;n-=take;
+   if(used==8){uint32_t op,len;memcpy(&op,header,4);memcpy(&len,header+4,4);if(len<8||len>256*1024*1024){enabled=false;fprintf(stderr,"HOSTGPU_TRACE invalid length=%u opcode=%u; observer disabled\n",len,op);return;}ops[op]++;remaining=len-8;used=0;}
+  }streamStats.add(ops,original);
+ }
+};
+
 static bool sendAll(int fd,const void*ptr,size_t n){auto*p=(const char*)ptr;while(n){ssize_t r=send(fd,p,n,0);if(r<0&&errno==EINTR)continue;if(r<=0)return false;p+=r;n-=r;}return true;}
 static bool receiveAll(int fd,void*ptr,size_t n){auto*p=(char*)ptr;while(n){ssize_t r=recv(fd,p,n,0);if(r<0&&errno==EINTR)continue;if(r<=0)return false;p+=r;n-=r;}return true;}
 static void onFrame(void*ctx,uint32_t display,int w,int h,int ydir,int format,int type,unsigned char*pixels){
@@ -44,8 +68,8 @@ static void connection(int fd,gfxstream::RendererPtr renderer){
  }
  if(strcmp(name,"pipe:opengles")){fprintf(stderr,"unsupported service %s\n",name);return;}
  auto channel=renderer->createRenderChannel();if(!channel)return;
- std::atomic<bool>done{false};std::thread rx([&](){while(!done){gfxstream::RenderChannel::Buffer b;auto r=channel->tryRead(&b);if(r==gfxstream::RenderChannel::IoResult::Ok){if(!sendAll(fd,b.data(),b.size()))break;}else if(r==gfxstream::RenderChannel::IoResult::Error)break;else std::this_thread::sleep_for(std::chrono::microseconds(250));}done=true;shutdown(fd,SHUT_RDWR);});
- while(!done){gfxstream::RenderChannel::Buffer b;b.resize(65536);ssize_t got=recv(fd,b.data(),b.size(),0);if(got<0&&errno==EINTR)continue;if(got<=0)break;b.resize(got);for(;;){auto r=channel->tryWrite(std::move(b));if(r==gfxstream::RenderChannel::IoResult::Ok)break;if(r==gfxstream::RenderChannel::IoResult::Error){done=true;break;}channel->waitUntilWritable();}}
+ StreamObserver observer;std::atomic<bool>done{false};std::thread rx([&](){while(!done){gfxstream::RenderChannel::Buffer b;auto r=channel->tryRead(&b);if(r==gfxstream::RenderChannel::IoResult::Ok){if(!sendAll(fd,b.data(),b.size()))break;}else if(r==gfxstream::RenderChannel::IoResult::Error)break;else channel->waitUntilReadable();}done=true;shutdown(fd,SHUT_RDWR);});
+ while(!done){gfxstream::RenderChannel::Buffer b;b.resize(65536);ssize_t got=recv(fd,b.data(),b.size(),0);if(got<0&&errno==EINTR)continue;if(got<=0)break;b.resize(got);observer.feed(b.data(),b.size());for(;;){auto r=channel->tryWrite(std::move(b));if(r==gfxstream::RenderChannel::IoResult::Ok)break;if(r==gfxstream::RenderChannel::IoResult::Error){done=true;break;}channel->waitUntilWritable();}}
  done=true;channel->stop();shutdown(fd,SHUT_RDWR);rx.join();
 }
 int main(int argc,char**argv){

@@ -1,0 +1,12 @@
+{
+  "process": "host_renderer",
+  "pid": 35007,
+  "guest_run": "20261020-185805-cc1698",
+  "profile_seconds": 3,
+  "active_render_thread": {"samples":805,"waiting_for_guest_stream":802,"executing_flush":3},
+  "readback_thread": {"samples":805,"waiting_for_work":804,"gpu_buffer_readback":1},
+  "frame_observation": {"seconds":5.024,"initial_count":93,"final_count":104,"frames_per_second":2.1895},
+  "conclusion": "Host GPU work is mostly waiting for guest commands. This sample does not isolate guest CPU versus guest/QEMU transport latency.",
+  "live_process_modified": false,
+  "followup": "Host reply pump changed from 250us polling to RenderChannel waitUntilReadable for future launches; isolated wire roundtrip and RGB-frame tests passed."
+}

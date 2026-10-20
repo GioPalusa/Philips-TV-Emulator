@@ -33,6 +33,10 @@ Each guest GLES thread has a separate bidirectional stream. Each host Unix-socke
 
 Commands are decoded by gfxstream. The bridge does not reinterpret opcodes. The guest broker and QEMU shared-memory device forward bytes; no guest TCP/IP is required.
 
+The host reply pump blocks on `RenderChannel::waitUntilReadable()`, avoiding periodic polling. An isolated 1000-call renderControl round-trip benchmark improved median latency from 0.318 ms (250 μs polling) to 0.0144 ms (event notification); 95th percentile improved from 0.333 ms to 0.0269 ms. This excludes the emulated CPU and guest broker.
+
+Set `PHILIPS_HOSTGPU_TRACE=1` before launch for passive stream byte/opcode counts, printed at most every five seconds while traffic flows. Counts do not modify commands or enable checksums.
+
 `SELECTED_RENDERER_ANGLE_INDIRECT` selects the GLES backend shader path. `ANGLE_DEFAULT_PLATFORM=metal` selects the actual GPU backend. Although the enum's upstream comment mentions SwiftShader, runtime evidence explicitly identifies Metal. Leaving the selection at `HOST` produces incompatible desktop GLSL during texture copies.
 
 ## Shared framebuffer

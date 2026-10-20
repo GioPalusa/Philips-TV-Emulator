@@ -1,0 +1,65 @@
+{
+  "transport": "Unix socket \u2192 gfxstream \u2192 ANGLE Metal \u2192 RGBA mmap",
+  "results": [
+    {
+      "requested": [
+        255,
+        0,
+        0,
+        255
+      ],
+      "actual": [
+        255,
+        0,
+        0,
+        255
+      ],
+      "flush": [
+        0
+      ],
+      "frame": 2,
+      "latency_ms": 185.299,
+      "pass": true
+    },
+    {
+      "requested": [
+        0,
+        255,
+        0,
+        255
+      ],
+      "actual": [
+        0,
+        255,
+        0,
+        255
+      ],
+      "flush": [
+        0
+      ],
+      "frame": 7,
+      "latency_ms": 21.148,
+      "pass": true
+    },
+    {
+      "requested": [
+        0,
+        0,
+        255,
+        255
+      ],
+      "actual": [
+        0,
+        0,
+        255,
+        255
+      ],
+      "flush": [
+        0
+      ],
+      "frame": 12,
+      "latency_ms": 25.066,
+      "pass": true
+    }
+  ]
+}
