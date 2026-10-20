@@ -52,7 +52,7 @@
  };
  
  /* Update the docs for highmem-mmio-size when changing this default */
-@@ -2877,6 +2882,375 @@
+@@ -2877,6 +2882,393 @@
      }
  }
  
@@ -72,14 +72,25 @@
 +#define PHILIPS_UART_BYTE_NS 86806 /* ceil(10 bits / 115200 baud), 8N1 */
 +static uint8_t philips_uart_ingress[256];
 +static unsigned philips_uart_ingress_head, philips_uart_ingress_count;
++static int64_t philips_uart_rx_deadline;
 +
 +static void philips_uart_rx_schedule(void)
 +{
 +    unsigned capacity = (philips_uart_regs[4 / 4] & 0x40) ? 31 : 1;
-+    if (philips_uart_ingress_count && philips_uart_rx_count < capacity &&
-+        !timer_pending(philips_uart_rx_timer)) {
-+        timer_mod(philips_uart_rx_timer,
-+                  qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) + PHILIPS_UART_BYTE_NS);
++    if (philips_uart_ingress_count && philips_uart_rx_count < capacity) {
++        if (!timer_pending(philips_uart_rx_timer)) {
++            if (!philips_uart_rx_deadline) {
++                philips_uart_rx_deadline =
++                    qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) + PHILIPS_UART_BYTE_NS;
++            }
++            timer_mod(philips_uart_rx_timer, philips_uart_rx_deadline);
++        }
++    } else {
++        /* Empty input or a full FIFO pauses the modeled serial line. Do not
++         * accumulate catch-up credit while applying bounded backpressure.
++         */
++        philips_uart_rx_deadline = 0;
++        timer_del(philips_uart_rx_timer);
 +    }
 +}
 +
@@ -119,12 +130,19 @@
 +static void philips_uart_received(void *opaque)
 +{
 +    unsigned capacity = (philips_uart_regs[4 / 4] & 0x40) ? 31 : 1;
-+    if (philips_uart_ingress_count && philips_uart_rx_count < capacity) {
++    int64_t now = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
++    /* Main-loop dispatch can be later than the timer deadline. Preserve wire
++     * time by admitting each elapsed byte, bounded by the hardware FIFO.
++     * MMIO reads never refill inline, and a blocked line restarts at one byte.
++     */
++    while (philips_uart_ingress_count && philips_uart_rx_count < capacity &&
++           philips_uart_rx_deadline <= now) {
 +        philips_uart_rx[philips_uart_rx_count++] =
 +            philips_uart_ingress[philips_uart_ingress_head];
 +        philips_uart_ingress_head = (philips_uart_ingress_head + 1) %
 +                                    sizeof(philips_uart_ingress);
 +        philips_uart_ingress_count--;
++        philips_uart_rx_deadline += PHILIPS_UART_BYTE_NS;
 +    }
 +    philips_uart_irq_update();
 +    philips_uart_rx_schedule();
@@ -428,7 +446,7 @@
  static void machvirt_init(MachineState *machine)
  {
      VirtMachineState *vms = VIRT_MACHINE(machine);
-@@ -3148,8 +3522,46 @@
+@@ -3148,8 +3540,46 @@
      fdt_add_timer_nodes(vms);
      fdt_add_cpu_nodes(vms);
  
@@ -477,7 +495,7 @@
  
      cxl_fmws_update_mmio();
  
-@@ -3191,6 +3603,63 @@
+@@ -3191,6 +3621,63 @@
          }
      }
      create_uart(vms, VIRT_UART0, sysmem, serial_hd(0), false);
@@ -541,7 +559,7 @@
      if (vms->secure) {
          create_uart(vms, VIRT_UART1, secure_sysmem, serial_hd(1), true);
      }
-@@ -3258,6 +3727,7 @@
+@@ -3258,6 +3745,7 @@
      vms->bootinfo.skip_dtb_autoload = true;
      vms->bootinfo.firmware_loaded = firmware_loaded;
      vms->bootinfo.psci_conduit = vms->psci_conduit;

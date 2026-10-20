@@ -1,0 +1,12 @@
+{
+  "result": "pass",
+  "clock_semantics": "Each intermediate timer deadline is visited; not a delayed-dispatch test",
+  "fifo_counts": {
+    "86805ns": 0,
+    "86806ns": 1,
+    "1000000ns": 11,
+    "3000000ns": 31
+  },
+  "byte_order": "pass",
+  "fifo_disabled_backpressure": "pass"
+}

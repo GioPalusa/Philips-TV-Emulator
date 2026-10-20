@@ -1,0 +1,54 @@
+{
+  "schema": "philips-uart-rx-deadline-v1",
+  "result": "PASS component and actual-QEMU timing tests; live latency measurement pending",
+  "wire_model": {
+    "baud": 115200,
+    "framing": "8N1",
+    "byte_ns": 86806,
+    "fifo_capacity": 31,
+    "fifo_disabled_capacity": 1,
+    "ingress_capacity": 256
+  },
+  "bug": "Rescheduling next byte at callback dispatch time + byte period loses elapsed wire time whenever the main loop dispatches a timer late.",
+  "deterministic_delayed_dispatch": {
+    "first_deadline_ns": 86806,
+    "dispatch_ns": 1000000,
+    "whole_elapsed_bytes": 11,
+    "old_received_bytes": 1,
+    "new_received_bytes": 11,
+    "test_origin": "Exact UART section extracted from virt.c, compiled with deterministic timer/character adapters and ASan/UBSan. Not a full-QEMU delayed-mainloop test."
+  },
+  "qtest": {
+    "actual_qemu_before": "pass",
+    "actual_qemu_after": "pass",
+    "checked_counts": {
+      "86805": 0,
+      "86806": 1,
+      "1000000": 11,
+      "3000000": 31
+    },
+    "semantics": "qtest clock_step and clock_set walk each intermediate deadline via qemu_clock_advance_virtual_time. They do not simulate late dispatch, so the old implementation passes normal pacing tests too."
+  },
+  "change": "Retain next-byte deadline and admit elapsed bytes in a loop bounded by FIFO free capacity. Empty ingress or full FIFO clears carried deadline. Reading FIFO schedules future delivery only; no inline refill. Backpressure restarts at now + one byte period. TX behavior unchanged.",
+  "coverage": [
+    "Exact byte deadline and predeadline",
+    "Byte order",
+    "Delayed callback accounts for elapsed wire time",
+    "31-byte FIFO maximum and 256-byte ingress bound",
+    "FIFO-disabled one-byte mode",
+    "Full FIFO backpressure without accumulated delivery credit",
+    "FIFO flush",
+    "All ingress bytes delivered in order",
+    "Idle to new burst starts with one complete byte period",
+    "Receive IRQ clears on empty FIFO"
+  ],
+  "source_section_sha256": "15e5f37cd68f8d304ef0f475bdbabc4f821a2c6a4f6b43046ed865844a7d7760",
+  "qemu_sha256": "2c2a6572417d25c39452e71857c066794a83df7f154f9de5cf57ad99a9d15340",
+  "limitations": [
+    "No live guest restart or mutation by these tests",
+    "This fixes modeled RX elapsed-time accounting; it does not establish that UART is the only remote latency bottleneck",
+    "No real-TV input latency comparison",
+    "Full FIFO applies deliberate lossless backpressure rather than simulating physical UART overrun",
+    "Nominal 115200 8N1 is fixed; arbitrary baud/control behavior remains incomplete"
+  ]
+}
